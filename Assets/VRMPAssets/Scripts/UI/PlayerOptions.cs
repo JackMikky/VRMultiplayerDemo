@@ -19,24 +19,25 @@ namespace XRMultiplayer
         [SerializeField] InputActionReference m_ToggleMenuAction;
         [SerializeField] AudioMixer m_Mixer;
 
-        [Header("Panels")]
-        [SerializeField] GameObject m_HostRoomPanel;
+        [Header("Panels")] [SerializeField] GameObject m_HostRoomPanel;
         [SerializeField] GameObject m_ClientRoomPanel;
         [SerializeField] GameObject[] m_OfflineWarningPanels;
         [SerializeField] GameObject[] m_OnlinePanels;
         [SerializeField] GameObject[] m_Panels;
         [SerializeField] Toggle[] m_PanelToggles;
 
-        [Header("Text Components")]
-        [SerializeField] TMP_Text m_SnapTurnText;
+        [Header("Text Components")] [SerializeField]
+        TMP_Text m_SnapTurnText;
+
         [SerializeField] TMP_Text m_RoomCodeText;
         [SerializeField] TMP_Text m_TimeText;
         [SerializeField] TMP_Text[] m_RoomNameText;
         [SerializeField] TMP_InputField m_RoomNameInputField;
         [SerializeField] TMP_Text[] m_PlayerCountText;
 
-        [Header("Voice Chat")]
-        [SerializeField] Button m_MicPermsButton;
+        [Header("Voice Chat")] [SerializeField]
+        Button m_MicPermsButton;
+
         [SerializeField] Slider m_InputVolumeSlider;
         [SerializeField] Slider m_OutputVolumeSlider;
         [SerializeField] Image m_LocalPlayerAudioVolume;
@@ -44,8 +45,9 @@ namespace XRMultiplayer
         [SerializeField] Image m_MicOnIcon;
         [SerializeField] TMP_Text m_VoiceChatStatus;
 
-        [Header("Player Options")]
-        [SerializeField] Vector2 m_MinMaxMoveSpeed = new Vector2(2.0f, 10.0f);
+        [Header("Player Options")] [SerializeField]
+        Vector2 m_MinMaxMoveSpeed = new Vector2(2.0f, 10.0f);
+
         [SerializeField] Vector2 m_MinMaxTurnAmount = new Vector2(15.0f, 180.0f);
         [SerializeField] float m_SnapTurnUpdateAmount = 15.0f;
 
@@ -61,7 +63,9 @@ namespace XRMultiplayer
             m_VoiceChatManager = FindFirstObjectByType<VoiceChatManager>();
             m_MoveProvider = FindFirstObjectByType<DynamicMoveProvider>();
             m_TurnProvider = FindFirstObjectByType<SnapTurnProvider>();
-            m_TunnelingVignetteController = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort.TunnelingVignetteController>();
+            m_TunnelingVignetteController =
+                FindFirstObjectByType<
+                    UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort.TunnelingVignetteController>();
 
             XRINetworkGameManager.Connected.Subscribe(ConnectOnline);
             XRINetworkGameManager.ConnectedRoomName.Subscribe(UpdateRoomName);
@@ -195,6 +199,7 @@ namespace XRMultiplayer
             {
                 ToggleMenu();
             }
+
             TogglePanel(0);
         }
 
@@ -226,10 +231,12 @@ namespace XRMultiplayer
         {
             m_VoiceChatStatus.text = $"<b>Voice Chat:</b> {statusMessage}";
         }
+
         public void SetVolumeLevel(float sliderValue)
         {
             m_Mixer.SetFloat("MainVolume", Mathf.Log10(sliderValue) * 20);
         }
+
         public void SetInputVolume(float volume)
         {
             float perc = Mathf.Lerp(-10, 10, volume);
@@ -273,6 +280,7 @@ namespace XRMultiplayer
             {
                 t.text = XRINetworkGameManager.ConnectedRoomName.Value;
             }
+
             m_RoomNameInputField.text = XRINetworkGameManager.ConnectedRoomName.Value;
         }
 
@@ -284,6 +292,7 @@ namespace XRMultiplayer
                 m_MoveProvider.leftHandMovementDirection = DynamicMoveProvider.MovementDirection.HandRelative;
             }
         }
+
         public void SetHeadOrientation(bool toggle)
         {
             if (toggle)
@@ -291,6 +300,7 @@ namespace XRMultiplayer
                 m_MoveProvider.leftHandMovementDirection = DynamicMoveProvider.MovementDirection.HeadRelative;
             }
         }
+
         public void SetMoveSpeed(float speedPercent)
         {
             m_MoveProvider.moveSpeed = Mathf.Lerp(m_MinMaxMoveSpeed.x, m_MinMaxMoveSpeed.y, speedPercent);
@@ -298,7 +308,8 @@ namespace XRMultiplayer
 
         public void UpdateSnapTurn(int dir)
         {
-            float newTurnAmount = Mathf.Clamp(m_TurnProvider.turnAmount + (m_SnapTurnUpdateAmount * dir), m_MinMaxTurnAmount.x, m_MinMaxTurnAmount.y);
+            float newTurnAmount = Mathf.Clamp(m_TurnProvider.turnAmount + (m_SnapTurnUpdateAmount * dir),
+                m_MinMaxTurnAmount.x, m_MinMaxTurnAmount.y);
             m_TurnProvider.turnAmount = newTurnAmount;
             m_SnapTurnText.text = $"{newTurnAmount}°";
         }
@@ -315,6 +326,7 @@ namespace XRMultiplayer
             {
                 gravityProvider.enabled = !toggle;
             }
+
             m_MoveProvider.enableFly = toggle;
         }
     }

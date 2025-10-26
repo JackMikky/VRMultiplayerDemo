@@ -18,6 +18,7 @@ namespace XRMultiplayer.MiniGames
             get => m_Score;
             set => m_Score = value;
         }
+
         /// <summary>
         /// Internal value that gets or sets the current score of the player.
         /// </summary>

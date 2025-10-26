@@ -10,11 +10,17 @@ namespace XRMultiplayer
     /// </summary>
     public class CalloutGazeController : MonoBehaviour
     {
-        [SerializeField, Tooltip("The transform which the forward direction will be used to evaluate as the gaze direction.")]
+        [SerializeField,
+         Tooltip("The transform which the forward direction will be used to evaluate as the gaze direction.")]
         protected Transform m_GazeTransform;
 
-        [SerializeField, Tooltip("Threshold for the dot product when determining if the Gaze Transform is facing this object. The lower the threshold, the wider the field of view."), Range(0.0f, 1.0f)]
+        [SerializeField,
+         Tooltip(
+             "Threshold for the dot product when determining if the Gaze Transform is facing this object. The lower the threshold, the wider the field of view."),
+         Range(0.0f, 1.0f)]
         protected float m_FacingThreshold = 0.85f;
+
+        [SerializeField] protected bool updateEveryFrame = true;
 
         [SerializeField, Tooltip("Events fired when the Gaze Transform begins facing this game object")]
         protected UnityEvent m_FacingEntered;
@@ -22,7 +28,9 @@ namespace XRMultiplayer
         [SerializeField, Tooltip("Events fired when the Gaze Transform stops facing this game object")]
         protected UnityEvent m_FacingExited;
 
-        [SerializeField, Tooltip("Distance threshold for movement in a single frame that determines a large movement that will trigger Facing Exited events.")]
+        [SerializeField,
+         Tooltip(
+             "Distance threshold for movement in a single frame that determines a large movement that will trigger Facing Exited events.")]
         float m_LargeMovementDistanceThreshold = 0.05f;
 
         [SerializeField, Tooltip("Cool down time after a large movement for Facing Entered events to fire again.")]
@@ -30,6 +38,7 @@ namespace XRMultiplayer
 
         [SerializeField, Tooltip("Use Distance Threshold")]
         bool m_UseDistanceThreshold = false;
+
         [SerializeField, Tooltip("Distance threshold to stop applying Facing Events")]
         float m_MaxDistanceThreshold = 10.0f;
 
@@ -45,6 +54,8 @@ namespace XRMultiplayer
 
         protected virtual void Update()
         {
+            if (!updateEveryFrame) return;
+
             CheckLargeMovement();
 
             if (m_LargeMovementCoolDown < m_LargeMovementCoolDownTime)
@@ -67,11 +78,13 @@ namespace XRMultiplayer
                     {
                         FacingExited();
                     }
+
                     return;
                 }
             }
 
-            var dotProduct = Vector3.Dot(m_GazeTransform.forward, (transform.position - m_GazeTransform.position).normalized);
+            var dotProduct = Vector3.Dot(m_GazeTransform.forward,
+                (transform.position - m_GazeTransform.position).normalized);
             if (dotProduct > m_FacingThreshold && !m_IsFacing)
                 FacingEntered();
             else if (dotProduct < m_FacingThreshold && m_IsFacing)
@@ -88,6 +101,7 @@ namespace XRMultiplayer
                 m_LargeMovementCoolDown = 0.0f;
                 FacingExited();
             }
+
             m_LargeMovementCoolDown += Time.deltaTime;
             m_LastPosition = currentPosition;
         }
@@ -106,7 +120,8 @@ namespace XRMultiplayer
 
         public void CheckPointerExit()
         {
-            var dotProduct = Vector3.Dot(m_GazeTransform.forward, (transform.position - m_GazeTransform.position).normalized);
+            var dotProduct = Vector3.Dot(m_GazeTransform.forward,
+                (transform.position - m_GazeTransform.position).normalized);
             float currentDistance = Vector3.Distance(m_GazeTransform.position, transform.position);
             if (dotProduct < m_FacingThreshold || (m_UseDistanceThreshold && currentDistance > m_MaxDistanceThreshold))
             {

@@ -14,9 +14,11 @@ namespace XRMultiplayer
         /// </summary>
         public static PlayerHudNotification Instance;
 
-        [Header("Display Options")]
-        [SerializeField] bool m_LockPitch = true;
+        [Header("Display Options")] [SerializeField]
+        bool m_LockPitch = true;
+
         [SerializeField] bool m_LockRoll = true;
+
         /// <summary>
         /// The speed at which the toast follows the camera.
         /// </summary>
@@ -36,7 +38,8 @@ namespace XRMultiplayer
         /// <summary>
         /// Text component to display the toast.
         /// </summary>
-        [SerializeField] TMP_Text m_Text;
+        [SerializeField]
+        TMP_Text m_Text;
 
         /// <summary>
         /// The layout group transform that contains the toast.
@@ -158,6 +161,7 @@ namespace XRMultiplayer
                 m_CanvasGroup.alpha -= Time.deltaTime * m_ShowHideSpeed;
                 yield return null;
             }
+
             m_LayoutGroupTransform.gameObject.SetActive(false);
         }
     }
