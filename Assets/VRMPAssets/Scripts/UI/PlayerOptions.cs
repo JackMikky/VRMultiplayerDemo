@@ -67,8 +67,12 @@ namespace XRMultiplayer
             XRINetworkGameManager.ConnectedRoomName.Subscribe(UpdateRoomName);
             XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
 
-            m_VoiceChatManager.selfMuted.Subscribe(MutedChanged);
-            m_VoiceChatManager.connectionStatus.Subscribe(UpdateVoiceChatStatus);
+            if (m_VoiceChatManager)
+            {
+                m_VoiceChatManager.selfMuted.Subscribe(MutedChanged);
+                m_VoiceChatManager.connectionStatus.Subscribe(UpdateVoiceChatStatus);
+            }
+
             m_InputVolumeSlider.onValueChanged.AddListener(SetInputVolume);
             m_OutputVolumeSlider.onValueChanged.AddListener(SetOutputVolume);
 
