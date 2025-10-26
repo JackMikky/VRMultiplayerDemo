@@ -9,6 +9,7 @@ TagManager:
   - Anchor
   - PlayerHand
   - Destroyer
+  - NetworkChatManager
   layers:
   - Default
   - TransparentFX
