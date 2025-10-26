@@ -24,4 +24,9 @@ public class LocalManager : MonoBehaviour
     {
         this.localAvatar.SetActive(!connected);
     }
+
+    public void SetLocalAvatarInvisibility(bool value)
+    {
+        this.localAvatar.SetActive(value);
+    }
 }
