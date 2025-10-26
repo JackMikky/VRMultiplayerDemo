@@ -192,8 +192,6 @@ namespace XRMultiplayer
             if (displayCanvasGroup != null)
             {
                 displayCanvasGroup.alpha = fadeAmount;
-
-                Debug.Log($"displayfade {fadeAmount}");
             }
         }
 
