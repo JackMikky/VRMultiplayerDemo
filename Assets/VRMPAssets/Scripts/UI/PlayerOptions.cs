@@ -130,14 +130,14 @@ namespace XRMultiplayer
         private void Update()
         {
             m_TimeText.text = $"{DateTime.Now:h:mm}<size=4><voffset=1em>{DateTime.Now:tt}</size></voffset>";
-            if (XRINetworkGameManager.Connected.Value)
-            {
-                m_LocalPlayerAudioVolume.fillAmount = XRINetworkPlayer.LocalPlayer.playerVoiceAmp;
-            }
-            else
-            {
-                m_LocalPlayerAudioVolume.fillAmount = OfflinePlayerAvatar.voiceAmp.Value;
-            }
+            //if (XRINetworkGameManager.Connected.Value)
+            //{
+            //    m_LocalPlayerAudioVolume.fillAmount = XRINetworkPlayer.LocalPlayer.playerVoiceAmp;
+            //}
+            //else
+            //{
+            //    m_LocalPlayerAudioVolume.fillAmount = OfflinePlayerAvatar.voiceAmp.Value;
+            //}
         }
 
         void ConnectOnline(bool connected)
