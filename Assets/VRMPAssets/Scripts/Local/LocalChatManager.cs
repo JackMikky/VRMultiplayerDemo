@@ -49,8 +49,7 @@ namespace XRMultiplayer
         void Start()
         {
             XRINetworkGameManager.Connected.Subscribe(ConnectedToNetwork);
-            _networkChatManager = GameObject.FindGameObjectWithTag("NetworkChatManager")
-                ?.GetComponent<NetworkChatManager>();
+            _networkChatManager = XRINetworkGameManager.Instance.networkChatManager;
 
             if (_networkChatManager != null)
             {
