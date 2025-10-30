@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8209289187454046780}
   - component: {fileID: 8059461763842174801}
+  - component: {fileID: 1219191767438663304}
   m_Layer: 0
   m_Name: ScreenWaper
   m_TagString: Untagged
@@ -49,3 +50,15 @@ MonoBehaviour:
   waitTime: 1
   Screen1: {fileID: 0}
   Screen2: {fileID: 0}
+--- !u!114 &1219191767438663304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8182280897945566466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a56001be1c47c4a4f88ad772dde7b901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::DoNotDestroyObject

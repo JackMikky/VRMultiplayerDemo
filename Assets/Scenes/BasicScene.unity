@@ -656,6 +656,7 @@ GameObject:
   - component: {fileID: 171074395}
   - component: {fileID: 171074394}
   - component: {fileID: 171074396}
+  - component: {fileID: 171074397}
   m_Layer: 0
   m_Name: NetworkChatManager
   m_TagString: NetworkChatManager
@@ -716,6 +717,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &171074397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171074393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a56001be1c47c4a4f88ad772dde7b901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::DoNotDestroyObject
 --- !u!1 &182140994
 GameObject:
   m_ObjectHideFlags: 0
@@ -728,6 +741,7 @@ GameObject:
   - component: {fileID: 182140996}
   - component: {fileID: 182140997}
   - component: {fileID: 182140998}
+  - component: {fileID: 182140999}
   m_Layer: 0
   m_Name: NetworkSceneManager
   m_TagString: Untagged
@@ -815,6 +829,18 @@ MonoBehaviour:
   onSceneLoadFailed:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &182140999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 182140994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a56001be1c47c4a4f88ad772dde7b901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::DoNotDestroyObject
 --- !u!1 &186050088
 GameObject:
   m_ObjectHideFlags: 0
