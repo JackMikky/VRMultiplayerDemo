@@ -636,7 +636,7 @@ namespace XRMultiplayer
         /// </summary>
         public virtual void LeaveLocalConnection()
         {
-            NetworkManager.Singleton.Shutdown();
+            NetworkManager.Singleton?.Shutdown();
         }
 
 
