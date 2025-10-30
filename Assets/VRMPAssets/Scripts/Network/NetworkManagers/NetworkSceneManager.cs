@@ -37,13 +37,13 @@ namespace XRMultiplayer
 
         private void Start()
         {
-            warpController.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
+            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
         }
 
         [Obsolete]
         public void LoadSceneByIDWithWarpFadeOut(string sceneID)
         {
-            warpController.StartFadeOutBySceneID(sceneID);
+            warpController?.StartFadeOutBySceneID(sceneID);
         }
 
         public void LoadSceneByID(string sceneID)
@@ -179,6 +179,13 @@ namespace XRMultiplayer
                 m_ExpectedSceneName = null;
                 m_ClientsFinishedLoading.Clear();
             }
+        }
+
+        private void OnDestroy()
+        {
+            this.onSceneLoadStart.RemoveAllListeners();
+            this.onSceneLoadDone.RemoveAllListeners();
+            this.onSceneLoadFailed.RemoveAllListeners();
         }
     }
 }
