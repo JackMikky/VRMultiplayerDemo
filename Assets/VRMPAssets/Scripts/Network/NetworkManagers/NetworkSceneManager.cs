@@ -35,9 +35,13 @@ namespace XRMultiplayer
 
         [SerializeField] WarpController warpController;
 
+        public string currentSceneName = "";
+
         private void Start()
         {
-            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
+           warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
+
+            currentSceneName= SceneManager.GetActiveScene().name;
         }
 
         [Obsolete]
@@ -173,8 +177,10 @@ namespace XRMultiplayer
 
             if (m_ClientsFinishedLoading.Count >= connectedCount)
             {
-                Debug.Log($"[NetworkSceneManager] All clients finished loading {m_ExpectedSceneName}");
+                SceneManager.UnloadSceneAsync(currentSceneName);
+                Debug.Log($"[NetworkSceneManager] All clients finished loading {sceneName}");
                 onSceneLoadDone?.Invoke(sceneName);
+                currentSceneName= sceneName;
 
                 m_ExpectedSceneName = null;
                 m_ClientsFinishedLoading.Clear();

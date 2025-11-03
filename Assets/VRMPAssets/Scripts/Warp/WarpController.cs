@@ -23,6 +23,16 @@ namespace XRMultiplayer
 
         const string fadeProperty = "_T";
 
+        void Awake()
+        {
+            SetFadeValue(0);
+
+            LocalManager.Instance.onApplicationStarted.AddListener(() =>
+            {
+                StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime));
+            });
+        }
+
         [System.Obsolete]
         void Start()
         {
@@ -48,7 +58,7 @@ namespace XRMultiplayer
             yield return new WaitForSeconds(waitTime);
 
             if (onWarpFadeOutComplete != null)
-                onWarpFadeOutComplete.Invoke(sceneID);
+                onWarpFadeOutComplete.Invoke(sceneID);  
         }
 
         void SetFadeValue(float value)
