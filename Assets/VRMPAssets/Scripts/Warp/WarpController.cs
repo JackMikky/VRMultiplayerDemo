@@ -27,9 +27,9 @@ namespace XRMultiplayer
         {
             SetFadeValue(0);
 
-            LocalManager.Instance.onApplicationStarted.AddListener(() =>
+            LocalManager.Instance.onLobbyLoaded.AddListener(() =>
             {
-                StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime));
+                StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, onWarpFadeInComplete.Invoke));
             });
         }
 
@@ -40,7 +40,7 @@ namespace XRMultiplayer
 
             _fadeValue.Subscribe(SetFadeValue);
 
-            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoadDone.AddListener((sceneName) =>
+            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddListener((sceneName) =>
             {
                 StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, onWarpFadeInComplete.Invoke));
             });
@@ -76,6 +76,50 @@ namespace XRMultiplayer
             this.onWarpFadeInComplete.RemoveAllListeners();
             this.onWarpFadeOutComplete.RemoveAllListeners();
             this._fadeValue.Dispose();
+        }
+
+        public void AddOnceListenerToWarpFadeInComplete(UnityAction callback)
+        {
+            if (callback == null) return;
+
+            if (onWarpFadeInComplete == null)
+                onWarpFadeInComplete = new UnityEvent();
+
+            UnityAction wrapper = null;
+            wrapper = () =>
+            {
+                this.RemoveListenerFromWarpFadeInComplete(wrapper);
+                callback();
+            };
+
+            onWarpFadeInComplete.AddListener(wrapper);
+        }
+
+        public void AddOnceListenerToWarpFadeOutComplete(UnityAction callback)
+        {
+            if (callback == null) return;
+
+            if (onWarpFadeOutComplete == null)
+                onWarpFadeOutComplete = new UnityEvent<string>();
+
+            UnityAction<string> wrapper = null;
+            wrapper = (str) =>
+            {
+                this.RemoveListenerFromWarpFadeOutComplete(wrapper);
+                callback();
+            };
+
+            onWarpFadeOutComplete.AddListener(wrapper);
+        }
+
+        public void RemoveListenerFromWarpFadeInComplete(UnityAction unityAction)
+        {
+            this.onWarpFadeInComplete.RemoveListener(unityAction);
+        }
+
+        public void RemoveListenerFromWarpFadeOutComplete(UnityAction<string> unityAction)
+        {
+            this.onWarpFadeOutComplete.RemoveListener(unityAction);
         }
     }
 }

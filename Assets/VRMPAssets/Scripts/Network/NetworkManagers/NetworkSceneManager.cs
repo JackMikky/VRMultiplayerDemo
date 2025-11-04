@@ -23,7 +23,7 @@ namespace XRMultiplayer
 
         [SerializeField] LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
 
-        public UnityEvent<string> onSceneLoadDone;
+        public UnityEvent<string> onSceneLoaded;
 
         public UnityEvent<string> onSceneLoadStart;
 
@@ -179,7 +179,7 @@ namespace XRMultiplayer
             {
                 SceneManager.UnloadSceneAsync(currentSceneName);
                 Debug.Log($"[NetworkSceneManager] All clients finished loading {sceneName}");
-                onSceneLoadDone?.Invoke(sceneName);
+                onSceneLoaded?.Invoke(sceneName);
                 currentSceneName= sceneName;
 
                 m_ExpectedSceneName = null;
@@ -190,7 +190,7 @@ namespace XRMultiplayer
         private void OnDestroy()
         {
             this.onSceneLoadStart.RemoveAllListeners();
-            this.onSceneLoadDone.RemoveAllListeners();
+            this.onSceneLoaded.RemoveAllListeners();
             this.onSceneLoadFailed.RemoveAllListeners();
         }
     }

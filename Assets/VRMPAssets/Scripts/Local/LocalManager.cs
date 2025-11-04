@@ -9,7 +9,9 @@ public class LocalManager : MonoBehaviour
 
     [SerializeField] GameObject localAvatar;
 
-    public UnityEvent onApplicationStarted;
+    public UnityEvent onLobbyLoadStart;
+
+    public UnityEvent onLobbyLoaded;
 
     const string lobbySceneName = "Lobby";
     private void Awake()
@@ -27,19 +29,20 @@ public class LocalManager : MonoBehaviour
 
     void Start()
     {
-        TrensportToLobby();
+        LoadLocalSceneByName(lobbySceneName);
+        SceneManager.sceneLoaded += HandleLobbyLoaded;
     }
 
-    void TrensportToLobby()
+   public void LoadLocalSceneByName(string sceneName)
     {
-        SceneManager.LoadSceneAsync(lobbySceneName, LoadSceneMode.Additive);
-        SceneManager.sceneLoaded+=OnLobbyLoaded;
-        XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = lobbySceneName;
+        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = sceneName;
+        onLobbyLoadStart.Invoke();
     }
 
-    void OnLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
-        this.onApplicationStarted.Invoke();
+        this.onLobbyLoaded.Invoke();
     }
 
     void HideLocalAvatar(bool connected)

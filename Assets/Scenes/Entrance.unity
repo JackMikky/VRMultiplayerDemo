@@ -557,6 +557,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   announcerAudioSource: {fileID: 1708689589}
+  warpController: {fileID: 642802449}
 --- !u!114 &182140997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -603,7 +604,7 @@ MonoBehaviour:
   - sceneID: 3
     sceneName: Room2
   loadSceneMode: 1
-  onSceneLoadDone:
+  onSceneLoaded:
     m_PersistentCalls:
       m_Calls: []
   onSceneLoadStart:
