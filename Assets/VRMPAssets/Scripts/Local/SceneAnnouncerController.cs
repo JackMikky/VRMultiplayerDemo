@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 namespace XRMultiplayer
 {
-    enum SceneAnnouncerType
+    internal enum SceneAnnouncerType
     {
         OnSceneLoadStart,
         OnSceneLoaded
@@ -11,32 +11,31 @@ namespace XRMultiplayer
 
     public class SceneAnnouncerController : MonoBehaviour
     {
-        NetworkSceneManager _networkSceneManager;
+        private NetworkSceneManager _networkSceneManager;
 
-        [SerializeField] AudioSource announcerAudioSource;
+        [SerializeField] private AudioSource announcerAudioSource;
 
-        AudioClip _onSceneLoadedClip;
+        private AudioClip _onSceneLoadedClip;
 
-        AudioClip _onSceneLoadStartClip;
+        private AudioClip _onSceneLoadStartClip;
 
-        const string ANNOUNCER_CLIP_FOLDER="Announcers";
+        private const string ANNOUNCER_CLIP_FOLDER = "Announcers";
 
-        const string START_SUFFIX="Start";
+        private const string START_SUFFIX = "Start";
 
-        const string LOADED_SUFFIX="Loaded";
+        private const string LOADED_SUFFIX = "Loaded";
 
-        UnityEvent OnSceneLoaded;
+        private CustomEvent OnSceneLoaded;
 
-        UnityEvent OnSceneLoadStart;
+        private CustomEvent OnSceneLoadStart;
 
-        [SerializeField] WarpController warpController;
+        [SerializeField] private WarpController warpController;
 
         private void Awake()
         {
             _onSceneLoadStartClip = this.LoadAnnouncerClipFormResource("Lobby", SceneAnnouncerType.OnSceneLoadStart);
 
             _onSceneLoadedClip = this.LoadAnnouncerClipFormResource("Lobby", SceneAnnouncerType.OnSceneLoaded);
-
         }
 
         private void Start()
@@ -46,12 +45,16 @@ namespace XRMultiplayer
             //{
             //    this.HandleSceneLoadStart();
             //});
-            LocalManager.Instance.onLobbyLoadStart.AddListener(() =>
+            //LocalManager.Instance.onLobbyLoadStart.AddListener(() =>
+            //{
+            //    this.HandleSceneLoadStart();
+            //});
+            warpController.onWarpFadeInStart.AddOnceListener(() =>
             {
                 this.HandleSceneLoadStart();
             });
 
-            warpController.AddOnceListenerToWarpFadeInComplete(() =>
+            warpController.onWarpFadeInComplete.AddOnceListener(() =>
             {
                 this.HandleOnSceneLoaded();
             });
@@ -61,9 +64,9 @@ namespace XRMultiplayer
             {
                 _networkSceneManager.onSceneLoadStart.AddListener((sceneName) =>
                 {
-                    _onSceneLoadStartClip= this.LoadAnnouncerClipFormResource(sceneName,SceneAnnouncerType.OnSceneLoadStart);
+                    _onSceneLoadStartClip = this.LoadAnnouncerClipFormResource(sceneName, SceneAnnouncerType.OnSceneLoadStart);
 
-                    _onSceneLoadedClip= this.LoadAnnouncerClipFormResource(sceneName,SceneAnnouncerType.OnSceneLoaded);
+                    _onSceneLoadedClip = this.LoadAnnouncerClipFormResource(sceneName, SceneAnnouncerType.OnSceneLoaded);
 
                     this.HandleSceneLoadStart();
                     Debug.Log($"[SceneAnnouncerController] onSceneLoadStart event received for scene: {sceneName}");
@@ -78,7 +81,7 @@ namespace XRMultiplayer
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (_networkSceneManager != null)
             {
@@ -86,35 +89,37 @@ namespace XRMultiplayer
             }
         }
 
-        void HandleOnSceneLoaded()
+        private void HandleOnSceneLoaded()
         {
             this.announcerAudioSource.clip = _onSceneLoadedClip;
             this.announcerAudioSource.Play();
             this.OnSceneLoaded?.Invoke();
         }
 
-        void HandleSceneLoadStart()
+        private void HandleSceneLoadStart()
         {
             this.announcerAudioSource.clip = _onSceneLoadStartClip;
             this.announcerAudioSource.Play();
             this.OnSceneLoadStart?.Invoke();
         }
 
-        AudioClip LoadAnnouncerClipFormResource(string sceneName, SceneAnnouncerType announcerType)
+        private AudioClip LoadAnnouncerClipFormResource(string sceneName, SceneAnnouncerType announcerType)
         {
             string suffixPath = "";
             switch (announcerType)
             {
                 case SceneAnnouncerType.OnSceneLoadStart:
-                    suffixPath= START_SUFFIX;
+                    suffixPath = START_SUFFIX;
                     break;
+
                 case SceneAnnouncerType.OnSceneLoaded:
                     suffixPath = LOADED_SUFFIX;
                     break;
+
                 default:
                     break;
             }
-            var loadPath= $"{ANNOUNCER_CLIP_FOLDER}/{sceneName}/{suffixPath}/{sceneName + suffixPath}";
+            var loadPath = $"{ANNOUNCER_CLIP_FOLDER}/{sceneName}/{suffixPath}/{sceneName + suffixPath}";
             var audioClip = Resources.Load<AudioClip>(loadPath);
             if (audioClip != null)
             {

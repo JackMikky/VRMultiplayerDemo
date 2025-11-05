@@ -19,9 +19,9 @@ namespace XRMultiplayer
             public string sceneName;
         }
 
-        [SerializeField] List<SceneRoomInfo> sceneList = new List<SceneRoomInfo>();
+        [SerializeField] private List<SceneRoomInfo> sceneList = new List<SceneRoomInfo>();
 
-        [SerializeField] LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
+        [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
 
         public UnityEvent<string> onSceneLoaded;
 
@@ -33,15 +33,15 @@ namespace XRMultiplayer
 
         private string m_ExpectedSceneName;
 
-        [SerializeField] WarpController warpController;
+        [SerializeField] private WarpController warpController;
 
         public string currentSceneName = "";
 
         private void Start()
         {
-           warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
+            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
 
-            currentSceneName= SceneManager.GetActiveScene().name;
+            currentSceneName = SceneManager.GetActiveScene().name;
         }
 
         [Obsolete]
@@ -85,7 +85,6 @@ namespace XRMultiplayer
             }
         }
 
-
         public void LoadSceneByName(string sceneName)
         {
             SceneRoomInfo? targetScene = null;
@@ -121,12 +120,12 @@ namespace XRMultiplayer
             }
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             SceneManager.sceneLoaded += HandleSceneLoaded;
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             SceneManager.sceneLoaded -= HandleSceneLoaded;
         }
@@ -180,7 +179,7 @@ namespace XRMultiplayer
                 SceneManager.UnloadSceneAsync(currentSceneName);
                 Debug.Log($"[NetworkSceneManager] All clients finished loading {sceneName}");
                 onSceneLoaded?.Invoke(sceneName);
-                currentSceneName= sceneName;
+                currentSceneName = sceneName;
 
                 m_ExpectedSceneName = null;
                 m_ClientsFinishedLoading.Clear();

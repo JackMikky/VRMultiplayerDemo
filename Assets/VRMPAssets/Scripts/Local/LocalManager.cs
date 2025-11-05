@@ -7,13 +7,14 @@ public class LocalManager : MonoBehaviour
 {
     public static LocalManager Instance { get; private set; }
 
-    [SerializeField] GameObject localAvatar;
+    [SerializeField] private GameObject localAvatar;
 
-    public UnityEvent onLobbyLoadStart;
+    public CustomEvent onLobbyLoadStart;
 
-    public UnityEvent onLobbyLoaded;
+    public CustomEvent onLobbyLoaded;
 
-    const string lobbySceneName = "Lobby";
+    private const string lobbySceneName = "Lobby";
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -25,27 +26,27 @@ public class LocalManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         XRINetworkGameManager.Connected.Subscribe(HideLocalAvatar);
-    }
-
-    void Start()
-    {
-        LoadLocalSceneByName(lobbySceneName);
         SceneManager.sceneLoaded += HandleLobbyLoaded;
     }
 
-   public void LoadLocalSceneByName(string sceneName)
+    private void Start()
     {
-        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-        XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = sceneName;
+        LoadLocalSceneByName(lobbySceneName);
         onLobbyLoadStart.Invoke();
     }
 
-    void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    public void LoadLocalSceneByName(string sceneName)
+    {
+        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = sceneName;
+    }
+
+    private void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         this.onLobbyLoaded.Invoke();
     }
 
-    void HideLocalAvatar(bool connected)
+    private void HideLocalAvatar(bool connected)
     {
         this.localAvatar.SetActive(!connected);
     }

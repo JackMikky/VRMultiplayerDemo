@@ -2518,6 +2518,11 @@ PrefabInstance:
       propertyPath: Screen2
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8059461763842174801, guid: cbb1a68d03835fd49ab19311bab1cfdd,
+        type: 3}
+      propertyPath: fadeInWaitTime
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8182280897945566466, guid: cbb1a68d03835fd49ab19311bab1cfdd,
         type: 3}
       propertyPath: m_Name
