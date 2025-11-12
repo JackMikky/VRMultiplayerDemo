@@ -26,6 +26,7 @@ public class LocalManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         XRINetworkGameManager.Connected.Subscribe(HideLocalAvatar);
+        // todo 每次加载场景都会调用，需要优化
         SceneManager.sceneLoaded += HandleLobbyLoaded;
     }
 
@@ -43,7 +44,8 @@ public class LocalManager : MonoBehaviour
 
     private void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
-        this.onLobbyLoaded.Invoke();
+        if (scene.name == lobbySceneName)
+            this.onLobbyLoaded.Invoke();
     }
 
     private void HideLocalAvatar(bool connected)

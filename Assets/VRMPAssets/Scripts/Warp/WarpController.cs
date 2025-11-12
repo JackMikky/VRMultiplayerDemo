@@ -19,16 +19,16 @@ namespace XRMultiplayer
         [Header("Events")]
         [Space(10)]
         [Tooltip("Triggered when the warp fade-out begins (screen starts going dark)")]
-        public CustomEvent onWarpFadeOutStart;
+        public CustomEvent<string> onWarpFadeOutStart;
 
         [Tooltip("Triggered when the warp fade-out is fully complete (screen is completely dark)")]
         public CustomEvent<string> onWarpFadeOutComplete;
 
         [Tooltip("Triggered when the warp fade-in begins (screen starts to brighten)")]
-        public CustomEvent onWarpFadeInStart;
+        public CustomEvent<string> onWarpFadeInStart;
 
         [Tooltip("Triggered when the warp fade-in is fully complete (screen is fully visible again)")]
-        public CustomEvent onWarpFadeInComplete;
+        public CustomEvent<string> onWarpFadeInComplete;
 
         [System.Obsolete] private readonly FloatTweenableVariable _fadeValue = new FloatTweenableVariable();
 
@@ -38,9 +38,9 @@ namespace XRMultiplayer
         {
             SetFadeValue(0);
 
-            LocalManager.Instance.onLobbyLoaded.AddListener(() =>
+            LocalManager.Instance.onLobbyLoadStart.AddOnceListener(() =>
             {
-                StartWarpFadeIn();
+                StartWarpFadeIn("Lobby");
             });
         }
 
@@ -53,42 +53,42 @@ namespace XRMultiplayer
 
             XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddListener((sceneName) =>
             {
-                StartWarpFadeIn();
+                StartWarpFadeIn(sceneName);
             });
         }
 
-        public void StartFadeOutBySceneID(string sceneID)
+        public void StartFadeOut(string scene)
         {
-            StartWarpFadeOut(sceneID);
+            StartWarpFadeOut(scene);
         }
 
-        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneID)
+        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneName)
         {
             yield return new WaitForSeconds(fadeOutWaitTime);
 
             if (onWarpFadeOutComplete != null)
-                onWarpFadeOutComplete.Invoke(sceneID);
+                onWarpFadeOutComplete.Invoke(sceneName);
         }
 
-        private IEnumerator InvokeWarpFadeInAfterDelay()
+        private IEnumerator InvokeWarpFadeInAfterDelay(string sceneName)
         {
             yield return new WaitForSeconds(fadeInWaitTime);
 
             if (onWarpFadeInComplete != null)
-                onWarpFadeInComplete.Invoke();
+                onWarpFadeInComplete.Invoke(sceneName);
         }
 
-        private void StartWarpFadeOut(string sceneID)
+        private void StartWarpFadeOut(string sceneName)
         {
-            onWarpFadeOutStart.Invoke();
+            onWarpFadeOutStart.Invoke(sceneName);
             StartCoroutine(_fadeValue.PlaySequence(0, 1, fadeTime,
-                () => StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneID))));
+                () => StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneName))));
         }
 
-        private void StartWarpFadeIn()
+        private void StartWarpFadeIn(string sceneName)
         {
-            onWarpFadeInStart.Invoke();
-            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () => StartCoroutine(InvokeWarpFadeInAfterDelay())));
+            onWarpFadeInStart.Invoke(sceneName);
+            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () => StartCoroutine(InvokeWarpFadeInAfterDelay(sceneName))));
         }
 
         private void SetFadeValue(float value)

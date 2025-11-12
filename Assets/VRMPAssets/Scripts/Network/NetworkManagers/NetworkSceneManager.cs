@@ -39,15 +39,14 @@ namespace XRMultiplayer
 
         private void Start()
         {
-            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
+            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByName);
 
             currentSceneName = SceneManager.GetActiveScene().name;
         }
 
-        [Obsolete]
-        public void LoadSceneByIDWithWarpFadeOut(string sceneID)
+        public void LoadSceneByNameWithWarpFadeOut(string name)
         {
-            warpController?.StartFadeOutBySceneID(sceneID);
+            warpController?.StartFadeOut(name);
         }
 
         public void LoadSceneByID(string sceneID)
@@ -81,6 +80,7 @@ namespace XRMultiplayer
             }
             else
             {
+                this.onSceneLoadFailed?.Invoke(targetScene.Value.sceneName);
                 Debug.LogError($"Scene with ID {sceneID} not found.");
             }
         }
@@ -116,6 +116,7 @@ namespace XRMultiplayer
             }
             else
             {
+                this.onSceneLoadFailed?.Invoke(sceneName);
                 Debug.LogError($"Scene with name {sceneName} not found.");
             }
         }
