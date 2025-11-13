@@ -24,7 +24,7 @@ namespace XRMultiplayer
             base.OnNetworkDespawn();
         }
 
-        void OnChatMessagesChanged(NetworkListEvent<FixedString512Bytes> changeEvent)
+        private void OnChatMessagesChanged(NetworkListEvent<FixedString512Bytes> changeEvent)
         {
             if (changeEvent.Type == NetworkListEvent<FixedString512Bytes>.EventType.Add)
             {
@@ -65,12 +65,12 @@ namespace XRMultiplayer
         }
 
         [ServerRpc(RequireOwnership = false)]
-        void SendMessageServerRpc(string json, ServerRpcParams rpcParams = default)
+        private void SendMessageServerRpc(string json, ServerRpcParams rpcParams = default)
         {
             ChatMessages.Add(json);
         }
 
-        void RaiseIncomingMessage(string userName, string text, string time)
+        private void RaiseIncomingMessage(string userName, string text, string time)
         {
             OnMessageReceived?.Invoke(userName, text, time);
         }
