@@ -6324,6 +6324,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -33
       objectReference: {fileID: 0}
+    - target: {fileID: 5879581700500063665, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: JoinLobbyAfterFadeOut
+      objectReference: {fileID: 0}
     - target: {fileID: 6010158165065103421, guid: 95bd29654e15ad844be6210374a75967,
         type: 3}
       propertyPath: m_IsActive
