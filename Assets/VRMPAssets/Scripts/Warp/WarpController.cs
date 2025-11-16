@@ -1,6 +1,8 @@
 using System.Collections;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Utilities.Tweenables.Primitives;
 
 namespace XRMultiplayer
@@ -36,59 +38,73 @@ namespace XRMultiplayer
 
         private void Awake()
         {
-            SetFadeValue(0);
-
-            LocalManager.Instance.onLobbyLoadStart.AddOnceListener(() =>
-            {
-                StartWarpFadeIn("Lobby");
-            });
+            SetFadeValue(1);
         }
 
         [System.Obsolete]
         private void Start()
         {
-            _fadeValue.Value = 0;
+            _fadeValue.Value = 1;
+            StartWarpFadeIn("Entrance");
 
             _fadeValue.Subscribe(SetFadeValue);
-
-            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddListener((sceneName) =>
-            {
-                StartWarpFadeIn(sceneName);
-            });
         }
 
-        public void StartFadeOut(string scene)
+        public void StartFadeOut(string scene, UnityAction<string> onCompleted = null)
         {
-            StartWarpFadeOut(scene);
+            StartWarpFadeOut(scene, onCompleted);
         }
 
-        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneName)
+        public void StartFadeIn(string scene, UnityAction<string> onCompleted = null)
+        {
+            StartWarpFadeIn(scene, onCompleted);
+        }
+
+        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneName, UnityAction<string> unityAction = null)
         {
             yield return new WaitForSeconds(fadeOutWaitTime);
 
             if (onWarpFadeOutComplete != null)
+            {
                 onWarpFadeOutComplete.Invoke(sceneName);
+                unityAction?.Invoke(sceneName);
+            }
         }
 
-        private IEnumerator InvokeWarpFadeInAfterDelay(string sceneName)
+        private IEnumerator InvokeWarpFadeInAfterDelay(string sceneName, UnityAction<string> unityAction = null)
         {
             yield return new WaitForSeconds(fadeInWaitTime);
 
             if (onWarpFadeInComplete != null)
+            {
                 onWarpFadeInComplete.Invoke(sceneName);
+                unityAction?.Invoke(sceneName);
+            }
         }
 
-        private void StartWarpFadeOut(string sceneName)
+        private void StartWarpFadeOut(string sceneName, UnityAction<string> onCompleted = null, bool invokeEvent = true)
         {
-            onWarpFadeOutStart.Invoke(sceneName);
+            if (invokeEvent)
+            {
+                onWarpFadeOutStart.Invoke(sceneName);
+            }
             StartCoroutine(_fadeValue.PlaySequence(0, 1, fadeTime,
-                () => StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneName))));
+                () =>
+                {
+                    StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneName, onCompleted));
+                }));
         }
 
-        private void StartWarpFadeIn(string sceneName)
+        private void StartWarpFadeIn(string sceneName, UnityAction<string> onCompleted = null, bool invokeEvent = true)
         {
-            onWarpFadeInStart.Invoke(sceneName);
-            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () => StartCoroutine(InvokeWarpFadeInAfterDelay(sceneName))));
+            if (invokeEvent)
+            {
+                onWarpFadeInStart.Invoke(sceneName);
+            }
+            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () =>
+            {
+                StartCoroutine(InvokeWarpFadeInAfterDelay(sceneName, onCompleted));
+            }));
         }
 
         private void SetFadeValue(float value)
@@ -102,7 +118,7 @@ namespace XRMultiplayer
         [System.Obsolete]
         private void OnDestroy()
         {
-            fullScreenMat.SetFloat(fadeProperty, 0);
+            fullScreenMat.SetFloat(fadeProperty, 1);
             this.onWarpFadeInComplete.RemoveAllListeners();
             this.onWarpFadeOutComplete.RemoveAllListeners();
             this._fadeValue.Dispose();

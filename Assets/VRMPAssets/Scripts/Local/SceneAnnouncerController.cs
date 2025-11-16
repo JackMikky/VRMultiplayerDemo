@@ -12,15 +12,19 @@ namespace XRMultiplayer
         OnSceneLoadFailed
     }
 
+    internal enum SceneName
+    {
+        Entrance,
+        Lobby,
+        Room1,
+        Room2
+    }
+
     public class SceneAnnouncerController : MonoBehaviour
     {
         private NetworkSceneManager _networkSceneManager;
 
         [SerializeField] private AudioSource announcerAudioSource;
-
-        private AudioClip _onSceneLoadedClip;
-
-        private AudioClip _onSceneLoadStartClip;
 
         private AudioClip _onSceneLoadFailedClip;
 
@@ -42,60 +46,38 @@ namespace XRMultiplayer
 
         private bool _isProcessingQueue = false;
 
+        [Header("Entrance Clips")]
+        [SerializeField] private SceneAnnounceClip entranceAnnounceClip = new SceneAnnounceClip();
+
+        [Header("Lobby Clips")]
+        [SerializeField]
+        private SceneAnnounceClip lobbyAnnounceClip = new SceneAnnounceClip();
+
+        [Header("Room1 Clips")]
+        [SerializeField]
+        private SceneAnnounceClip room1AnnounceClip = new SceneAnnounceClip();
+
+        [Header("Room2 Clips")]
+        [SerializeField] private SceneAnnounceClip room2AnnounceClip = new SceneAnnounceClip();
+
         private void Awake()
         {
-            _onSceneLoadStartClip = this.LoadSceneAnnouncerClip("Lobby", SceneAnnouncerType.OnSceneLoadStart);
+            entranceAnnounceClip.LoadClips();
 
-            _onSceneLoadedClip = this.LoadSceneAnnouncerClip("Lobby", SceneAnnouncerType.OnSceneLoaded);
+            lobbyAnnounceClip.LoadClips();
 
-            var failedClipPath = $"{LOAD_FAILED_SUFFIX}/{LOAD_FAILED_SUFFIX}";
-            _onSceneLoadFailedClip = this.LoadAnnouncerClipFormResources(failedClipPath);
-        }
+            room1AnnounceClip.LoadClips();
 
-        private void Start()
-        {
-            //todo:when network connected invoke HandleSceneLoadStart
-            //warpController.AddOnceListenerToWarpFadeOutComplete(() =>
-            //{
-            //    this.HandleSceneLoadStart();
-            //});
-            //LocalManager.Instance.onLobbyLoadStart.AddListener(() =>
-            //{
-            //    this.HandleSceneLoadStart();
-            //});
-            //warpController.onWarpFadeOutStart.AddOnceListener((sceneName) =>
-            //{
-            //    this.HandleSceneLoadStart();
-            //});
+            room2AnnounceClip.LoadClips();
 
-            warpController.onWarpFadeInStart.AddOnceListener((sceneName) =>
+            warpController.onWarpFadeInStart.AddListener((sceneName) =>
             {
-                this.HandleSceneLoadStart();
+                this.HandleOnSceneLoaded(sceneName);
             });
 
-            _networkSceneManager = XRINetworkGameManager.Instance.networkSceneManager;
-            if (_networkSceneManager != null)
+            warpController.onWarpFadeOutStart.AddListener((sceneName) =>
             {
-                warpController.onWarpFadeOutStart.AddListener((sceneName) =>
-                {
-                    _onSceneLoadStartClip = this.LoadSceneAnnouncerClip(sceneName, SceneAnnouncerType.OnSceneLoadStart);
-
-                    _onSceneLoadedClip = this.LoadSceneAnnouncerClip(sceneName, SceneAnnouncerType.OnSceneLoaded);
-
-                    this.HandleSceneLoadStart();
-                    Debug.Log($"[SceneAnnouncerController] onSceneLoadStart event received for scene: {sceneName}");
-                });
-
-                warpController.onWarpFadeInComplete.AddListener((sceneName) =>
-                {
-                    this.HandleOnSceneLoaded();
-
-                    Debug.Log($"[SceneAnnouncerController] Playing announcer clip for scene: {sceneName}");
-                });
-            }
-
-            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoadFailed.AddListener((sceneName) =>
-            {
+                this.HandleSceneLoadStart(sceneName);
             });
         }
 
@@ -134,14 +116,68 @@ namespace XRMultiplayer
             _isProcessingQueue = false;
         }
 
-        private void HandleOnSceneLoaded()
+        public void HandleOnSceneLoaded(string sceneName)
         {
-            EnqueueClip(_onSceneLoadedClip, () => this.OnSceneLoaded?.Invoke());
+            var clip = null as AudioClip;
+            switch (sceneName)
+            {
+                case "Entrance":
+                    clip = entranceAnnounceClip.GetLoadedClipRandom();
+                    break;
+
+                case "Lobby":
+                    clip = lobbyAnnounceClip.GetLoadedClipRandom();
+                    break;
+
+                case "Room1":
+                    clip = room1AnnounceClip.GetLoadedClipRandom();
+                    break;
+
+                case "Room2":
+                    clip = room2AnnounceClip.GetLoadedClipRandom();
+                    break;
+
+                default:
+                    break;
+            }
+            if (clip == null)
+            {
+                clip = this.LoadSceneAnnouncerClip(sceneName, SceneAnnouncerType.OnSceneLoaded);
+            }
+
+            EnqueueClip(clip, () => this.OnSceneLoaded?.Invoke());
         }
 
-        private void HandleSceneLoadStart()
+        public void HandleSceneLoadStart(string sceneName)
         {
-            EnqueueClip(_onSceneLoadStartClip, () => this.OnSceneLoadStart?.Invoke());
+            var clip = null as AudioClip;
+            switch (sceneName)
+            {
+                case "Entrance":
+                    clip = entranceAnnounceClip.GetLoadStartClipRandom();
+                    break;
+
+                case "Lobby":
+                    clip = lobbyAnnounceClip.GetLoadStartClipRandom();
+                    break;
+
+                case "Room1":
+                    clip = room1AnnounceClip.GetLoadStartClipRandom();
+                    break;
+
+                case "Room2":
+                    clip = room2AnnounceClip.GetLoadStartClipRandom();
+                    break;
+
+                default:
+                    break;
+            }
+            if (clip == null)
+            {
+                clip = this.LoadSceneAnnouncerClip(sceneName, SceneAnnouncerType.OnSceneLoadStart);
+            }
+
+            EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
         }
 
         private AudioClip LoadSceneAnnouncerClip(string sceneName, SceneAnnouncerType announcerType)
@@ -187,6 +223,11 @@ namespace XRMultiplayer
                 Debug.LogWarning($"[SceneAnnouncerController] Announcer clip not found at path: {loadPath}");
                 return null;
             }
+        }
+
+        public void PlayAnnounceClip(AudioClip audioClip, UnityAction nextAction = null)
+        {
+            EnqueueClip(audioClip, nextAction);
         }
     }
 }

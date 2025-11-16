@@ -1,6 +1,9 @@
+using Unity.Services.Lobbies.Models;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using XRMultiplayer;
 
 public class LocalManager : MonoBehaviour
@@ -9,11 +12,9 @@ public class LocalManager : MonoBehaviour
 
     [SerializeField] private GameObject localAvatar;
 
-    public CustomEvent onLobbyLoadStart;
+    [SerializeField] private GameObject lobbyObject;
 
-    public CustomEvent onLobbyLoaded;
-
-    private const string lobbySceneName = "Lobby";
+    [SerializeField] private GameObject entranceObject;
 
     private void Awake()
     {
@@ -26,14 +27,23 @@ public class LocalManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         XRINetworkGameManager.Connected.Subscribe(HideLocalAvatar);
-        // todo 每次加载场景都会调用，需要优化
-        SceneManager.sceneLoaded += HandleLobbyLoaded;
     }
 
     private void Start()
     {
-        LoadLocalSceneByName(lobbySceneName);
-        onLobbyLoadStart.Invoke();
+        var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
+        warp.onWarpFadeOutComplete.AddOnceListener((sceneName) =>
+        {
+            if (sceneName == "Lobby")
+            {
+                HideEntranceObject();
+                warp.StartFadeIn(sceneName);
+                XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddListener((sceneName) =>
+                {
+                    warp.StartFadeIn(sceneName);
+                });
+            }
+        });
     }
 
     public void LoadLocalSceneByName(string sceneName)
@@ -42,10 +52,10 @@ public class LocalManager : MonoBehaviour
         XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = sceneName;
     }
 
-    private void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    private void HideEntranceObject()
     {
-        if (scene.name == lobbySceneName)
-            this.onLobbyLoaded.Invoke();
+        lobbyObject.SetActive(true);
+        entranceObject.SetActive(false);
     }
 
     private void HideLocalAvatar(bool connected)
