@@ -21,11 +21,13 @@ namespace XRMultiplayer
 
         [SerializeField] private List<SceneRoomInfo> sceneList = new List<SceneRoomInfo>();
 
-        [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
+        [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Single;
 
-        public UnityEvent<string> onSceneLoaded;
+        public LoadSceneMode LoadSceneMode { get => loadSceneMode; }
 
-        public UnityEvent<string> onSceneLoadStart;
+        public CustomEvent<string> onSceneLoaded;
+
+        public CustomEvent<string> onSceneLoadStart;
 
         public UnityEvent<string> onSceneLoadFailed;
 
@@ -37,20 +39,20 @@ namespace XRMultiplayer
 
         public WarpController WarpController => warpController;
 
-        public string currentSceneName = "";
+        private string currentSceneName = "Entrance";
+
+        private string lastSceneName = "";
 
         private void Start()
         {
             currentSceneName = SceneManager.GetActiveScene().name;
+            lastSceneName = currentSceneName;
         }
 
         public void LoadSceneByNameWithWarpFadeOut(string name)
         {
-            // Host/server should instruct all clients (and itself) to perform the warp fade-out.
-            // Clients will notify the server when their fade-out completes, server will initiate the actual network scene load.
             if (NetworkManager.Singleton == null)
             {
-                // Fallback: no networking available, behave locally.
                 warpController?.StartFadeOut(name, (sceneName) => { LoadSceneByName(sceneName); });
                 return;
             }
@@ -59,11 +61,9 @@ namespace XRMultiplayer
             {
                 // Tell all clients (including host) to start fade out.
                 StartFadeOutOnClientsClientRpc(name);
-                // The host (server) will also run the ClientRpc callback locally and will call LoadSceneByName directly when its fade completes.
             }
             else
             {
-                // Not the server: request server to start the fade/load sequence.
                 RequestLoadSceneServerRpc(name);
             }
         }
@@ -125,7 +125,7 @@ namespace XRMultiplayer
                     m_ClientsFinishedLoading.Clear();
 
                     NetworkManager.Singleton.SceneManager.LoadScene(targetScene.Value.sceneName,
-                        this.loadSceneMode);
+                        loadSceneMode);
                     onSceneLoadStart.Invoke(sceneName);
                 }
                 else
@@ -152,6 +152,9 @@ namespace XRMultiplayer
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            lastSceneName = currentSceneName;
+            Debug.Log($"[NetworkSceneManager] Last Scene:{lastSceneName}");
+            currentSceneName = scene.name;
             Debug.Log($"[NetworkSceneManager] Local scene loaded: {scene.name}");
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient)
@@ -171,6 +174,7 @@ namespace XRMultiplayer
                     }
                 }
             }
+            onSceneLoaded?.Invoke(currentSceneName);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -196,13 +200,11 @@ namespace XRMultiplayer
 
             if (m_ClientsFinishedLoading.Count >= connectedCount)
             {
-                SceneManager.UnloadSceneAsync(currentSceneName);
                 Debug.Log($"[NetworkSceneManager] All clients finished loading {sceneName}");
-                onSceneLoaded?.Invoke(sceneName);
-                currentSceneName = sceneName;
-
                 m_ExpectedSceneName = null;
                 m_ClientsFinishedLoading.Clear();
+                Debug.Log($"[NetworkSceneManager] Unloaded scene: {lastSceneName}");
+                StartFadeInOnClientsClientRpc(sceneName);
             }
         }
 
@@ -230,6 +232,12 @@ namespace XRMultiplayer
                     RequestLoadSceneServerRpc(sn);
                 }
             });
+        }
+
+        [ClientRpc]
+        private void StartFadeInOnClientsClientRpc(string sceneName)
+        {
+            warpController?.StartFadeIn(sceneName);
         }
 
         // ServerRpc: clients call this to request the server to start the network scene load.

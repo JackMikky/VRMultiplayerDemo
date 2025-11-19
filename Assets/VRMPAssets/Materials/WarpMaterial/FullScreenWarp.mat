@@ -62,7 +62,7 @@ Material:
     - _Fullscreen_StencilReference: 2
     - _Fullscreen_StencilWriteMask: 255
     - _Sample: 0
-    - _T: 1
+    - _T: 0
     - _UseNoise: 1
     - _factor: 3
     m_Colors:

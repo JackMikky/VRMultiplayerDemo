@@ -12,14 +12,6 @@ namespace XRMultiplayer
         OnSceneLoadFailed
     }
 
-    internal enum SceneName
-    {
-        Entrance,
-        Lobby,
-        Room1,
-        Room2
-    }
-
     public class SceneAnnouncerController : MonoBehaviour
     {
         private NetworkSceneManager _networkSceneManager;
@@ -85,7 +77,11 @@ namespace XRMultiplayer
         {
             if (_networkSceneManager != null)
             {
-                //todo:release reference
+                _clipQueue.Clear();
+                OnSceneLoaded.RemoveAllListeners();
+                OnSceneLoadStart.RemoveAllListeners();
+                _networkSceneManager = null;
+                warpController = null;
             }
         }
 

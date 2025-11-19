@@ -118,7 +118,11 @@ namespace XRMultiplayer
         [System.Obsolete]
         private void OnDestroy()
         {
+#if UNITY_EDITOR
+            fullScreenMat.SetFloat(fadeProperty, 0);
+#else
             fullScreenMat.SetFloat(fadeProperty, 1);
+#endif
             this.onWarpFadeInComplete.RemoveAllListeners();
             this.onWarpFadeOutComplete.RemoveAllListeners();
             this._fadeValue.Dispose();

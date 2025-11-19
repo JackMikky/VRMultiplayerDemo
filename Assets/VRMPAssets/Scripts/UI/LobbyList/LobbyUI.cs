@@ -6,6 +6,7 @@ using Unity.Services.Multiplayer;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 
 namespace XRMultiplayer
 {
@@ -174,7 +175,6 @@ namespace XRMultiplayer
 
         public void SetVoiceChatAudioFadeModel(int fadeModel)
         {
-            
         }
 
         public void TogglePrivacy(bool toggle)
@@ -249,21 +249,24 @@ namespace XRMultiplayer
         public void HostLobbyAfterFadeOut()
         {
             var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
-            warp.onWarpFadeInStart.AddOnceListener((sceneName) =>
+            var loadMode = XRINetworkGameManager.Instance.networkSceneManager.LoadSceneMode;
+            warp.StartFadeOut("Lobby", (sn) =>
             {
-                HostLocalRoom();
+                HostLocalRoom(() =>
+                {
+                    NetworkManager.Singleton.SceneManager.LoadScene(sn, loadMode);
+                });
             });
-            warp.StartFadeOut("Lobby");
         }
 
         public void JoinLobbyAfterFadeOut()
         {
             var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
-            warp.onWarpFadeInStart.AddOnceListener((sceneName) =>
+            warp.StartFadeOut("Lobby", (sn) =>
             {
                 JoinLocalRoom();
+                warp.StartFadeIn(sn);
             });
-            warp.StartFadeOut("Lobby");
         }
 
         private void EnableRefresh()
@@ -322,11 +325,12 @@ namespace XRMultiplayer
             }
         }
 
-        public void HostLocalRoom()
+        public void HostLocalRoom(UnityAction onNetworkConnected)
         {
             if (XRINetworkGameManager.Instance.HostLocalConnection())
             {
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionSuccessPanel);
+                onNetworkConnected.Invoke();
             }
             else
             {
