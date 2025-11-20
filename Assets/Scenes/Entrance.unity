@@ -488,7 +488,7 @@ MonoBehaviour:
     sceneName: Room1
   - sceneID: 3
     sceneName: Room2
-  loadSceneMode: 1
+  loadSceneMode: 0
   onSceneLoaded:
     m_PersistentCalls:
       m_Calls: []
