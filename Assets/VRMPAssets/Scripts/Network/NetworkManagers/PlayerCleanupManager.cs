@@ -12,7 +12,10 @@ namespace XRMultiplayer
 
         void OnDisable()
         {
-            NetworkManager.Singleton.OnClientDisconnectCallback -= HandleDisconnect;
+            if (NetworkManager.Singleton)
+            {
+                NetworkManager.Singleton.OnClientDisconnectCallback -= HandleDisconnect;
+            }
         }
 
         void HandleDisconnect(ulong clientId)

@@ -13,99 +13,98 @@ namespace XRMultiplayer
         /// <summary>
         /// Indicates whether the music should start playing automatically.
         /// </summary>
-        [SerializeField] bool m_AutoPlay;
+        [SerializeField] private bool m_AutoPlay;
 
         /// <summary>
         /// The list of music clips to play.
         /// </summary>
         [SerializeField, Tooltip("Format clip name to 'Song Title-Artist Name'")]
-        AudioClip[] m_MusicClips;
+        private AudioClip[] m_MusicClips;
 
         /// <summary>
         /// The audio source to play the music.
         /// </summary>
-        [SerializeField] AudioSource m_AudioSource;
+        [SerializeField] private AudioSource m_AudioSource;
 
         /// <summary>
         /// The slider to control the timeline of the current playing track.
         /// </summary>
-        [SerializeField] Slider m_TimelineSlider;
+        [SerializeField] private Slider m_TimelineSlider;
 
         /// <summary>
         /// The slider to control the volume of the current playing track.
         /// </summary>
-        [SerializeField] Slider m_VolumeSlider;
+        [SerializeField] private Slider m_VolumeSlider;
 
         /// <summary>
         /// The dropdown to select the current track to play.
         /// </summary>
-        [SerializeField] TMP_Dropdown m_Dropdown;
+        [SerializeField] private TMP_Dropdown m_Dropdown;
 
         /// <summary>
         /// The text to display the current playing track.
         /// </summary>
-        [SerializeField] TMP_Text[] m_CurrentSongText;
+        [SerializeField] private TMP_Text[] m_CurrentSongText;
 
         /// <summary>
         /// The toggle to play/pause the current track.
         /// </summary>
-        [SerializeField] Toggle m_PlayPauseToggle;
+        [SerializeField] private Toggle m_PlayPauseToggle;
 
         /// <summary>
         /// The toggle to shuffle the music.
         /// </summary>
-        [SerializeField] Toggle m_ShuffleToggle;
+        [SerializeField] private Toggle m_ShuffleToggle;
 
         /// <summary>
         /// The button to play the next track.
         /// </summary>
-        [SerializeField] Button m_NextButton;
+        [SerializeField] private Button m_NextButton;
 
         /// <summary>
         /// The button to play the previous track.
         /// </summary>
-        [SerializeField] Button m_PreviousButton;
+        [SerializeField] private Button m_PreviousButton;
 
         /// <summary>
         /// The image to display the play/pause state.
         /// </summary>
-        [SerializeField] Image m_PlayPauseImage;
+        [SerializeField] private Image m_PlayPauseImage;
 
         /// <summary>
         /// The sprite to display the pause state.
         /// </summary>
-        [SerializeField] Sprite m_PauseSprite;
+        [SerializeField] private Sprite m_PauseSprite;
 
         /// <summary>
         /// The sprite to display the play state.
         /// </summary>
-        [SerializeField] Sprite m_PlaySprite;
+        [SerializeField] private Sprite m_PlaySprite;
 
         /// <summary>
         /// The network variable to store the current song ID.
         /// </summary>
-        readonly NetworkVariable<int> m_CurrentSongIdNetworked = new NetworkVariable<int>(0,
+        private readonly NetworkVariable<int> m_CurrentSongIdNetworked = new NetworkVariable<int>(0,
             NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         /// <summary>
         /// The network variable to store the state of whether or not we are actively playing music.
         /// </summary>
-        readonly NetworkVariable<bool> m_IsPlayingNetworked = new NetworkVariable<bool>(false,
+        private readonly NetworkVariable<bool> m_IsPlayingNetworked = new NetworkVariable<bool>(false,
             NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         /// <summary>
         /// Indicates whether the music should be shuffled.
         /// </summary>
-        bool m_Shuffle;
+        private bool m_Shuffle;
 
         /// <summary>
         /// The current song ID.
         /// </summary>
-        int currentSongId = 0;
-
+        private int currentSongId = 0;
 
         /// <inheritdoc/>
-        void Start()
+        private void Start()
         {
             // Clear the dropdown options
             m_Dropdown.ClearOptions();
@@ -187,7 +186,6 @@ namespace XRMultiplayer
             m_CurrentSongIdNetworked.OnValueChanged -= CurrentSongUpdated;
             m_IsPlayingNetworked.OnValueChanged -= OnIsPlayingChanged;
 
-
             SetClipTime(0.0f);
             m_TimelineSlider.SetValueWithoutNotify(0.0f);
 
@@ -227,7 +225,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Sets up the listeners for UI events.
         /// </summary>
-        void SetupUIListeners()
+        private void SetupUIListeners()
         {
             m_TimelineSlider.onValueChanged.AddListener(SetClipTime);
             m_VolumeSlider.onValueChanged.AddListener(UpdateVolume);
@@ -242,7 +240,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Removes the listeners for UI events.
         /// </summary>
-        void RemoveUIListeners()
+        private void RemoveUIListeners()
         {
             m_TimelineSlider.onValueChanged.RemoveListener(SetClipTime);
             m_VolumeSlider.onValueChanged.RemoveListener(UpdateVolume);
@@ -258,7 +256,7 @@ namespace XRMultiplayer
         /// Updates the volume of the audio source.
         /// </summary>
         /// <param name="volume">The new volume value.</param>
-        void UpdateVolume(float volume)
+        private void UpdateVolume(float volume)
         {
             m_AudioSource.volume = volume;
         }
@@ -267,7 +265,7 @@ namespace XRMultiplayer
         /// Toggles the shuffle mode.
         /// </summary>
         /// <param name="toggle">The new toggle state.</param>
-        void ToggleShuffle(bool toggle)
+        private void ToggleShuffle(bool toggle)
         {
             m_Shuffle = toggle;
         }
@@ -276,7 +274,7 @@ namespace XRMultiplayer
         /// Toggles the play/pause state of the audio source.
         /// </summary>
         /// <param name="toggle">The new toggle state.</param>
-        void TogglePlay(bool toggle)
+        private void TogglePlay(bool toggle)
         {
             if (IsOwner)
             {
@@ -288,7 +286,7 @@ namespace XRMultiplayer
         /// Picks a new song based on the shuffle mode and direction.
         /// </summary>
         /// <param name="dir">The direction to pick the new song (-1 for previous, 1 for next).</param>
-        void PickNewSong(int dir = 1)
+        private void PickNewSong(int dir = 1)
         {
             if (!IsOwner)
                 return;
@@ -307,7 +305,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Picks a random song to play.
         /// </summary>
-        void PickRandomSong()
+        private void PickRandomSong()
         {
             int tries = 10;
             int randomSongId = m_CurrentSongIdNetworked.Value;
@@ -329,7 +327,7 @@ namespace XRMultiplayer
         /// Picks a song to play based on the selected dropdown option.
         /// </summary>
         /// <param name="songId">The ID of the song to play.</param>
-        void PickSong(int songId)
+        private void PickSong(int songId)
         {
             m_Dropdown.value = songId;
 
@@ -346,7 +344,7 @@ namespace XRMultiplayer
         /// </summary>
         /// <param name="oldSongId">The ID of the previous song.</param>
         /// <param name="songId">The ID of the new song.</param>
-        void CurrentSongUpdated(int oldSongId, int songId)
+        private void CurrentSongUpdated(int oldSongId, int songId)
         {
             if (songId >= 0 && songId < m_MusicClips.Length)
             {
@@ -363,14 +361,14 @@ namespace XRMultiplayer
             }
         }
 
-        void SetSong(int songId)
+        private void SetSong(int songId)
         {
             m_AudioSource.clip = m_MusicClips[songId];
             currentSongId = songId;
             UpdateSongTitleText();
         }
 
-        void OnIsPlayingChanged(bool oldValue, bool newValue)
+        private void OnIsPlayingChanged(bool oldValue, bool newValue)
         {
             if (newValue)
             {
@@ -390,7 +388,7 @@ namespace XRMultiplayer
         /// Sets the clip time of the audio source based on the timeline slider value.
         /// </summary>
         /// <param name="value">The new value of the timeline slider.</param>
-        void SetClipTime(float value)
+        private void SetClipTime(float value)
         {
             if (!enabled)
                 return;
@@ -399,14 +397,14 @@ namespace XRMultiplayer
         }
 
         [Rpc(SendTo.Owner)]
-        void GetCurrentSongPercFromOwnerRpc(RpcParams rpcParams = default)
+        private void GetCurrentSongPercFromOwnerRpc(RpcParams rpcParams = default)
         {
             SendCurrentSongPercToSpecificRpc(m_AudioSource.time / m_AudioSource.clip.length,
                 RpcTarget.Single(rpcParams.Receive.SenderClientId, RpcTargetUse.Temp));
         }
 
         [Rpc(SendTo.SpecifiedInParams)]
-        void SendCurrentSongPercToSpecificRpc(float perc, RpcParams rpcParams = default)
+        private void SendCurrentSongPercToSpecificRpc(float perc, RpcParams rpcParams = default)
         {
             m_AudioSource.time = perc * m_AudioSource.clip.length;
             m_TimelineSlider.SetValueWithoutNotify(perc / m_AudioSource.clip.length);
@@ -415,7 +413,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Updates the song title text.
         /// </summary>
-        void UpdateSongTitleText()
+        private void UpdateSongTitleText()
         {
             string songName = m_MusicClips[currentSongId == -1 ? 0 : currentSongId].name;
             string[] songNameSplit = m_MusicClips[currentSongId == -1 ? 0 : currentSongId].name.Split('-');
