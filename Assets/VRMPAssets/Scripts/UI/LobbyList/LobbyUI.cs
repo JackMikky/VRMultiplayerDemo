@@ -5,6 +5,8 @@ using TMPro;
 using Unity.Services.Multiplayer;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 
 namespace XRMultiplayer
 {
@@ -14,9 +16,9 @@ namespace XRMultiplayer
         ///  The timeout for direct join in seconds. This is the time we wait for a direct join to complete before giving up.
         ///  This is used to prevent the client from waiting indefinitely if the server is not responding.
         /// </summary>
-        const float k_DirectJoinTimeout = 4.5f;
+        private const float k_DirectJoinTimeout = 4.5f;
 
-        enum ConnectionSubPanel
+        private enum ConnectionSubPanel
         {
             LobbyPanel = 0,
             CreationPanel = 1,
@@ -26,44 +28,47 @@ namespace XRMultiplayer
             NoConnectionPanel = 5
         }
 
-        [Header("Lobby List")] [SerializeField]
-        Transform m_LobbyListParent;
+        [Header("Lobby List")]
+        [SerializeField]
+        private Transform m_LobbyListParent;
 
-        [SerializeField] GameObject m_LobbyListPrefab;
+        [SerializeField] private GameObject m_LobbyListPrefab;
 
-        [SerializeField] GameObject m_SessionPanelObject;
+        [SerializeField] private GameObject m_SessionPanelObject;
 
-        [SerializeField] GameObject m_LocalPanelObject;
+        [SerializeField] private GameObject m_LocalPanelObject;
 
-        [SerializeField] Button m_RefreshButton;
+        [SerializeField] private Button m_RefreshButton;
 
-        [SerializeField] Image m_CooldownImage;
+        [SerializeField] private Image m_CooldownImage;
 
-        [SerializeField] float m_AutoRefreshTime = 5.0f;
+        [SerializeField] private float m_AutoRefreshTime = 5.0f;
 
-        [SerializeField] float m_RefreshCooldownTime = .5f;
+        [SerializeField] private float m_RefreshCooldownTime = .5f;
 
-        [Header("Connection Texts")] [SerializeField]
-        TMP_Text m_ConnectionUpdatedText;
+        [Header("Connection Texts")]
+        [SerializeField]
+        private TMP_Text m_ConnectionUpdatedText;
 
-        [SerializeField] TMP_Text m_ConnectionSuccessText;
+        [SerializeField] private TMP_Text m_ConnectionSuccessText;
 
-        [SerializeField] TMP_Text m_ConnectionFailedText;
+        [SerializeField] private TMP_Text m_ConnectionFailedText;
 
-        [Header("Room Creation")] [SerializeField]
-        TMP_InputField m_RoomNameText;
+        [Header("Room Creation")]
+        [SerializeField]
+        private TMP_InputField m_RoomNameText;
 
-        [SerializeField] Toggle m_PrivacyToggle;
+        [SerializeField] private Toggle m_PrivacyToggle;
 
-        [SerializeField] GameObject[] m_ConnectionSubPanels;
+        [SerializeField] private GameObject[] m_ConnectionSubPanels;
 
-        VoiceChatManager m_VoiceChatManager;
+        private VoiceChatManager m_VoiceChatManager;
 
-        Coroutine m_UpdateLobbiesRoutine;
-        Coroutine m_CooldownFillRoutine;
+        private Coroutine m_UpdateLobbiesRoutine;
+        private Coroutine m_CooldownFillRoutine;
 
-        bool m_Private = false;
-        int m_PlayerCount;
+        private bool m_Private = false;
+        private int m_PlayerCount;
 
         private void Awake()
         {
@@ -89,7 +94,7 @@ namespace XRMultiplayer
             }
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             ToggleConnectionSubPanel(ConnectionSubPanel.LobbyPanel);
         }
@@ -170,7 +175,6 @@ namespace XRMultiplayer
 
         public void SetVoiceChatAudioFadeModel(int fadeModel)
         {
-            // m_VoiceChatManager.AudioFadeModel = (AudioFadeModel)fadeModel;
         }
 
         public void TogglePrivacy(bool toggle)
@@ -178,7 +182,7 @@ namespace XRMultiplayer
             m_Private = toggle;
         }
 
-        void ToggleConnectionSubPanel(ConnectionSubPanel panel)
+        private void ToggleConnectionSubPanel(ConnectionSubPanel panel)
         {
             ToggleConnectionSubPanel((int)panel);
         }
@@ -190,7 +194,6 @@ namespace XRMultiplayer
                 m_ConnectionSubPanels[i].SetActive(i == panelId);
             }
 
-
             if (panelId == 0)
             {
                 ShowLobbies();
@@ -201,7 +204,7 @@ namespace XRMultiplayer
             }
         }
 
-        void OnConnected(bool connected)
+        private void OnConnected(bool connected)
         {
             if (connected)
             {
@@ -210,7 +213,7 @@ namespace XRMultiplayer
             }
         }
 
-        void ConnectedUpdated(string update)
+        private void ConnectedUpdated(string update)
         {
             m_ConnectionUpdatedText.text = $"<b>Status:</b> {update}";
         }
@@ -234,7 +237,7 @@ namespace XRMultiplayer
             m_UpdateLobbiesRoutine = StartCoroutine(UpdateAvailableLobbies());
         }
 
-        IEnumerator UpdateAvailableLobbies()
+        private IEnumerator UpdateAvailableLobbies()
         {
             while (true)
             {
@@ -243,13 +246,36 @@ namespace XRMultiplayer
             }
         }
 
-        void EnableRefresh()
+        public void HostLobbyAfterFadeOut()
+        {
+            var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
+            var loadMode = XRINetworkGameManager.Instance.networkSceneManager.LoadSceneMode;
+            warp.StartFadeOut("Lobby", (sn) =>
+            {
+                HostLocalRoom(() =>
+                {
+                    NetworkManager.Singleton.SceneManager.LoadScene(sn, loadMode);
+                });
+            });
+        }
+
+        public void JoinLobbyAfterFadeOut()
+        {
+            var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
+            warp.StartFadeOut("Lobby", (sn) =>
+            {
+                JoinLocalRoom();
+                warp.StartFadeIn(sn);
+            });
+        }
+
+        private void EnableRefresh()
         {
             m_CooldownImage.enabled = false;
             m_RefreshButton.interactable = true;
         }
 
-        IEnumerator UpdateButtonCooldown()
+        private IEnumerator UpdateButtonCooldown()
         {
             m_RefreshButton.interactable = false;
 
@@ -263,7 +289,7 @@ namespace XRMultiplayer
             EnableRefresh();
         }
 
-        async void UpdateLobbyDisplay()
+        private async void UpdateLobbyDisplay()
         {
             if (m_CooldownImage.enabled || (int)XRINetworkGameManager.CurrentConnectionState.Value < 2) return;
             if (m_CooldownFillRoutine != null) StopCoroutine(m_CooldownFillRoutine);
@@ -299,11 +325,12 @@ namespace XRMultiplayer
             }
         }
 
-        public void HostLocalRoom()
+        public void HostLocalRoom(UnityAction onNetworkConnected)
         {
             if (XRINetworkGameManager.Instance.HostLocalConnection())
             {
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionSuccessPanel);
+                onNetworkConnected.Invoke();
             }
             else
             {
@@ -326,14 +353,14 @@ namespace XRMultiplayer
             }
         }
 
-        void FailedToJoinLocal()
+        private void FailedToJoinLocal()
         {
             Utils.LogError($"Failed to join local room:");
             m_ConnectionFailedText.text = $"<b>Error:</b> Room does not exist or could not be joined";
             ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionFailurePanel);
         }
 
-        IEnumerator CheckForFailedConnection()
+        private IEnumerator CheckForFailedConnection()
         {
             yield return new WaitForSeconds(k_DirectJoinTimeout);
             if (!NetworkManager.Singleton.IsConnectedClient)

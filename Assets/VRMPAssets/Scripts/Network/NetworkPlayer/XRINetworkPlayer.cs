@@ -260,7 +260,7 @@ namespace XRMultiplayer
                 // Local Name unsubscribe.
                 XRINetworkGameManager.LocalPlayerName.Unsubscribe(UpdateLocalPlayerName);
                 XRINetworkGameManager.LocalPlayerColor.Unsubscribe(UpdateLocalPlayerColor);
-                m_VoiceChat.selfMuted.Unsubscribe(SelfMutedChanged);
+                m_VoiceChat?.selfMuted.Unsubscribe(SelfMutedChanged);
             }
             else if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
             {
@@ -338,8 +338,11 @@ namespace XRMultiplayer
             m_PlayerName.Value = new FixedString128Bytes(XRINetworkGameManager.LocalPlayerName.Value);
             XRINetworkGameManager.LocalPlayerColor.Subscribe(UpdateLocalPlayerColor);
             XRINetworkGameManager.LocalPlayerName.Subscribe(UpdateLocalPlayerName);
-            m_VoiceChat.selfMuted.Subscribe(SelfMutedChanged);
-            m_VoiceChat.ToggleSelfMute(true, true);
+            if (m_VoiceChat)
+            {
+                m_VoiceChat.selfMuted.Subscribe(SelfMutedChanged);
+                m_VoiceChat.ToggleSelfMute(true, true);
+            }
 
             onSpawnedLocal?.Invoke();
         }

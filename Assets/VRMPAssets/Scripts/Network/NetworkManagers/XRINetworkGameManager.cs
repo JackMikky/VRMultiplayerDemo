@@ -194,6 +194,10 @@ namespace XRMultiplayer
 
         SessionManager m_SessionManager;
 
+        [SerializeField] public NetworkSceneManager networkSceneManager;
+
+        [SerializeField] public NetworkChatManager networkChatManager;
+
         /// <summary>
         /// List that handles all current players by ID.
         /// Useful for getting specific players.
@@ -632,7 +636,7 @@ namespace XRMultiplayer
         /// </summary>
         public virtual void LeaveLocalConnection()
         {
-            NetworkManager.Singleton.Shutdown();
+            NetworkManager.Singleton?.Shutdown();
         }
 
 
