@@ -10,6 +10,7 @@ TagManager:
   - PlayerHand
   - Destroyer
   - NetworkChatManager
+  - ColorPallet
   layers:
   - Default
   - TransparentFX

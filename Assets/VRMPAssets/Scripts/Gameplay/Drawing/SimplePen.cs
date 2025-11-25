@@ -1,38 +1,53 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using XRMultiplayer;
 
-public class SimplePen : MonoBehaviour
+public class SimplePen : NetworkBehaviour
 {
-    [SerializeField] PenTrail m_TrailRendererPrefab;
-    [SerializeField] Transform m_PenTipTransform;
-    [SerializeField] Renderer m_PenTipRenderer;
+    [SerializeField] private PenTrail m_TrailRendererPrefab;
+    [SerializeField] private Transform m_PenTipTransform;
+    [SerializeField] private Renderer m_PenTipRenderer;
 
-    NetworkPhysicsInteractable m_NetworkInteractable;
+    private NetworkPhysicsInteractable m_NetworkInteractable;
 
-    PenTrail m_CurrentTrailRenderer;
+    private PenTrail m_CurrentTrailRenderer;
 
-    Color m_CurrentColor;
+    private NetworkVariable<Color> m_CurrentColor = new NetworkVariable<Color>(Color.red);
 
-    List<PenTrail> m_PenTrails = new();
-
-    void Awake()
+    public Color CurrentColor
     {
-        TryGetComponent(out m_NetworkInteractable);
+        set => m_CurrentColor.Value = value;
     }
 
-    void Start()
+    private List<PenTrail> m_PenTrails = new();
+
+    private Renderer penRenderer;
+
+    private void Awake()
     {
-        SetColor();
+        TryGetComponent(out m_NetworkInteractable);
+        SetColor(m_CurrentColor.Value);
+        m_CurrentColor.OnValueChanged += (previousValue, newValue) => { SetColor(newValue); };
+    }
+
+    private void Start()
+    {
         XRINetworkGameManager.Connected.Subscribe(ConnectedToNetworkGame);
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         XRINetworkGameManager.Connected.Unsubscribe(ConnectedToNetworkGame);
     }
 
-    void ConnectedToNetworkGame(bool connected)
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        SetColor(m_CurrentColor.Value);
+    }
+
+    private void ConnectedToNetworkGame(bool connected)
     {
         if (!connected)
         {
@@ -48,7 +63,7 @@ public class SimplePen : MonoBehaviour
         if (toggle && m_CurrentTrailRenderer == null)
         {
             m_CurrentTrailRenderer = Instantiate(m_TrailRendererPrefab, m_PenTipTransform.position, m_PenTipTransform.rotation, m_PenTipTransform);
-            m_CurrentTrailRenderer.SetColor(m_CurrentColor);
+            m_CurrentTrailRenderer.SetColor(m_CurrentColor.Value);
         }
         else if (!toggle && m_CurrentTrailRenderer != null)
         {
@@ -58,18 +73,12 @@ public class SimplePen : MonoBehaviour
         }
     }
 
-    public void SetColor()
+    public void SetColor(Color color)
     {
-        if (XRINetworkGameManager.Instance.TryGetPlayerByID(m_NetworkInteractable.OwnerClientId, out XRINetworkPlayer player))
+        this.m_CurrentColor.Value = color;
+        if (m_PenTipRenderer != null)
         {
-            m_CurrentColor = player.playerColor;
+            m_PenTipRenderer.material.color = color;
         }
-        // Failed to get player, might be offline
-        else
-        {
-            m_CurrentColor = XRINetworkGameManager.LocalPlayerColor.Value;
-        }
-        m_PenTipRenderer.material.color = m_CurrentColor;
     }
-
 }
