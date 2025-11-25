@@ -4,7 +4,9 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
 using System.Globalization;
 
 #if UNITY_EDITOR
+
 using UnityEditor;
+
 #endif
 
 namespace XRMultiplayer
@@ -17,18 +19,16 @@ namespace XRMultiplayer
         /// <summary>
         /// The prefab for the message text.
         /// </summary>
-        [SerializeField] GameObject m_MessagePrefab;
+        [SerializeField] private GameObject m_MessagePrefab;
 
         /// <summary>
         /// The transform that contains the viewport for the messages.
         /// </summary>
-        [SerializeField] Transform m_ContentViewport;
+        [SerializeField] private Transform m_ContentViewport;
 
-        [SerializeField] LocalChatManager localChatManager;
+        [SerializeField] private LocalChatManager localChatManager;
 
-
-        // 在 Start() 中订阅
-        void Start()
+        private void Start()
         {
             XRINetworkGameManager.Connected.Subscribe(ConnectedToNetwork);
 
@@ -38,7 +38,7 @@ namespace XRMultiplayer
             }
         }
 
-        void ConnectedToNetwork(bool connected)
+        private void ConnectedToNetwork(bool connected)
         {
             if (!connected)
             {
@@ -55,12 +55,10 @@ namespace XRMultiplayer
             GlobalNonNativeKeyboard.instance.keyboard.closeOnSubmit = !toggle;
         }
 
-        // 重建界面显示（从本地缓存）
-        void RebuildDisplay()
+        private void RebuildDisplay()
         {
             if (m_ContentViewport == null) return;
 
-            // 清空现有
             for (int i = m_ContentViewport.childCount - 1; i >= 0; i--)
             {
                 Destroy(m_ContentViewport.GetChild(i).gameObject);
@@ -78,12 +76,11 @@ namespace XRMultiplayer
         {
             if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text)) return;
 
-            if (text.Length > localChatManager.maxMessageHistoryCount)
+            if (text.Length > localChatManager.maxCharacterCount)
             {
-                text = text.Substring(0, localChatManager.maxMessageHistoryCount);
+                text = text.Substring(0, localChatManager.maxCharacterCount);
             }
 
-            // 获取本地玩家名字（保留现有接口）
             string userName = XRINetworkPlayer.LocalPlayer != null ? XRINetworkPlayer.LocalPlayer.playerName : "Player";
 
             var chatEntry = new LocalChatManager.ChatEntry
@@ -95,14 +92,12 @@ namespace XRMultiplayer
             SubmitMessageLocal(chatEntry);
         }
 
-        void SubmitMessageLocal(LocalChatManager.ChatEntry chatEntry)
+        private void SubmitMessageLocal(LocalChatManager.ChatEntry chatEntry)
         {
             if (localChatManager.messageHistory.Count > localChatManager.maxMessageHistoryCount)
             {
-                // 删除最早的消息
                 localChatManager.messageHistory.RemoveAt(0);
 
-                // 同步移除显示区第一个子项（如果存在）
                 if (m_ContentViewport.childCount > 0)
                 {
                     Destroy(m_ContentViewport.GetChild(0).gameObject);
@@ -112,7 +107,7 @@ namespace XRMultiplayer
             CreateText(chatEntry);
         }
 
-        void CreateText(LocalChatManager.ChatEntry chatEntry)
+        private void CreateText(LocalChatManager.ChatEntry chatEntry)
         {
             if (m_MessagePrefab == null || m_ContentViewport == null) return;
 
@@ -125,8 +120,7 @@ namespace XRMultiplayer
             }
         }
 
-        // 在类中添加处理器和取消订阅（避免内存泄漏）
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (localChatManager != null)
             {
@@ -136,7 +130,6 @@ namespace XRMultiplayer
 
         private void HandleNetworkChatMessage(LocalChatManager.ChatEntry chatEntry)
         {
-            // 复用现有本地提交显示流程
             SubmitMessageLocal(chatEntry);
         }
 
@@ -147,10 +140,11 @@ namespace XRMultiplayer
     }
 
 #if UNITY_EDITOR
+
     [CustomEditor(typeof(MessageBoard), true), CanEditMultipleObjects]
     public class NetworkMessageBoardEditor : Editor
     {
-        [SerializeField, TextArea(10, 15)] string m_DebugText;
+        [SerializeField, TextArea(10, 15)] private string m_DebugText;
 
         public override void OnInspectorGUI()
         {
@@ -176,5 +170,6 @@ namespace XRMultiplayer
             GUI.enabled = true;
         }
     }
+
 #endif
 }

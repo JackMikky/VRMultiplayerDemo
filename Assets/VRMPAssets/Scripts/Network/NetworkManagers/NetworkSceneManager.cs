@@ -21,11 +21,13 @@ namespace XRMultiplayer
 
         [SerializeField] private List<SceneRoomInfo> sceneList = new List<SceneRoomInfo>();
 
-        [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
+        [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Single;
 
-        public UnityEvent<string> onSceneLoaded;
+        public LoadSceneMode LoadSceneMode { get => loadSceneMode; }
 
-        public UnityEvent<string> onSceneLoadStart;
+        public CustomEvent<string> onSceneLoaded;
+
+        public CustomEvent<string> onSceneLoadStart;
 
         public UnityEvent<string> onSceneLoadFailed;
 
@@ -35,19 +37,35 @@ namespace XRMultiplayer
 
         [SerializeField] private WarpController warpController;
 
-        public string currentSceneName = "";
+        public WarpController WarpController => warpController;
+
+        private string currentSceneName = "Entrance";
+
+        private string lastSceneName = "";
 
         private void Start()
         {
-            warpController?.onWarpFadeOutComplete.AddListener(this.LoadSceneByID);
-
             currentSceneName = SceneManager.GetActiveScene().name;
+            lastSceneName = currentSceneName;
         }
 
-        [Obsolete]
-        public void LoadSceneByIDWithWarpFadeOut(string sceneID)
+        public void LoadSceneByNameWithWarpFadeOut(string name)
         {
-            warpController?.StartFadeOutBySceneID(sceneID);
+            if (NetworkManager.Singleton == null)
+            {
+                warpController?.StartFadeOut(name, (sceneName) => { LoadSceneByName(sceneName); });
+                return;
+            }
+
+            if (NetworkManager.Singleton.IsServer)
+            {
+                // Tell all clients (including host) to start fade out.
+                StartFadeOutOnClientsClientRpc(name);
+            }
+            else
+            {
+                RequestLoadSceneServerRpc(name);
+            }
         }
 
         public void LoadSceneByID(string sceneID)
@@ -81,6 +99,7 @@ namespace XRMultiplayer
             }
             else
             {
+                this.onSceneLoadFailed?.Invoke(targetScene.Value.sceneName);
                 Debug.LogError($"Scene with ID {sceneID} not found.");
             }
         }
@@ -106,7 +125,7 @@ namespace XRMultiplayer
                     m_ClientsFinishedLoading.Clear();
 
                     NetworkManager.Singleton.SceneManager.LoadScene(targetScene.Value.sceneName,
-                        this.loadSceneMode);
+                        loadSceneMode);
                     onSceneLoadStart.Invoke(sceneName);
                 }
                 else
@@ -116,6 +135,7 @@ namespace XRMultiplayer
             }
             else
             {
+                this.onSceneLoadFailed?.Invoke(sceneName);
                 Debug.LogError($"Scene with name {sceneName} not found.");
             }
         }
@@ -132,6 +152,9 @@ namespace XRMultiplayer
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            lastSceneName = currentSceneName;
+            Debug.Log($"[NetworkSceneManager] Last Scene:{lastSceneName}");
+            currentSceneName = scene.name;
             Debug.Log($"[NetworkSceneManager] Local scene loaded: {scene.name}");
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient)
@@ -151,6 +174,7 @@ namespace XRMultiplayer
                     }
                 }
             }
+            onSceneLoaded?.Invoke(currentSceneName);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -176,13 +200,11 @@ namespace XRMultiplayer
 
             if (m_ClientsFinishedLoading.Count >= connectedCount)
             {
-                SceneManager.UnloadSceneAsync(currentSceneName);
                 Debug.Log($"[NetworkSceneManager] All clients finished loading {sceneName}");
-                onSceneLoaded?.Invoke(sceneName);
-                currentSceneName = sceneName;
-
                 m_ExpectedSceneName = null;
                 m_ClientsFinishedLoading.Clear();
+                Debug.Log($"[NetworkSceneManager] Unloaded scene: {lastSceneName}");
+                StartFadeInOnClientsClientRpc(sceneName);
             }
         }
 
@@ -191,6 +213,49 @@ namespace XRMultiplayer
             this.onSceneLoadStart.RemoveAllListeners();
             this.onSceneLoaded.RemoveAllListeners();
             this.onSceneLoadFailed.RemoveAllListeners();
+        }
+
+        // ClientRpc: invoked on all clients (and on host as client) to start the fade out.
+        [ClientRpc]
+        private void StartFadeOutOnClientsClientRpc(string sceneName)
+        {
+            warpController?.StartFadeOut(sceneName, (sn) =>
+            {
+                // Host/server will be both client & server: if this instance is server, perform the actual load directly.
+                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+                {
+                    LoadSceneByName(sn);
+                }
+                else
+                {
+                    // Clients notify the server that their fade-out completed and request the server to load the scene.
+                    RequestLoadSceneServerRpc(sn);
+                }
+            });
+        }
+
+        [ClientRpc]
+        private void StartFadeInOnClientsClientRpc(string sceneName)
+        {
+            warpController?.StartFadeIn(sceneName);
+        }
+
+        // ServerRpc: clients call this to request the server to start the network scene load.
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestLoadSceneServerRpc(string sceneName, ServerRpcParams rpcParams = default)
+        {
+            // Only the server should proceed. Guard against duplicate requests.
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
+
+            if (!string.IsNullOrEmpty(m_ExpectedSceneName))
+            {
+                // A load is already expected/started, ignore duplicate requests.
+                Debug.Log($"[NetworkSceneManager] Ignoring duplicate load request for {sceneName}");
+                return;
+            }
+
+            Debug.Log($"[NetworkSceneManager] Received load request from client. Server will load: {sceneName}");
+            LoadSceneByName(sceneName);
         }
     }
 }

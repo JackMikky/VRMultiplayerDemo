@@ -1,6 +1,8 @@
 using System.Collections;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Utilities.Tweenables.Primitives;
 
 namespace XRMultiplayer
@@ -19,16 +21,16 @@ namespace XRMultiplayer
         [Header("Events")]
         [Space(10)]
         [Tooltip("Triggered when the warp fade-out begins (screen starts going dark)")]
-        public CustomEvent onWarpFadeOutStart;
+        public CustomEvent<string> onWarpFadeOutStart;
 
         [Tooltip("Triggered when the warp fade-out is fully complete (screen is completely dark)")]
         public CustomEvent<string> onWarpFadeOutComplete;
 
         [Tooltip("Triggered when the warp fade-in begins (screen starts to brighten)")]
-        public CustomEvent onWarpFadeInStart;
+        public CustomEvent<string> onWarpFadeInStart;
 
         [Tooltip("Triggered when the warp fade-in is fully complete (screen is fully visible again)")]
-        public CustomEvent onWarpFadeInComplete;
+        public CustomEvent<string> onWarpFadeInComplete;
 
         [System.Obsolete] private readonly FloatTweenableVariable _fadeValue = new FloatTweenableVariable();
 
@@ -36,59 +38,73 @@ namespace XRMultiplayer
 
         private void Awake()
         {
-            SetFadeValue(0);
-
-            LocalManager.Instance.onLobbyLoaded.AddListener(() =>
-            {
-                StartWarpFadeIn();
-            });
+            SetFadeValue(1);
         }
 
         [System.Obsolete]
         private void Start()
         {
-            _fadeValue.Value = 0;
+            _fadeValue.Value = 1;
+            StartWarpFadeIn("Entrance");
 
             _fadeValue.Subscribe(SetFadeValue);
-
-            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddListener((sceneName) =>
-            {
-                StartWarpFadeIn();
-            });
         }
 
-        public void StartFadeOutBySceneID(string sceneID)
+        public void StartFadeOut(string scene, UnityAction<string> onCompleted = null)
         {
-            StartWarpFadeOut(sceneID);
+            StartWarpFadeOut(scene, onCompleted);
         }
 
-        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneID)
+        public void StartFadeIn(string scene, UnityAction<string> onCompleted = null)
+        {
+            StartWarpFadeIn(scene, onCompleted);
+        }
+
+        private IEnumerator InvokeWarpFadeOutAfterDelay(string sceneName, UnityAction<string> unityAction = null)
         {
             yield return new WaitForSeconds(fadeOutWaitTime);
 
             if (onWarpFadeOutComplete != null)
-                onWarpFadeOutComplete.Invoke(sceneID);
+            {
+                onWarpFadeOutComplete.Invoke(sceneName);
+                unityAction?.Invoke(sceneName);
+            }
         }
 
-        private IEnumerator InvokeWarpFadeInAfterDelay()
+        private IEnumerator InvokeWarpFadeInAfterDelay(string sceneName, UnityAction<string> unityAction = null)
         {
             yield return new WaitForSeconds(fadeInWaitTime);
 
             if (onWarpFadeInComplete != null)
-                onWarpFadeInComplete.Invoke();
+            {
+                onWarpFadeInComplete.Invoke(sceneName);
+                unityAction?.Invoke(sceneName);
+            }
         }
 
-        private void StartWarpFadeOut(string sceneID)
+        private void StartWarpFadeOut(string sceneName, UnityAction<string> onCompleted = null, bool invokeEvent = true)
         {
-            onWarpFadeOutStart.Invoke();
+            if (invokeEvent)
+            {
+                onWarpFadeOutStart.Invoke(sceneName);
+            }
             StartCoroutine(_fadeValue.PlaySequence(0, 1, fadeTime,
-                () => StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneID))));
+                () =>
+                {
+                    StartCoroutine(InvokeWarpFadeOutAfterDelay(sceneName, onCompleted));
+                }));
         }
 
-        private void StartWarpFadeIn()
+        private void StartWarpFadeIn(string sceneName, UnityAction<string> onCompleted = null, bool invokeEvent = true)
         {
-            onWarpFadeInStart.Invoke();
-            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () => StartCoroutine(InvokeWarpFadeInAfterDelay())));
+            if (invokeEvent)
+            {
+                onWarpFadeInStart.Invoke(sceneName);
+            }
+            StartCoroutine(_fadeValue.PlaySequence(1, 0, fadeTime, () =>
+            {
+                StartCoroutine(InvokeWarpFadeInAfterDelay(sceneName, onCompleted));
+            }));
         }
 
         private void SetFadeValue(float value)
@@ -102,7 +118,11 @@ namespace XRMultiplayer
         [System.Obsolete]
         private void OnDestroy()
         {
+#if UNITY_EDITOR
             fullScreenMat.SetFloat(fadeProperty, 0);
+#else
+            fullScreenMat.SetFloat(fadeProperty, 1);
+#endif
             this.onWarpFadeInComplete.RemoveAllListeners();
             this.onWarpFadeOutComplete.RemoveAllListeners();
             this._fadeValue.Dispose();

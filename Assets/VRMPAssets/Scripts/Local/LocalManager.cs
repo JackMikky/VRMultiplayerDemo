@@ -1,6 +1,10 @@
+using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using XRMultiplayer;
 
 public class LocalManager : MonoBehaviour
@@ -8,12 +12,6 @@ public class LocalManager : MonoBehaviour
     public static LocalManager Instance { get; private set; }
 
     [SerializeField] private GameObject localAvatar;
-
-    public CustomEvent onLobbyLoadStart;
-
-    public CustomEvent onLobbyLoaded;
-
-    private const string lobbySceneName = "Lobby";
 
     private void Awake()
     {
@@ -26,24 +24,25 @@ public class LocalManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         XRINetworkGameManager.Connected.Subscribe(HideLocalAvatar);
-        SceneManager.sceneLoaded += HandleLobbyLoaded;
     }
 
     private void Start()
     {
-        LoadLocalSceneByName(lobbySceneName);
-        onLobbyLoadStart.Invoke();
+        var warp = XRINetworkGameManager.Instance.networkSceneManager.WarpController;
+
+        XRINetworkGameManager.Instance.networkSceneManager.onSceneLoaded.AddOnceListener((sceneName) =>
+        {
+            if (sceneName == "Lobby")
+            {
+                warp.StartFadeIn(sceneName);
+                Debug.Log("Fade in start");
+            }
+        });
     }
 
     public void LoadLocalSceneByName(string sceneName)
     {
-        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-        XRINetworkGameManager.Instance.networkSceneManager.currentSceneName = sceneName;
-    }
-
-    private void HandleLobbyLoaded(Scene scene, LoadSceneMode loadSceneMode)
-    {
-        this.onLobbyLoaded.Invoke();
+        SceneManager.LoadSceneAsync(sceneName, XRINetworkGameManager.Instance.networkSceneManager.LoadSceneMode);
     }
 
     private void HideLocalAvatar(bool connected)
