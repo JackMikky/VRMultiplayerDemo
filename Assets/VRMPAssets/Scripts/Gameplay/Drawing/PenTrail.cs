@@ -68,7 +68,7 @@ namespace XRMultiplayer
         {
             m_TrailRenderer.startWidth = m_StartWidth * 3.0f;
             m_TrailRenderer.endWidth = m_StartWidth * 3.0f;
-            UpdateColor(Color.red);
+            UpdateColor(m_StartColor);
         }
 
         void HoverExited(HoverExitEventArgs args)
