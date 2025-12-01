@@ -290,7 +290,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 3316501773
   InScenePlacedSourceGlobalObjectIdHash: 625894338
   DeferredDespawnTick: 0
-  Ownership: 3
+  Ownership: 2
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -444,6 +444,7 @@ MonoBehaviour:
     type: 3}
   m_PenTipTransform: {fileID: 5851977545489548212}
   m_PenTipRenderer: {fileID: 2003772507999593207}
+  lineWidthSlider: {fileID: 0}
 --- !u!1 &2763490474549077649
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,6 +738,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Primitive_Pyramid
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ced450f78c2a94f68967a4ef88cad491,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

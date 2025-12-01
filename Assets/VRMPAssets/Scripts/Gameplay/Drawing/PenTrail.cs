@@ -8,16 +8,16 @@ namespace XRMultiplayer
     public class PenTrail : MonoBehaviour
     {
         public TrailRenderer trailRenderer => m_TrailRenderer;
-        TrailRenderer m_TrailRenderer;
+        private TrailRenderer m_TrailRenderer;
 
-        [SerializeField] bool m_UseLifetime = false;
-        [SerializeField] float m_ObjectLifetimeInSeconds = 900.0f;
+        [SerializeField] private bool m_UseLifetime = false;
+        [SerializeField] private float m_ObjectLifetimeInSeconds = 900.0f;
 
-        GameObject m_SpawnedInteractableObject;
-        Color m_StartColor;
-        float m_StartWidth;
-        // Start is called before the first frame update
-        void Awake()
+        private GameObject m_SpawnedInteractableObject;
+        private Color m_StartColor;
+        private float m_StartWidth;
+
+        private void Awake()
         {
             if (!TryGetComponent(out m_TrailRenderer))
             {
@@ -33,7 +33,14 @@ namespace XRMultiplayer
             UpdateColor(m_StartColor);
         }
 
-        void UpdateColor(Color color)
+        public void SetLineWidth(float width)
+        {
+            m_StartWidth = width;
+            m_TrailRenderer.startWidth = width;
+            m_TrailRenderer.endWidth = width;
+        }
+
+        private void UpdateColor(Color color)
         {
             m_TrailRenderer.material.color = color;
             m_TrailRenderer.startColor = color;
@@ -64,21 +71,21 @@ namespace XRMultiplayer
                 Destroy(gameObject, m_ObjectLifetimeInSeconds);
         }
 
-        void HoverEntered(HoverEnterEventArgs args)
+        private void HoverEntered(HoverEnterEventArgs args)
         {
             m_TrailRenderer.startWidth = m_StartWidth * 3.0f;
             m_TrailRenderer.endWidth = m_StartWidth * 3.0f;
             UpdateColor(m_StartColor);
         }
 
-        void HoverExited(HoverExitEventArgs args)
+        private void HoverExited(HoverExitEventArgs args)
         {
             m_TrailRenderer.startWidth = m_StartWidth;
             m_TrailRenderer.endWidth = m_StartWidth;
             UpdateColor(m_StartColor);
         }
 
-        void DestroyTrail(ActivateEventArgs args)
+        private void DestroyTrail(ActivateEventArgs args)
         {
             Destroy(gameObject);
         }
