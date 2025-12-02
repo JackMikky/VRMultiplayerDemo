@@ -74,7 +74,18 @@ namespace XRMultiplayer
             }
 
             m_PlayerNameText.text = name;
-            m_PlayerInitialText.text = name.Substring(0, 1);
+            
+            string trimmed = name.Trim();
+            string initials = "";
+            if (trimmed.Length > 0)
+            {
+                var parts = trimmed.Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries);
+                foreach (var p in parts)
+                {
+                    initials += char.ToUpperInvariant(p[0]);
+                }
+            }
+            m_PlayerInitialText.text = initials;
             m_PlayerNameText.rectTransform.sizeDelta = new Vector2(m_PlayerNameText.preferredWidth * .25f,
                 m_PlayerNameText.rectTransform.sizeDelta.y);
         }
