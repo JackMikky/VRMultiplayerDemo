@@ -28,11 +28,6 @@ namespace XRMultiplayer
             set => m_CurrentColor.Value = value;
         }
 
-        public float LineWidth
-        {
-            set => m_LineWidth.Value = value;
-        }
-
         private List<PenTrail> m_PenTrails = new();
 
         private Renderer penRenderer;
@@ -90,6 +85,7 @@ namespace XRMultiplayer
 
         public void SetColor(Color color)
         {
+            if (!IsServer) return;
             this.m_CurrentColor.Value = color;
             if (m_PenTipRenderer != null)
             {
@@ -99,7 +95,8 @@ namespace XRMultiplayer
 
         public void SetLineWidth(float width)
         {
-            this.LineWidth = width;
+            if (!IsServer) return;
+            m_LineWidth.Value = width;
             if (m_CurrentTrailRenderer != null)
             {
                 m_CurrentTrailRenderer.SetLineWidth(width);

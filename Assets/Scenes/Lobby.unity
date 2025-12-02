@@ -3155,6 +3155,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 460938084451739152, guid: bc88b72691cf239499211adf424f560e,
         type: 3}
+      propertyPath: Ownership
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 460938084451739152, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
       propertyPath: GlobalObjectIdHash
       value: 949917865
       objectReference: {fileID: 0}
@@ -3315,6 +3320,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Simple_Pen_Customed
+      objectReference: {fileID: 0}
+    - target: {fileID: 2603013640247322898, guid: f6c7eac9edd90c24695dd8dab6371806,
+        type: 3}
+      propertyPath: m_AllowOverrideOwnership
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4816573149015948085, guid: f6c7eac9edd90c24695dd8dab6371806,
         type: 3}

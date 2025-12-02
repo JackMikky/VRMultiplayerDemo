@@ -10,7 +10,9 @@ using System;
 using System.Collections;
 
 #if UNITY_EDITOR
+
 using UnityEditor;
+
 #endif
 
 namespace XRMultiplayer
@@ -48,6 +50,7 @@ namespace XRMultiplayer
             get => m_InteractionCheckTime;
             set => m_InteractionCheckTime = value;
         }
+
         [SerializeField, Tooltip("Amount of time before checking for false positives of the object interaction state.")]
         protected float m_InteractionCheckTime = 2.0f;
 
@@ -59,6 +62,7 @@ namespace XRMultiplayer
             get => m_IgnoreSocketSelectedCallback;
             set => m_IgnoreSocketSelectedCallback = value;
         }
+
         [SerializeField, Tooltip("Ignore Socket Interaction")]
         protected bool m_IgnoreSocketSelectedCallback = true;
 
@@ -70,6 +74,7 @@ namespace XRMultiplayer
             get => m_ResetObjectOnDisconnect;
             set => m_ResetObjectOnDisconnect = value;
         }
+
         [SerializeField, Tooltip("Reset object on disconnect")]
         protected bool m_ResetObjectOnDisconnect = true;
 
@@ -81,6 +86,7 @@ namespace XRMultiplayer
             get => m_RelinquishOwnershipAfterTime;
             set => m_RelinquishOwnershipAfterTime = value;
         }
+
         [Header("Ownership Relinquish"), SerializeField, Tooltip("Should we relinquish ownership back to the room host after a set amount of time?")]
         protected bool m_RelinquishOwnershipAfterTime = true;
 
@@ -92,6 +98,7 @@ namespace XRMultiplayer
             get => m_RelinquishOwnershipTime;
             set => m_RelinquishOwnershipTime = value;
         }
+
         [SerializeField, Tooltip("Amount of time before relinquishing ownership of the object back to the host.")]
         protected float m_RelinquishOwnershipTime = 5.0f;
 
@@ -102,6 +109,7 @@ namespace XRMultiplayer
         {
             get => m_IsInteracting.Value;
         }
+
         /// <summary>
         /// Syncs the current state of being interacted with or not.
         /// Prevents users from taking control of currently controlled objects, unless <see cref="allowOverrideOwnership"/> is true.
@@ -110,11 +118,14 @@ namespace XRMultiplayer
         /// <see cref="allowOverrideOwnership"/> will allow users to bypass this value and take ownership from other players.
         /// </remarks>
         protected NetworkVariable<bool> m_IsInteracting = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
         [HideInInspector, SerializeField, Tooltip("Use a Unity Event for a callback when the IsInteracting value changes.")]
+        private
 
         //Disabling warning for unused variable since it's used in the editor script
 #pragma warning disable 0414
         bool m_UseInteractingChangedEvent = false;
+
 #pragma warning restore 0414
         [HideInInspector] public UnityEvent<bool> OnInteractingChanged;
 
@@ -126,10 +137,13 @@ namespace XRMultiplayer
             get => m_SyncHover;
             set => m_SyncHover = value;
         }
+
         [HideInInspector, SerializeField, Tooltip("Sync Hover interaction over network")]
         protected bool m_SyncHover = false;
+
         [HideInInspector, SerializeField, Tooltip("Use Unity Events for Networked Hooks")]
         protected bool m_UseHoverEvents = false;
+
         [HideInInspector] public UnityEvent<bool> HoverNetworkedEventServer;
         [HideInInspector] public UnityEvent<bool> HoverNetworkedEventAll;
 
@@ -141,10 +155,13 @@ namespace XRMultiplayer
             get => m_SyncSelect;
             set => m_SyncSelect = value;
         }
+
         [HideInInspector, SerializeField, Tooltip("Sync Select interaction over network")]
         protected bool m_SyncSelect = true;
+
         [HideInInspector, SerializeField, Tooltip("Use Unity Events for Networked Hooks")]
         protected bool m_UseSelectEvents = false;
+
         [HideInInspector] public UnityEvent<bool> SelectNetworkedEventServer;
         [HideInInspector] public UnityEvent<bool> SelectNetworkedEventAll;
 
@@ -156,10 +173,13 @@ namespace XRMultiplayer
             get => m_SyncActivate;
             set => m_SyncActivate = value;
         }
+
         [HideInInspector, SerializeField, Tooltip("Sync Activate interaction over network")]
         protected bool m_SyncActivate = true;
+
         [HideInInspector, SerializeField, Tooltip("Use Unity Events for Networked Hooks")]
         protected bool m_UseActivateEvents = false;
+
         [HideInInspector] public UnityEvent<bool> ActivateNetworkedEventServer;
         [HideInInspector] public UnityEvent<bool> ActivateNetworkedEventAll;
 
@@ -171,6 +191,7 @@ namespace XRMultiplayer
             get => m_BaseInteractable;
             set => m_BaseInteractable = value;
         }
+
         protected XRBaseInteractable m_BaseInteractable;
 
         public bool canProcess => isActiveAndEnabled;
@@ -192,22 +213,24 @@ namespace XRMultiplayer
 #pragma warning restore CS0618 // Type or member is obsolete
 
 #if UNITY_EDITOR
+
         /// <summary>
         /// Foldout states for the editor.
         /// </summary>
         [HideInInspector, SerializeField]
-        bool[] m_FoldoutValues = {true, true, true};
+        private bool[] m_FoldoutValues = { true, true, true };
+
 #endif
 
         /// <summary>
         /// After a set amount of time, relinquish ownership of the object back to the host.
         /// </summary>
-        IEnumerator m_RelinquishToHostEnumerator;
+        private IEnumerator m_RelinquishToHostEnumerator;
 
         /// <summary>
         /// Check for false positives of the object being interacted with.
         /// </summary>
-        IEnumerator m_HostInteractionCheckEnumerator;
+        private IEnumerator m_HostInteractionCheckEnumerator;
 
         /// <inheritdoc/>
         public virtual void Awake()
@@ -253,7 +276,7 @@ namespace XRMultiplayer
         /// <param name="setup">
         /// Whether or not we are adding or removing the listeners.
         /// </param>
-        void SetupListeners(bool setup)
+        private void SetupListeners(bool setup)
         {
             if (setup)
             {
@@ -438,13 +461,20 @@ namespace XRMultiplayer
             if (IsOwner)
             {
                 m_IsInteracting.Value = false;
-                NetworkObject.SetOwnershipLock(false);
+                ChangeOwnershipBackToServerServerRpc();
                 RelinquishOwnershipAfterTime();
             }
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        private void ChangeOwnershipBackToServerServerRpc()
+        {
+            //NetworkObject.SetOwnershipLock(false);
+            NetworkObject.ChangeOwnership(NetworkManager.ServerClientId);
+        }
+
         [Rpc(SendTo.Owner)]
-        void ResetObjectToSessionOwnerRpc()
+        private void ResetObjectToSessionOwnerRpc()
         {
             if (NetworkObject.OwnerClientId != NetworkManager.Singleton.CurrentSessionOwner)
                 NetworkObject.ChangeOwnership(NetworkManager.Singleton.CurrentSessionOwner);
@@ -487,7 +517,8 @@ namespace XRMultiplayer
         /// and gets called remotely from the server on all clients.
         /// </summary>
         /// <param name="selected">Whether or not selected was called.</param>
-        public virtual void Selected(bool selected) { }
+        public virtual void Selected(bool selected)
+        { }
 
         /// <summary>
         /// Callback for the Activate event executed for the local user.
@@ -619,14 +650,13 @@ namespace XRMultiplayer
 
                 if (baseInteractable.isSelected)
                     m_InteractionManager.CancelInteractableSelection((IXRSelectInteractable)baseInteractable);
-
             }
         }
 
         /// <summary>
         /// Checks every <see cref="interactionCheckTime"/> for false positives of the object being interacted with.
         /// </summary>
-        IEnumerator CheckForOwnerInteraction()
+        private IEnumerator CheckForOwnerInteraction()
         {
             while (IsOwner)
             {
@@ -645,7 +675,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Checks if the object is selected by a socket.
         /// </summary>
-        bool IsSelectedBySocket()
+        private bool IsSelectedBySocket()
         {
             if (baseInteractable.isSelected)
             {
@@ -695,7 +725,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Coroutine to relinquish ownership of the object back to the host after a set amount of time.
         /// </summary>
-        IEnumerator RelinquishOwnershipToHost()
+        private IEnumerator RelinquishOwnershipToHost()
         {
             yield return new WaitForSeconds(relinquishOwnershipTime);
             if (!IsOwner && !baseInteractable.isSelected)
@@ -726,6 +756,7 @@ namespace XRMultiplayer
     }
 
 #if UNITY_EDITOR
+
     /// <summary>
     /// Custom Editor for the <see cref="NetworkBaseInteractable"/> class.
     /// </summary>
@@ -733,27 +764,28 @@ namespace XRMultiplayer
     public class NetworkBaseInteractableEditor : Editor
     {
         // Serialized properties
-        SerializedProperty m_UseInteractingChangedEvent;
-        SerializedProperty m_InteractingChangedEvent;
-        SerializedProperty m_SyncHover;
-        SerializedProperty m_UseHoverEvents;
-        SerializedProperty m_SyncHoverEventServer;
-        SerializedProperty m_SyncHoverEventAll;
-        SerializedProperty m_SyncSelect;
-        SerializedProperty m_UseSelectEvents;
-        SerializedProperty m_SyncSelectEventServer;
-        SerializedProperty m_SyncSelectEventAll;
-        SerializedProperty m_SyncActivate;
-        SerializedProperty m_UseActivateEvents;
-        SerializedProperty m_SyncActivateEventServer;
-        SerializedProperty m_SyncActivateEventAll;
-        SerializedProperty m_FoldoutStates;
+        private SerializedProperty m_UseInteractingChangedEvent;
+
+        private SerializedProperty m_InteractingChangedEvent;
+        private SerializedProperty m_SyncHover;
+        private SerializedProperty m_UseHoverEvents;
+        private SerializedProperty m_SyncHoverEventServer;
+        private SerializedProperty m_SyncHoverEventAll;
+        private SerializedProperty m_SyncSelect;
+        private SerializedProperty m_UseSelectEvents;
+        private SerializedProperty m_SyncSelectEventServer;
+        private SerializedProperty m_SyncSelectEventAll;
+        private SerializedProperty m_SyncActivate;
+        private SerializedProperty m_UseActivateEvents;
+        private SerializedProperty m_SyncActivateEventServer;
+        private SerializedProperty m_SyncActivateEventAll;
+        private SerializedProperty m_FoldoutStates;
 
         /// <summary>
         /// Called when the editor is enabled.
         /// Initializes the serialized properties.
         /// </summary>
-        void OnEnable()
+        private void OnEnable()
         {
             m_UseInteractingChangedEvent = serializedObject.FindProperty("m_UseInteractingChangedEvent");
             m_InteractingChangedEvent = serializedObject.FindProperty("OnInteractingChanged");
@@ -859,5 +891,6 @@ namespace XRMultiplayer
             serializedObject.ApplyModifiedProperties();
         }
     }
+
 #endif
 }

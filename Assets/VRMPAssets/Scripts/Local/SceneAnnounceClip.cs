@@ -17,6 +17,13 @@ public class SceneAnnounceClip
     private const string LOADED_SUFFIX = "Loaded";
     private const string LOAD_FAILED_SUFFIX = "LoadFailed";
 
+    public SceneAnnounceClip(string folderHead)
+    {
+        this.folderHead = folderHead;
+        loadStartClips = new List<AudioClip>();
+        loadedClips = new List<AudioClip>();
+    }
+
     public void LoadClips()
     {
         var startClipsPath = $"{folderHead}/{START_SUFFIX}";

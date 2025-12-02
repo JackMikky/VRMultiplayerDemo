@@ -953,6 +953,7 @@ GameObject:
   - component: {fileID: 460938084451739152}
   - component: {fileID: 7996316075951038422}
   - component: {fileID: 2533254357638902971}
+  - component: {fileID: 4440476699643228920}
   m_Layer: 5
   m_Name: ColorPallet
   m_TagString: Untagged
@@ -1002,9 +1003,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &206199487413406543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1148,7 +1149,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 949917865
   InScenePlacedSourceGlobalObjectIdHash: 3577812295
   DeferredDespawnTick: 0
-  Ownership: 1
+  Ownership: 2
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -1219,8 +1220,21 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkRigidbodyBaseExpanded: 0
   UseRigidBodyForMotion: 0
-  AutoUpdateKinematicState: 0
+  AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &4440476699643228920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7548087030084484396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b753457618a28f84191439f05ffea834, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &8614533358879322478
 GameObject:
   m_ObjectHideFlags: 0
