@@ -3,51 +3,67 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace XRMultiplayer
+[System.Serializable]
+public class SceneAnnounceClip
 {
-    [System.Serializable]
-    public class SceneAnnounceClip : AudioClipLoader
+    [SerializeField] private string folderHead;
+    [SerializeField] private List<AudioClip> loadStartClips;
+
+    [SerializeField] private List<AudioClip> loadedClips;
+    [SerializeField] private AudioClip loadFailedClip;
+
+    private const string ANNOUNCER_CLIP_FOLDER = "Announcers";
+    private const string START_SUFFIX = "Start";
+    private const string LOADED_SUFFIX = "Loaded";
+    private const string LOAD_FAILED_SUFFIX = "LoadFailed";
+
+    public SceneAnnounceClip(string folderHead)
     {
-        [SerializeField] private string folderHead;
-        [SerializeField] private List<AudioClip> loadStartClips;
+        this.folderHead = folderHead;
+        loadStartClips = new List<AudioClip>();
+        loadedClips = new List<AudioClip>();
+    }
 
-        [SerializeField] private List<AudioClip> loadedClips;
-        [SerializeField] private AudioClip loadFailedClip;
+    public void LoadClips()
+    {
+        var startClipsPath = $"{folderHead}/{START_SUFFIX}";
+        loadStartClips.AddRange(this.LoadAllClipFormResources(startClipsPath));
 
-        public void LoadClips()
+        var loadedClipsPath = $"{folderHead}/{LOADED_SUFFIX}";
+        loadedClips.AddRange(this.LoadAllClipFormResources(loadedClipsPath));
+
+        var loadFailedClipPath = $"{LOAD_FAILED_SUFFIX}";
+        var faildClips = this.LoadAllClipFormResources(loadFailedClipPath);
+        if (faildClips != null)
         {
-            var startClipsPath = $"{folderHead}/{START_SUFFIX}";
-            loadStartClips.AddRange(this.LoadAllClipFormResources(startClipsPath));
-
-            var loadedClipsPath = $"{folderHead}/{LOADED_SUFFIX}";
-            loadedClips.AddRange(this.LoadAllClipFormResources(loadedClipsPath));
+            this.loadFailedClip = faildClips.FirstOrDefault();
         }
+    }
 
-        public AudioClip LoadFailedClip => loadFailedClip;
+    public AudioClip LoadFailedClip => loadFailedClip;
 
-        public AudioClip GetLoadStartClipRandom()
+    public AudioClip GetLoadStartClipRandom()
+    {
+        return this.loadStartClips[Random.Range(0, this.loadStartClips.Count)];
+    }
+
+    public AudioClip GetLoadedClipRandom()
+    {
+        return this.loadedClips[Random.Range(0, this.loadedClips.Count)];
+    }
+
+    private AudioClip[] LoadAllClipFormResources(string relativePath)
+    {
+        var loadPath = $"{ANNOUNCER_CLIP_FOLDER}/{relativePath}";
+        var audioClip = Resources.LoadAll<AudioClip>(loadPath);
+        if (audioClip != null)
         {
-            return this.loadStartClips[Random.Range(0, this.loadStartClips.Count)];
+            return audioClip;
         }
-
-        public AudioClip GetLoadedClipRandom()
+        else
         {
-            return this.loadedClips[Random.Range(0, this.loadedClips.Count)];
-        }
-
-        protected override AudioClip[] LoadAllClipFormResources(string relativePath)
-        {
-            var loadPath = $"{ANNOUNCER_CLIP_FOLDER}/{relativePath}";
-            var audioClip = Resources.LoadAll<AudioClip>(loadPath);
-            if (audioClip != null)
-            {
-                return audioClip;
-            }
-            else
-            {
-                Debug.LogWarning($"[SceneAnnouncerController] Announcer clip not found at path: {loadPath}");
-                return null;
-            }
+            Debug.LogWarning($"[SceneAnnouncerController] Announcer clip not found at path: {loadPath}");
+            return null;
         }
     }
 }
