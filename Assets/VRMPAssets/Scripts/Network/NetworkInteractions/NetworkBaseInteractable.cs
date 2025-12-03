@@ -429,7 +429,8 @@ namespace XRMultiplayer
                 if (IsOwner)
                 {
                     m_IsInteracting.Value = true;
-                    NetworkObject.SetOwnershipLock(true);
+                    if(NetworkObject.IsOwnershipDistributable)
+                        NetworkObject.SetOwnershipLock(true);
                 }
             }
         }
@@ -469,7 +470,8 @@ namespace XRMultiplayer
         [ServerRpc(RequireOwnership = false)]
         private void ChangeOwnershipBackToServerServerRpc()
         {
-            //NetworkObject.SetOwnershipLock(false);
+            if (NetworkObject.IsOwnershipDistributable)
+                NetworkObject.SetOwnershipLock(false);
             NetworkObject.ChangeOwnership(NetworkManager.ServerClientId);
         }
 
@@ -493,7 +495,8 @@ namespace XRMultiplayer
             // If we are not the owner and we are selecting the object, request to change ownership
             if (selected && OwnerClientId != clientId)
             {
-                NetworkObject.SetOwnershipLock(false);
+                if (NetworkObject.IsOwnershipDistributable)
+                    NetworkObject.SetOwnershipLock(false);
                 NetworkObject.ChangeOwnership(clientId);
             }
 
@@ -627,8 +630,8 @@ namespace XRMultiplayer
                         m_IsInteracting.Value = true;
                     }
                 }
-
-                NetworkObject.SetOwnershipLock(m_IsInteracting.Value);
+                if (NetworkObject.IsOwnershipDistributable)
+                    NetworkObject.SetOwnershipLock(m_IsInteracting.Value);
             }
         }
 

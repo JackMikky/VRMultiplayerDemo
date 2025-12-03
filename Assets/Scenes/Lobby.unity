@@ -2144,6 +2144,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 765390354}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &866384954 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8766567132034289751, guid: f6c7eac9edd90c24695dd8dab6371806,
+    type: 3}
+  m_PrefabInstance: {fileID: 7366981290520912877}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b950049051c4d15468f2446a40a6c40e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &917457887
 GameObject:
   m_ObjectHideFlags: 0
@@ -3131,16 +3143,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 460938084451739152, guid: bc88b72691cf239499211adf424f560e,
-        type: 3}
-      propertyPath: Ownership
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 460938084451739152, guid: bc88b72691cf239499211adf424f560e,
-        type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 949917865
-      objectReference: {fileID: 0}
     - target: {fileID: 686020568850223593, guid: bc88b72691cf239499211adf424f560e,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -3170,6 +3172,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2011771951254871180, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: ActivateNetworkedEventAll.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 866384954}
+    - target: {fileID: 2023967654609563568, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2489168328
+      objectReference: {fileID: 0}
+    - target: {fileID: 2023967654609563568, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 1350577797
       objectReference: {fileID: 0}
     - target: {fileID: 2978936534772413056, guid: bc88b72691cf239499211adf424f560e,
         type: 3}
@@ -3261,6 +3278,11 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 2241218076
       objectReference: {fileID: 0}
+    - target: {fileID: 6081783951131434552, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 1350577797
+      objectReference: {fileID: 0}
     - target: {fileID: 7548087030084484396, guid: bc88b72691cf239499211adf424f560e,
         type: 3}
       propertyPath: m_Name
@@ -3298,11 +3320,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Simple_Pen_Customed
-      objectReference: {fileID: 0}
-    - target: {fileID: 2603013640247322898, guid: f6c7eac9edd90c24695dd8dab6371806,
-        type: 3}
-      propertyPath: m_AllowOverrideOwnership
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4816573149015948085, guid: f6c7eac9edd90c24695dd8dab6371806,
         type: 3}

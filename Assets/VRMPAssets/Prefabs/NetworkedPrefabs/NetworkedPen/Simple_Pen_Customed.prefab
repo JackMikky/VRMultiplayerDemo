@@ -377,7 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  m_AllowOverrideOwnership: 0
+  m_AllowOverrideOwnership: 1
   m_InteractionCheckTime: 2
   m_IgnoreSocketSelectedCallback: 1
   m_ResetObjectOnDisconnect: 1
