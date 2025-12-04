@@ -703,10 +703,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   announcerAudioSource: {fileID: 1708689589}
   warpController: {fileID: 642802449}
-  entranceAnnounceClip: {fileID: 0}
-  lobbyAnnounceClip: {fileID: 0}
-  room1AnnounceClip: {fileID: 0}
-  room2AnnounceClip: {fileID: 0}
+  entranceAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  lobbyAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  room1AnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  room2AnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
   loadFailedAnnounceClips: []
 --- !u!4 &423744169
 Transform:

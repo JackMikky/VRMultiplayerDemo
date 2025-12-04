@@ -55,9 +55,13 @@ namespace XRMultiplayer
             m_TrailRenderer.BakeMesh(mesh, true);
 
             m_SpawnedInteractableObject = new();
+            m_SpawnedInteractableObject.tag = "PenTrail";
             m_SpawnedInteractableObject.transform.position = Vector3.zero;
+            this.gameObject.AddComponent<MeshFilter>().mesh = mesh;
+            this.gameObject.AddComponent<MeshCollider>().sharedMesh = mesh;
             m_SpawnedInteractableObject.AddComponent<MeshFilter>().mesh = mesh;
             m_SpawnedInteractableObject.AddComponent<MeshCollider>().sharedMesh = mesh;
+            m_SpawnedInteractableObject.AddComponent<PenTrailDestoryer>().SetParent(this.gameObject);
 
             m_SpawnedInteractableObject.transform.parent = transform;
 

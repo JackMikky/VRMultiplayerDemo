@@ -11,6 +11,7 @@ TagManager:
   - Destroyer
   - NetworkChatManager
   - ColorPallet
+  - PenTrail
   layers:
   - Default
   - TransparentFX
