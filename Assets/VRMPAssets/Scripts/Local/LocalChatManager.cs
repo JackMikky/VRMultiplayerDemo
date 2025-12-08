@@ -40,7 +40,10 @@ namespace XRMultiplayer
         /// </summary>
         [SerializeField] private int m_MaxCharacterCount = 256;
 
-        public int MaxCharacterCount { get => m_MaxCharacterCount; }
+        public int maxCharacterCount
+        {
+            get { return m_MaxCharacterCount; }
+        }
 
         private void Awake()
         {

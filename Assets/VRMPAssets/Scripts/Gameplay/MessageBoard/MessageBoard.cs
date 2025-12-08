@@ -3,11 +3,8 @@ using System;
 using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
 using System.Globalization;
 using static XRMultiplayer.LocalChatManager;
-
 #if UNITY_EDITOR
-
 using UnityEditor;
-
 #endif
 
 namespace XRMultiplayer
@@ -77,9 +74,9 @@ namespace XRMultiplayer
         {
             if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text)) return;
 
-            if (text.Length > localChatManager.MaxCharacterCount)
+            if (text.Length > localChatManager.maxCharacterCount)
             {
-                text = text.Substring(0, localChatManager.MaxCharacterCount);
+                text = text.Substring(0, localChatManager.maxCharacterCount);
             }
 
             string userName = XRINetworkPlayer.LocalPlayer != null ? XRINetworkPlayer.LocalPlayer.playerName : "Player";
