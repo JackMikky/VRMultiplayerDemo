@@ -2,11 +2,9 @@ using UnityEngine;
 using System;
 using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
 using System.Globalization;
-
+using static XRMultiplayer.LocalChatManager;
 #if UNITY_EDITOR
-
 using UnityEditor;
-
 #endif
 
 namespace XRMultiplayer
@@ -83,7 +81,7 @@ namespace XRMultiplayer
 
             string userName = XRINetworkPlayer.LocalPlayer != null ? XRINetworkPlayer.LocalPlayer.playerName : "Player";
 
-            var chatEntry = new LocalChatManager.ChatEntry
+            var chatEntry = new ChatEntry
             {
                 user = userName,
                 message = text,
@@ -92,7 +90,7 @@ namespace XRMultiplayer
             SubmitMessageLocal(chatEntry);
         }
 
-        private void SubmitMessageLocal(LocalChatManager.ChatEntry chatEntry)
+        private void SubmitMessageLocal(ChatEntry chatEntry)
         {
             if (localChatManager.messageHistory.Count > localChatManager.maxMessageHistoryCount)
             {
@@ -107,7 +105,7 @@ namespace XRMultiplayer
             CreateText(chatEntry);
         }
 
-        private void CreateText(LocalChatManager.ChatEntry chatEntry)
+        private void CreateText(ChatEntry chatEntry)
         {
             if (m_MessagePrefab == null || m_ContentViewport == null) return;
 
@@ -128,7 +126,7 @@ namespace XRMultiplayer
             }
         }
 
-        private void HandleNetworkChatMessage(LocalChatManager.ChatEntry chatEntry)
+        private void HandleNetworkChatMessage(ChatEntry chatEntry)
         {
             SubmitMessageLocal(chatEntry);
         }

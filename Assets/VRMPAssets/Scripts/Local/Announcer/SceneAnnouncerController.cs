@@ -38,6 +38,9 @@ namespace XRMultiplayer
         [Header("LoadFailed Clips")]
         [SerializeField] private AudioClip[] loadFailedAnnounceClips = null;
 
+        [Header("LoadFailed Clips")]
+        [SerializeField] private AudioClip[] loadFailedAnnounceClips = null;
+
         private void Awake()
         {
             entranceAnnounceClip = new SceneAnnounceClip("Entrance");
