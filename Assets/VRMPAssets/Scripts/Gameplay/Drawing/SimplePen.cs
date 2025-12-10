@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-using XRMultiplayer;
 
 namespace XRMultiplayer
 {
@@ -12,48 +11,89 @@ namespace XRMultiplayer
         [SerializeField] private PenTrail m_TrailRendererPrefab;
         [SerializeField] private Transform m_PenTipTransform;
         [SerializeField] private Renderer m_PenTipRenderer;
-
-        private NetworkPhysicsInteractable m_NetworkInteractable;
+        [SerializeField] private PenTip penTip;
 
         private PenTrail m_CurrentTrailRenderer;
 
-        private NetworkVariable<Color> m_CurrentColor = new NetworkVariable<Color>(Color.red);
+        private NetworkVariable<Color> m_CurrentColor = new NetworkVariable<Color>(
+            Color.red,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
 
-        private NetworkVariable<float> m_LineWidth = new NetworkVariable<float>(0.001f);
+        private NetworkVariable<float> m_LineWidth = new NetworkVariable<float>(
+            0.001f,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
 
         [SerializeField] private Slider lineWidthSlider;
 
-        public Color CurrentColor
-        {
-            set => m_CurrentColor.Value = value;
-        }
-
-        private List<PenTrail> m_PenTrails = new();
-
-        private Renderer penRenderer;
+        private List<PenTrail> m_PenTrails = new List<PenTrail>();
 
         private void Awake()
         {
-            TryGetComponent(out m_NetworkInteractable);
-            SetColor(m_CurrentColor.Value);
-            m_CurrentColor.OnValueChanged += (previousValue, newValue) => { SetColor(newValue); };
+            m_CurrentColor.OnValueChanged += OnColorChanged;
+            m_LineWidth.OnValueChanged += OnLineWidthChanged;
         }
 
         private void Start()
         {
-            lineWidthSlider.onValueChanged.AddListener(SetLineWidth);
+            if (lineWidthSlider != null)
+            {
+                lineWidthSlider.onValueChanged.AddListener(RequestSetLineWidth);
+            }
             XRINetworkGameManager.Connected.Subscribe(ConnectedToNetworkGame);
-        }
-
-        private void OnDestroy()
-        {
-            XRINetworkGameManager.Connected.Unsubscribe(ConnectedToNetworkGame);
         }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            SetColor(m_CurrentColor.Value);
+
+            ApplyColor(m_CurrentColor.Value);
+            ApplyLineWidth(m_LineWidth.Value);
+        }
+
+        private void OnDestroy()
+        {
+            m_CurrentColor.OnValueChanged -= OnColorChanged;
+            m_LineWidth.OnValueChanged -= OnLineWidthChanged;
+
+            if (lineWidthSlider != null)
+            {
+                lineWidthSlider.onValueChanged.RemoveListener(RequestSetLineWidth);
+            }
+
+            XRINetworkGameManager.Connected.Unsubscribe(ConnectedToNetworkGame);
+        }
+
+        private void OnColorChanged(Color previousValue, Color newValue)
+        {
+            ApplyColor(newValue);
+        }
+
+        private void OnLineWidthChanged(float previousValue, float newValue)
+        {
+            ApplyLineWidth(newValue);
+        }
+
+        private void ApplyColor(Color color)
+        {
+            if (m_PenTipRenderer != null)
+            {
+                m_PenTipRenderer.material.color = color;
+            }
+
+            if (m_CurrentTrailRenderer != null)
+            {
+                m_CurrentTrailRenderer.SetColor(color);
+            }
+        }
+
+        private void ApplyLineWidth(float width)
+        {
+            if (m_CurrentTrailRenderer != null)
+            {
+                m_CurrentTrailRenderer.SetLineWidth(width);
+            }
         }
 
         private void ConnectedToNetworkGame(bool connected)
@@ -62,8 +102,12 @@ namespace XRMultiplayer
             {
                 foreach (var trail in m_PenTrails)
                 {
-                    Destroy(trail.gameObject);
+                    if (trail != null)
+                    {
+                        Destroy(trail.gameObject);
+                    }
                 }
+                m_PenTrails.Clear();
             }
         }
 
@@ -79,28 +123,47 @@ namespace XRMultiplayer
             {
                 m_CurrentTrailRenderer.transform.SetParent(null);
                 m_CurrentTrailRenderer.CreateInteractableTrail();
+
+                m_PenTrails.Add(m_CurrentTrailRenderer);
+
                 m_CurrentTrailRenderer = null;
             }
         }
 
-        public void SetColor(Color color)
+        public void RequestSetColor(Color color)
         {
-            if (!IsServer) return;
-            this.m_CurrentColor.Value = color;
-            if (m_PenTipRenderer != null)
+            if (IsServer)
             {
-                m_PenTipRenderer.material.color = color;
+                m_CurrentColor.Value = color;
+            }
+            else
+            {
+                RequestSetColorServerRpc(color);
             }
         }
 
-        public void SetLineWidth(float width)
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestSetColorServerRpc(Color color)
         {
-            if (!IsServer) return;
-            m_LineWidth.Value = width;
-            if (m_CurrentTrailRenderer != null)
+            m_CurrentColor.Value = color;
+        }
+
+        public void RequestSetLineWidth(float width)
+        {
+            if (IsServer)
             {
-                m_CurrentTrailRenderer.SetLineWidth(width);
+                m_LineWidth.Value = width;
             }
+            else
+            {
+                RequestSetLineWidthServerRpc(width);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestSetLineWidthServerRpc(float width)
+        {
+            m_LineWidth.Value = width;
         }
     }
 }
