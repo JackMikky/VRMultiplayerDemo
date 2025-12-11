@@ -1,5 +1,6 @@
 using UnityEngine;
-namespace VRMPAssets
+
+namespace XRMultiplayer
 {
     public class LineCleaning : MonoBehaviour
     {

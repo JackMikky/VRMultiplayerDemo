@@ -1,16 +1,19 @@
 using UnityEngine;
 
-public class PenTrailDestoryer : MonoBehaviour
+namespace XRMultiplayer
 {
-    private GameObject parentObject;
-
-    public void SetParent(GameObject gameObject)
+    public class PenTrailDestoryer : MonoBehaviour
     {
-        this.parentObject = gameObject;
-    }
+        private GameObject parentObject;
 
-    private void OnDestroy()
-    {
-        Destroy(parentObject);
+        public void SetParent(GameObject gameObject)
+        {
+            this.parentObject = gameObject;
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(parentObject);
+        }
     }
 }
