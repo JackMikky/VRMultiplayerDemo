@@ -14,13 +14,13 @@ public class NavMeshTeleportValidator : TeleportationProvider
         if (m_DebugMode)
             Debug.Log($"Teleportation request detected. {currentRequest.destinationPosition}");
 
-        if (this.TryTeleport(currentRequest.destinationPosition))
+        if (this.CheckTeleport(currentRequest.destinationPosition))
             base.Update();
 
         validRequest = false;
     }
 
-    private bool TryTeleport(Vector3 targetPosition)
+    private bool CheckTeleport(Vector3 targetPosition)
     {
         NavMeshHit hit;
 

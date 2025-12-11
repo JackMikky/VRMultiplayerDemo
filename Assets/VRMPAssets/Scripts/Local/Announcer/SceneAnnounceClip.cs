@@ -6,13 +6,25 @@ using UnityEngine;
 namespace XRMultiplayer
 {
     [System.Serializable]
-    public class SceneAnnounceClip : AudioClipLoader
+    public class SceneAnnounceClip
     {
         [SerializeField] private string folderHead;
         [SerializeField] private List<AudioClip> loadStartClips;
 
         [SerializeField] private List<AudioClip> loadedClips;
         [SerializeField] private AudioClip loadFailedClip;
+
+        private const string ANNOUNCER_CLIP_FOLDER = "Announcers";
+        private const string START_SUFFIX = "Start";
+        private const string LOADED_SUFFIX = "Loaded";
+        private const string LOAD_FAILED_SUFFIX = "LoadFailed";
+
+        public SceneAnnounceClip(string folderHead)
+        {
+            this.folderHead = folderHead;
+            loadStartClips = new List<AudioClip>();
+            loadedClips = new List<AudioClip>();
+        }
 
         public void LoadClips()
         {
@@ -21,6 +33,13 @@ namespace XRMultiplayer
 
             var loadedClipsPath = $"{folderHead}/{LOADED_SUFFIX}";
             loadedClips.AddRange(this.LoadAllClipFormResources(loadedClipsPath));
+
+            var loadFailedClipPath = $"{LOAD_FAILED_SUFFIX}";
+            var faildClips = this.LoadAllClipFormResources(loadFailedClipPath);
+            if (faildClips != null)
+            {
+                this.loadFailedClip = faildClips.FirstOrDefault();
+            }
         }
 
         public AudioClip LoadFailedClip => loadFailedClip;
@@ -35,7 +54,7 @@ namespace XRMultiplayer
             return this.loadedClips[Random.Range(0, this.loadedClips.Count)];
         }
 
-        protected override AudioClip[] LoadAllClipFormResources(string relativePath)
+        private AudioClip[] LoadAllClipFormResources(string relativePath)
         {
             var loadPath = $"{ANNOUNCER_CLIP_FOLDER}/{relativePath}";
             var audioClip = Resources.LoadAll<AudioClip>(loadPath);

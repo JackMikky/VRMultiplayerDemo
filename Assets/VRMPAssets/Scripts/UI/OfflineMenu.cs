@@ -10,28 +10,27 @@ namespace XRMultiplayer
         /// Colors to choose from for the player.
         /// </summary>
         [SerializeField, Tooltip("Default name for the player")]
-        private Color[] m_PlayerColors;
+        Color[] m_PlayerColors;
 
         [Header("Player Info")]
         /// <summary>
         /// Default name for the player.
         /// </summary>
         [SerializeField, Tooltip("Default name for the player")]
-        private string m_DefaultPlayerName = "Unity Creator";
+        string m_DefaultPlayerName = "Unity Creator";
 
-        [SerializeField] private TMP_Text m_PlayerNameText;
-        [SerializeField] private TMP_Text m_PlayerInitialText;
-        [SerializeField] private Image[] m_PlayerColorIcons;
-        [SerializeField] private Image m_VolumeIndicator;
-        [SerializeField] private Image m_MicIcon;
-        [SerializeField] private Sprite m_MutedSprite;
-        [SerializeField] private Sprite m_UnmutedSprite;
+        [SerializeField] TMP_Text m_PlayerNameText;
+        [SerializeField] TMP_Text m_PlayerInitialText;
+        [SerializeField] Image[] m_PlayerColorIcons;
+        [SerializeField] Image m_VolumeIndicator;
+        [SerializeField] Image m_MicIcon;
+        [SerializeField] Sprite m_MutedSprite;
+        [SerializeField] Sprite m_UnmutedSprite;
 
-        [Header("Panel Objects")]
-        [SerializeField]
-        private GameObject m_CustomizationPanel;
+        [Header("Panel Objects")] [SerializeField]
+        GameObject m_CustomizationPanel;
 
-        [SerializeField] private GameObject m_ConnectionPanel;
+        [SerializeField] GameObject m_ConnectionPanel;
 
         private void Awake()
         {
@@ -60,13 +59,13 @@ namespace XRMultiplayer
             XRINetworkGameManager.Instance.OnConnectionFailedAction -= ConnectionFailed;
         }
 
-        private void SetupPlayerDefaults()
+        void SetupPlayerDefaults()
         {
             XRINetworkGameManager.LocalPlayerName.Value = m_DefaultPlayerName;
             XRINetworkGameManager.LocalPlayerColor.Value = m_PlayerColors[Random.Range(0, m_PlayerColors.Length)];
         }
 
-        private void SetPlayerName(string name)
+        void SetPlayerName(string name)
         {
             if (name == string.Empty)
             {
@@ -75,7 +74,7 @@ namespace XRMultiplayer
             }
 
             m_PlayerNameText.text = name;
-
+            
             string trimmed = name.Trim();
             string initials = "";
             if (trimmed.Length > 0)
@@ -91,7 +90,7 @@ namespace XRMultiplayer
                 m_PlayerNameText.rectTransform.sizeDelta.y);
         }
 
-        private void SetPlayerColor(Color color)
+        void SetPlayerColor(Color color)
         {
             foreach (var c in m_PlayerColorIcons)
             {
@@ -99,7 +98,7 @@ namespace XRMultiplayer
             }
         }
 
-        private void UpdateMicIcon(float amp)
+        void UpdateMicIcon(float amp)
         {
             m_VolumeIndicator.fillAmount = amp;
         }
@@ -116,7 +115,7 @@ namespace XRMultiplayer
             m_ConnectionPanel.SetActive(true);
         }
 
-        private void OnConnected(bool connected)
+        void OnConnected(bool connected)
         {
             if (connected)
             {
@@ -129,12 +128,12 @@ namespace XRMultiplayer
             }
         }
 
-        private void MutedChanged(bool muted)
+        void MutedChanged(bool muted)
         {
             m_MicIcon.sprite = muted ? m_MutedSprite : m_UnmutedSprite;
         }
 
-        private void ConnectionFailed(string reason)
+        void ConnectionFailed(string reason)
         {
             CompleteCustomization();
         }

@@ -2809,6 +2809,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 772940494392197733, guid: c4a645c929982ea41a52b5037ee7d94d,
+        type: 3}
+      propertyPath: objectsToEnableOnline.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 772940494392197733, guid: c4a645c929982ea41a52b5037ee7d94d,
+        type: 3}
+      propertyPath: objectsToEnableOffline.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 772940494392197733, guid: c4a645c929982ea41a52b5037ee7d94d,
+        type: 3}
+      propertyPath: 'objectsToEnableOffline.Array.data[0]'
+      value: 
+      objectReference: {fileID: 671320011}
     - target: {fileID: 6449601363766435539, guid: c4a645c929982ea41a52b5037ee7d94d,
         type: 3}
       propertyPath: m_StartHidden
@@ -2874,6 +2889,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c4a645c929982ea41a52b5037ee7d94d, type: 3}
+--- !u!1 &671320011 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6973649085223906267, guid: c4a645c929982ea41a52b5037ee7d94d,
+    type: 3}
+  m_PrefabInstance: {fileID: 671320010}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &682223316
 GameObject:
   m_ObjectHideFlags: 1
