@@ -3686,10 +3686,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   announcerAudioSource: {fileID: 957887850}
   warpController: {fileID: 1688267072}
-  entranceAnnounceClip: {fileID: 0}
-  lobbyAnnounceClip: {fileID: 0}
-  room1AnnounceClip: {fileID: 0}
-  room2AnnounceClip: {fileID: 0}
+  entranceAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  lobbyAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  room1AnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  room2AnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
   loadFailedAnnounceClips: []
 --- !u!4 &1059215952
 Transform:
@@ -5545,7 +5561,7 @@ PrefabInstance:
     - target: {fileID: 6368049467093905607, guid: 9cdcf50d65507694a8ec885c76aed226,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6368049467093905607, guid: 9cdcf50d65507694a8ec885c76aed226,
         type: 3}
@@ -5570,7 +5586,7 @@ PrefabInstance:
     - target: {fileID: 6368049467093905607, guid: 9cdcf50d65507694a8ec885c76aed226,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.01
+      value: -6.057
       objectReference: {fileID: 0}
     - target: {fileID: 6368049467093905607, guid: 9cdcf50d65507694a8ec885c76aed226,
         type: 3}
