@@ -1,9 +1,9 @@
 fileFormatVersion: 2
 <<<<<<<< HEAD:Assets/Scenes/Lobby.meta
-guid: 7c82babe221111642b990e49bf3f58f5
+guid: fe5a262ad214843448d12c3f747b6df2
 ========
-guid: 55029f91848ec954fabe9f5efb8cb721
->>>>>>>> develop/Lobby:Assets/VRMPAssets/Materials/StrokeDrawer.meta
+guid: 4388baaac83f4b548bf5885eb3ccf537
+>>>>>>>> develop/Lobby:Assets/VRMPAssets/Prefabs/StrokeLine.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

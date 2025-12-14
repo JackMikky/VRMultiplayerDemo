@@ -45,9 +45,17 @@ namespace XRMultiplayer
         private void Start()
         {
             _fadeValue.Value = 1;
-            StartWarpFadeIn("Entrance");
+
+            StartCoroutine(DelayEntranceFadeIn());
 
             _fadeValue.Subscribe(SetFadeValue);
+        }
+
+        [System.Obsolete]
+        private IEnumerator DelayEntranceFadeIn()
+        {
+            yield return new WaitForSeconds(fadeInWaitTime);
+            StartWarpFadeIn("Entrance");
         }
 
         public void StartFadeOut(string scene, UnityAction<string> onCompleted = null)
