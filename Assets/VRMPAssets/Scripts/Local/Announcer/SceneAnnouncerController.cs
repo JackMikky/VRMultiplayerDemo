@@ -22,30 +22,34 @@ namespace XRMultiplayer
         private bool _isProcessingQueue = false;
 
         [Header("Entrance Clips")]
-        [SerializeField] private SceneAnnounceClip entranceAnnounceClip = new SceneAnnounceClip();
+        [SerializeField] private SceneAnnounceClip entranceAnnounceClip;
 
         [Header("Lobby Clips")]
         [SerializeField]
-        private SceneAnnounceClip lobbyAnnounceClip = new SceneAnnounceClip();
+        private SceneAnnounceClip lobbyAnnounceClip;
 
         [Header("Room1 Clips")]
         [SerializeField]
-        private SceneAnnounceClip room1AnnounceClip = new SceneAnnounceClip();
+        private SceneAnnounceClip room1AnnounceClip;
 
         [Header("Room2 Clips")]
-        [SerializeField] private SceneAnnounceClip room2AnnounceClip = new SceneAnnounceClip();
+        [SerializeField] private SceneAnnounceClip room2AnnounceClip;
 
         [Header("LoadFailed Clips")]
         [SerializeField] private AudioClip[] loadFailedAnnounceClips = null;
 
         private void Awake()
         {
+            entranceAnnounceClip = new SceneAnnounceClip("Entrance");
             entranceAnnounceClip.LoadClips();
 
+            lobbyAnnounceClip = new SceneAnnounceClip("Lobby");
             lobbyAnnounceClip.LoadClips();
 
+            room1AnnounceClip = new SceneAnnounceClip("Room1");
             room1AnnounceClip.LoadClips();
 
+            room2AnnounceClip = new SceneAnnounceClip("Room2");
             room2AnnounceClip.LoadClips();
 
             if (loadFailedAnnounceClips == null)
