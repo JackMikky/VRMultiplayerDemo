@@ -3687,9 +3687,11 @@ MonoBehaviour:
   announcerAudioSource: {fileID: 957887850}
   warpController: {fileID: 1688267072}
   entranceAnnounceClip:
-    folderHead: 
-    loadStartClips: []
-    loadedClips: []
+    folderHead: Enetrance
+    loadStartClips:
+    - {fileID: 8300000, guid: 35bf246f3b7d5d64da223f049bb22f1f, type: 3}
+    loadedClips:
+    - {fileID: 8300000, guid: 30ba53fe51c80a54b89bb9554c1d832c, type: 3}
     loadFailedClip: {fileID: 0}
   lobbyAnnounceClip:
     folderHead: 
@@ -5382,7 +5384,7 @@ AudioReverbZone:
   m_GameObject: {fileID: 1499411134}
   m_Enabled: 1
   m_MinDistance: 5
-  m_MaxDistance: 10
+  m_MaxDistance: 18
   m_ReverbPreset: 1
   m_Room: -1000
   m_RoomHF: -100
@@ -5816,7 +5818,7 @@ PrefabInstance:
     - target: {fileID: 8059461763842174801, guid: cbb1a68d03835fd49ab19311bab1cfdd,
         type: 3}
       propertyPath: fadeInWaitTime
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8059461763842174801, guid: cbb1a68d03835fd49ab19311bab1cfdd,
         type: 3}
