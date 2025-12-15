@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using XRMultiplayer;
+using Unity.Netcode;
 
 namespace VRMPAssets.Scripts.UI
 {
-    public class SceneChangeMainGraphic : MonoBehaviour
+    public class SceneChangeMainGraphic : NetworkBehaviour
     {
         [Header("MainGraphic")]
         [SerializeField] private RawImage mainGraphicImage;
@@ -49,6 +50,25 @@ namespace VRMPAssets.Scripts.UI
             {
                 SelectRandomSubGraphic();
             }
+            else if (selectRandomOnStart && subGraphics != null && subGraphics.Count > 0)
+            {
+                SelectDefaultSubGraphic();
+            }
+        }
+
+        /// <summary>
+        /// subGraphicsからランダムに1つ選択してボタンを発火する
+        /// </summary>
+        private void SelectDefaultSubGraphic()
+        {
+            int index = 0;
+            SceneChangeSubGraphic randomSubGraphic = subGraphics[index];
+
+            if (randomSubGraphic != null)
+            {
+                randomSubGraphic.button.onClick.Invoke();
+                Debug.Log($"SubGraphic selected: {index}");
+            }
         }
 
         /// <summary>
@@ -68,6 +88,29 @@ namespace VRMPAssets.Scripts.UI
 
         public void UpdateMainGraphic(Texture2D texture, string roomName)
         {
+            // ローカルで更新
+            ApplyMainGraphicUpdate(texture, roomName);
+
+            // ネットワーク経由で全Clientに通知
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
+            {
+                if (IsHost)
+                {
+                    // SubGraphicのインデックスを取得して送信
+                    int subGraphicIndex = GetSubGraphicIndexByRoomName(roomName);
+                    if (subGraphicIndex >= 0)
+                    {
+                        UpdateMainGraphicClientRpc(subGraphicIndex, roomName);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// MainGraphicの更新を実際に適用する
+        /// </summary>
+        private void ApplyMainGraphicUpdate(Texture2D texture, string roomName)
+        {
             confirmButton.onClick.RemoveAllListeners();
             this.mainGraphicImage.texture = texture;
             this.selectedRoomName = roomName;
@@ -83,6 +126,49 @@ namespace VRMPAssets.Scripts.UI
             });
         }
 
+        /// <summary>
+        /// RoomNameからSubGraphicのインデックスを取得
+        /// </summary>
+        private int GetSubGraphicIndexByRoomName(string roomName)
+        {
+            for (int i = 0; i < subGraphics.Count; i++)
+            {
+                // SubGraphicのChangeRoomNameと比較するため、リフレクションを使用
+                var changeRoomNameField = subGraphics[i].GetType().GetField("changeRoomName",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (changeRoomNameField != null)
+                {
+                    string changeRoomName = (string)changeRoomNameField.GetValue(subGraphics[i]);
+                    if (changeRoomName == roomName)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 全クライアントにMainGraphic更新を通知
+        /// </summary>
+        [ClientRpc]
+        private void UpdateMainGraphicClientRpc(int subGraphicIndex, string roomName)
+        {
+            if (!IsHost && subGraphicIndex >= 0 && subGraphicIndex < subGraphics.Count)
+            {
+                SceneChangeSubGraphic subGraphic = subGraphics[subGraphicIndex];
+
+                // SubGraphicからTextureを取得
+                var graphicTextureField = subGraphic.GetType().GetField("graphicTexture",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (graphicTextureField != null)
+                {
+                    Texture2D texture = (Texture2D)graphicTextureField.GetValue(subGraphic);
+                    ApplyMainGraphicUpdate(texture, roomName);
+                }
+            }
+        }
+
         public void HideSubGraphicBackground()
         {
             foreach (var subGraphic in subGraphics)
@@ -93,9 +179,20 @@ namespace VRMPAssets.Scripts.UI
 
         /// <summary>
         /// 指定された SubGraphic 以外のすべての背景を非表示にする
+        /// Hostのみ実行可能
         /// </summary>
         public void HideOtherBackgrounds(SceneChangeSubGraphic activeSubGraphic)
         {
+            // Hostチェック
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
+            {
+                if (!IsHost)
+                {
+                    Debug.LogWarning("背景の制御はHostのみ実行できます。");
+                    return;
+                }
+            }
+
             foreach (var subGraphic in subGraphics)
             {
                 if (subGraphic != activeSubGraphic)
