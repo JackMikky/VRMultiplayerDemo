@@ -10,7 +10,8 @@ public class SceneButtonInitializer : MonoBehaviour, IUIInitializer
     public void InitializeUI()
     {
         var button = GetComponent<Button>();
-        button.onClick.AddListener(() => XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(changeToSceneName));
+        button.onClick.AddListener(() =>
+XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(changeToSceneName));
     }
 
     private void OnEnable()
