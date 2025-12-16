@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using XRMultiplayer;
-using Unity.Netcode;
 
 namespace VRMPAssets.Scripts.UI
 {
@@ -25,8 +25,6 @@ namespace VRMPAssets.Scripts.UI
         [Header("Random Selection")]
         [SerializeField] private bool selectRandomOnStart = true;
 
-        private string selectedRoomName;
-
         private void Awake()
         {
             var buttonImage = cancelButton.GetComponentInChildren<Image>();
@@ -42,7 +40,7 @@ namespace VRMPAssets.Scripts.UI
                         var pos = buttonImage.transform.localPosition;
                         pos.z = originalZPosition;
                         buttonImage.transform.localPosition = pos;
-                        SetSubDialogActiveClientRpc(false);
+                        this.subDialog.SetActive(false);
                     }
                 }
             });
@@ -52,7 +50,7 @@ namespace VRMPAssets.Scripts.UI
                 {
                     if (IsHost)
                     {
-                        SetSubDialogActiveClientRpc(true);
+                        this.subDialog.SetActive(true);
                     }
                 }
             });
@@ -116,18 +114,17 @@ namespace VRMPAssets.Scripts.UI
         {
             confirmButton.onClick.RemoveAllListeners();
             this.mainGraphicImage.texture = texture;
-            this.selectedRoomName = roomName;
             confirmButton.onClick.AddListener(() =>
             {
-                this.subDialog.SetActive(false);
-                mainGraphicButton.interactable = false;
-                foreach (var subGraphic in subGraphics)
-                {
-                    subGraphic.UpdateInteractable(false);
-                }
                 if (IsHost)
                 {
-                    XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(selectedRoomName);
+                    this.subDialog.SetActive(false);
+                    mainGraphicButton.interactable = false;
+                    foreach (var subGraphic in subGraphics)
+                    {
+                        subGraphic.UpdateInteractable(false);
+                    }
+                    XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(roomName);
                 }
             });
         }
