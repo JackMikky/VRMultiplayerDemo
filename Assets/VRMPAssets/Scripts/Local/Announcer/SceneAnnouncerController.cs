@@ -28,29 +28,54 @@ namespace XRMultiplayer
         [SerializeField]
         private SceneAnnounceClip lobbyAnnounceClip;
 
-        [Header("Room1 Clips")]
+        [Header("Construction Clips")]
         [SerializeField]
-        private SceneAnnounceClip room1AnnounceClip;
+        private SceneAnnounceClip constructionAnnounceClip;
 
-        [Header("Room2 Clips")]
-        [SerializeField] private SceneAnnounceClip room2AnnounceClip;
+        [Header("Manufacturing Clips")]
+        [SerializeField] private SceneAnnounceClip manufacturingAnnounceClip;
+
+        [Header("Prevention_Basic Clips")]
+        [SerializeField] private SceneAnnounceClip prevention_BasicAnnounceClip;
+
+        [Header("Medical Clips")]
+        [SerializeField] private SceneAnnounceClip medicalAnnounceClip;
 
         [Header("LoadFailed Clips")]
         [SerializeField] private AudioClip[] loadFailedAnnounceClips = null;
 
+        private Dictionary<SceneListEnum, SceneAnnounceClip> _sceneClips;
+
         private void Awake()
         {
-            entranceAnnounceClip = new SceneAnnounceClip("Entrance");
+            entranceAnnounceClip = new SceneAnnounceClip(SceneListEnum.Entrance.ToString());
             entranceAnnounceClip.LoadClips();
 
-            lobbyAnnounceClip = new SceneAnnounceClip("Lobby");
+            lobbyAnnounceClip = new SceneAnnounceClip(SceneListEnum.Lobby.ToString());
             lobbyAnnounceClip.LoadClips();
 
-            room1AnnounceClip = new SceneAnnounceClip("Room1");
-            room1AnnounceClip.LoadClips();
+            constructionAnnounceClip = new SceneAnnounceClip(SceneListEnum.Construction.ToString());
+            constructionAnnounceClip.LoadClips();
 
-            room2AnnounceClip = new SceneAnnounceClip("Room2");
-            room2AnnounceClip.LoadClips();
+            manufacturingAnnounceClip = new SceneAnnounceClip(SceneListEnum.Manufacturing.ToString());
+            manufacturingAnnounceClip.LoadClips();
+
+            prevention_BasicAnnounceClip = new SceneAnnounceClip(SceneListEnum.Prevention_Basic.ToString());
+            prevention_BasicAnnounceClip.LoadClips();
+
+            medicalAnnounceClip = new SceneAnnounceClip(SceneListEnum.Medical.ToString());
+            medicalAnnounceClip.LoadClips();
+
+            // Dictionary初期化
+            _sceneClips = new Dictionary<SceneListEnum, SceneAnnounceClip>
+            {
+                { SceneListEnum.Entrance, entranceAnnounceClip },
+                { SceneListEnum.Lobby, lobbyAnnounceClip },
+                { SceneListEnum.Construction, constructionAnnounceClip },
+                { SceneListEnum.Manufacturing, manufacturingAnnounceClip },
+                { SceneListEnum.Prevention_Basic, prevention_BasicAnnounceClip },
+                { SceneListEnum.Medical, medicalAnnounceClip }
+            };
 
             if (loadFailedAnnounceClips == null)
             {
@@ -109,58 +134,32 @@ namespace XRMultiplayer
 
         public void HandleOnSceneLoaded(string sceneName)
         {
-            var clip = null as AudioClip;
-            switch (sceneName)
+            if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
             {
-                case "Entrance":
-                    clip = entranceAnnounceClip.GetLoadedClipRandom();
-                    break;
-
-                case "Lobby":
-                    clip = lobbyAnnounceClip.GetLoadedClipRandom();
-                    break;
-
-                case "Room1":
-                    clip = room1AnnounceClip.GetLoadedClipRandom();
-                    break;
-
-                case "Room2":
-                    clip = room2AnnounceClip.GetLoadedClipRandom();
-                    break;
-
-                default:
-                    break;
+                Debug.LogWarning($"[SceneAnnouncerController] Unknown scene name: {sceneName}");
+                return;
             }
 
-            EnqueueClip(clip, () => this.OnSceneLoaded?.Invoke());
+            if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
+            {
+                var clip = announceClip.GetLoadedClipRandom();
+                EnqueueClip(clip, () => this.OnSceneLoaded?.Invoke());
+            }
         }
 
         public void HandleSceneLoadStart(string sceneName)
         {
-            var clip = null as AudioClip;
-            switch (sceneName)
+            if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
             {
-                case "Entrance":
-                    clip = entranceAnnounceClip.GetLoadStartClipRandom();
-                    break;
-
-                case "Lobby":
-                    clip = lobbyAnnounceClip.GetLoadStartClipRandom();
-                    break;
-
-                case "Room1":
-                    clip = room1AnnounceClip.GetLoadStartClipRandom();
-                    break;
-
-                case "Room2":
-                    clip = room2AnnounceClip.GetLoadStartClipRandom();
-                    break;
-
-                default:
-                    break;
+                Debug.LogWarning($"[SceneAnnouncerController] Unknown scene name: {sceneName}");
+                return;
             }
 
-            EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
+            if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
+            {
+                var clip = announceClip.GetLoadStartClipRandom();
+                EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
+            }
         }
 
         protected override AudioClip[] LoadAllClipFormResources(string relativePath)

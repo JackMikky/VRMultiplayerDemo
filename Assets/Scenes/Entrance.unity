@@ -3057,9 +3057,13 @@ MonoBehaviour:
   - sceneID: 1
     sceneName: Lobby
   - sceneID: 2
-    sceneName: Room1
+    sceneName: Construction
   - sceneID: 3
-    sceneName: Room2
+    sceneName: Manufacturing
+  - sceneID: 4
+    sceneName: Prevention_Basic
+  - sceneID: 5
+    sceneName: Medical
   loadSceneMode: 0
   onSceneLoaded:
     m_PersistentCalls:
@@ -3860,12 +3864,22 @@ MonoBehaviour:
     loadStartClips: []
     loadedClips: []
     loadFailedClip: {fileID: 0}
-  room1AnnounceClip:
+  constructionAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
     loadFailedClip: {fileID: 0}
-  room2AnnounceClip:
+  manufacturingAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  prevention_BasicAnnounceClip:
+    folderHead: 
+    loadStartClips: []
+    loadedClips: []
+    loadFailedClip: {fileID: 0}
+  medicalAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
