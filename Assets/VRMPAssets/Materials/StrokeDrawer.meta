@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scenes/Lobby.meta
 guid: 7c82babe221111642b990e49bf3f58f5
-========
-guid: 55029f91848ec954fabe9f5efb8cb721
->>>>>>>> develop/Lobby:Assets/VRMPAssets/Materials/StrokeDrawer.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

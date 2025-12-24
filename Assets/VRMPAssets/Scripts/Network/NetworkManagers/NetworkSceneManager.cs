@@ -64,7 +64,8 @@ namespace XRMultiplayer
             }
             else
             {
-                RequestLoadSceneServerRpc(name);
+                // Host only
+                // RequestLoadSceneServerRpc(name);
             }
         }
 
