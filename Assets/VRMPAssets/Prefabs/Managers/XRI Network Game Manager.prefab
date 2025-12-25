@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2130375573001811736}
   - component: {fileID: 1149903581173863409}
   - component: {fileID: 2808410049059023866}
+  - component: {fileID: 7981277363408864116}
   m_Layer: 0
   m_Name: XRI Network Game Manager
   m_TagString: Untagged
@@ -46,6 +47,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AutoConnectOnLobbyJoin: 1
+  networkSceneManager: {fileID: 0}
+  networkChatManager: {fileID: 0}
 --- !u!114 &2808410049059023866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,3 +63,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SessionType: 1
   hideEditorFromLobby: 0
+--- !u!114 &7981277363408864116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8647664954492677990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a56001be1c47c4a4f88ad772dde7b901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::DoNotDestroyObject
