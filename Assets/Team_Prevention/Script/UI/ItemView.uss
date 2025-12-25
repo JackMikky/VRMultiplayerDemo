@@ -1,0 +1,54 @@
+
+:root {
+    --item_size: 96px;
+    --padding: 1px;
+    --margin: 0px;
+    --radius: 10px;
+}
+
+.item-row {
+    /* background-color: rgba(0,0,0,1); */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: var(--padding, 1px);
+    margin: var(--margin, 0px);
+    min-height: var(--item_size, 96px);  /* デフォルト値を指定して安全化 */
+    /* min-width: auto; ← 削除 or min-width: 0; */
+    /* border-radius: var(--radius); ← 必要なら後で段階的に */
+}
+
+/* 偶数/奇数行 */
+.item-row.row-even { background-color: rgb(50,50,50); }
+.item-row.row-odd  { background-color: rgb(20,20,20); }
+
+/* 選択行 */
+.item-row.row-selected 
+{ 
+    background-color: rgb(40,120,200);
+}
+
+/* hover は filter を使わず色で調整 */
+.item-row:hover { background-color: rgb(110,110,110); }
+
+
+.item-icon {
+    flex: 0 0 33.33%;
+    height: 100%;
+    width: 100%;
+    margin:5px;
+    /* border-radius: var(--radius); */
+    background-color: rgba(0,0,0,0.25);
+    margin-right: 2%;
+}
+
+.item-title {
+    flex: 0 0 66.67%;
+    color: white;
+    font-size: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-align: left;   /* upper-left → left に変更 */
+    -unity-font-style: bold;
+}

@@ -1,0 +1,11 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Team_Prevention/Script/UI/ItemBox.uss?fileID=7433441132597879392&amp;guid=04b848211b20f9542beb964935642966&amp;type=3#ItemBox" />
+    <ui:VisualElement name="ItemBox">
+        <ui:Label text="Items" name="ItemLabel" />
+        <ui:ListView name="ItemList" selection-type="Single" fixed-item-height="100"  />
+        <ui:VisualElement name="UnderArea">
+            <ui:Button text="Remove" name="Remove" />
+            <ui:Button text="Use" name="Use" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

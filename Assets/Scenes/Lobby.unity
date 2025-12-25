@@ -470,7 +470,7 @@ PrefabInstance:
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
       propertyPath: changeRoomName
-      value: Room4
+      value: Medical
       objectReference: {fileID: 0}
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
@@ -899,7 +899,7 @@ PrefabInstance:
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
       propertyPath: changeRoomName
-      value: Room3
+      value: Prevention_Basic
       objectReference: {fileID: 0}
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
@@ -4963,7 +4963,7 @@ PrefabInstance:
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
       propertyPath: changeRoomName
-      value: Room2
+      value: Manufacturing
       objectReference: {fileID: 0}
     - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
@@ -6700,6 +6700,11 @@ PrefabInstance:
       propertyPath: mainGraphic
       value: 
       objectReference: {fileID: 1230019511}
+    - target: {fileID: 1218079587948139456, guid: 57497ba56fa8c594cb189ec856b90b98,
+        type: 3}
+      propertyPath: changeRoomName
+      value: Construction
+      objectReference: {fileID: 0}
     - target: {fileID: 2580717880283228393, guid: 57497ba56fa8c594cb189ec856b90b98,
         type: 3}
       propertyPath: m_Name

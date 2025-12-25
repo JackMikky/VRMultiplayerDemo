@@ -1,0 +1,87 @@
+:root {
+	--radius: 5%;
+	--margin: 3%;
+    --item_size: 200px;
+	--button_height: 70%;
+	--button_weight: 10%;
+	--button_radius: 40px;
+	--button_margin: 10%;
+	--item_size_max: 350;
+}
+
+#ItemLabel{
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	color: rgb(255, 255, 255);
+	-unity-text-align: upper-center;
+	-unity-font-style: bold;
+	font-size: 80%;
+	margin-top: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	padding-top: 5;
+	padding-right: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+}
+
+#ItemList{
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: var(--margin);
+	/*border-radius: var(--radius);*/
+	border-width: 0;
+	border-color: rgb(65, 60, 60);
+	background-color: rgb(135, 128, 128);
+	background-size: 100% 300%;
+	min-height: var(--item_size);
+	max-height: var(--item_size);
+}
+
+
+#ItemBox{
+	flex-grow: 1;
+	background-color: rgb(0, 0, 0);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+
+#UnderArea{
+	flex-grow: 1;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#Remove{
+	flex-grow: 1;
+	width : var(--button_weight);
+	height: var(--button_height);
+	background-color: rgb(200, 0, 0);
+	border-radius: var(--button_radius);
+	overflow: hidden;
+	margin-right: var(--button_margin);
+	margin-left: var(--button_margin);
+	-unity-text-align: upper-center;
+	-unity-font-style: bold;
+}
+
+
+#Use{
+	flex-grow: 1;
+	width : var(--button_weight);
+	height: var(--button_height);
+	background-color: rgb(0, 180, 50);
+	border-radius: var(--button_radius);
+	overflow: hidden;
+	margin-right: var(--button_margin);
+	margin-left: var(--button_margin);
+	-unity-text-align: upper-center;
+	-unity-font-style: bold;
+}

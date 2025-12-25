@@ -1,0 +1,7 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Team_Prevention/Script/UI/ItemView.uss?fileID=7433441132597879392&amp;guid=26fa6da33f143dc4ab60fa591615879a&amp;type=3#ItemView" />
+    <ui:VisualElement name="Row" class="item-row">
+        <ui:Image name="Icon" scale-mode="ScaleToFit" class="item-icon" />
+        <ui:Label name="Title" text="Content" class="item-title" />
+    </ui:VisualElement>
+</ui:UXML>

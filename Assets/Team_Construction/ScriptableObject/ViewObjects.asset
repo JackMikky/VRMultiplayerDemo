@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d71b3e156a929d143ac18f3707959983, type: 3}
+  m_Name: ViewObjects
+  m_EditorClassIdentifier: Assembly-CSharp::PXR.Construction.Runtime.ViewObjectAssets
+  assets:
+  - GameObject: {fileID: 5127594791945062240, guid: cc5690486c99139459220c25fe2a2eb3,
+      type: 3}
+  - GameObject: {fileID: 1166932263657074657, guid: 368755858be00194888a5b192a89e28c,
+      type: 3}
+  - GameObject: {fileID: 7168906373033304959, guid: d86732afdc0822b4190fca42ed1da839,
+      type: 3}
+  - GameObject: {fileID: 798284538937705621, guid: b8adcdf8591314845879d40899cd516c,
+      type: 3}
+  - GameObject: {fileID: 581311325549921110, guid: b47ed25ec51a773459f8db4dc4d85cab,
+      type: 3}

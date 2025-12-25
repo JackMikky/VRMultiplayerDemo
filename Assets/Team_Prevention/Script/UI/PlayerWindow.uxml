@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Team_Prevention/Script/UI/HPBar.uss?fileID=7433441132597879392&amp;guid=71ecfd95c2a026546bde4227beff79c8&amp;type=3#HPBar" />
+    <ui:VisualElement name="HealthBarBackground" style="flex-grow: 1; width: 550px; height: 200px; position: absolute; align-self: flex-end;">
+        <ui:VisualElement name="HPBar" class="hp-bar__component" style="display: none;">
+            <ui:VisualElement name="hp_bar" class="hp-bar">
+                <ui:VisualElement name="background" class="hp-bar__background" />
+                <ui:VisualElement name="fill" class="hp-bar__fill" />
+                <ui:Label text="USS微妙に理解した" name="Label_HP" enabled="true" selectable="true" focusable="true" class="hp-bar__label" />
+                <ui:VisualElement name="border" class="hp-bar__border" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:ProgressBar name="HPBarProgress" binding-value-path="HP" low-value="0" high-value="100" class="hp-bar__component2" />
+    </ui:VisualElement>
+</ui:UXML>

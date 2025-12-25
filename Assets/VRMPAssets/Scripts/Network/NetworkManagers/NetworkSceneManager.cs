@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -7,6 +6,16 @@ using UnityEngine.SceneManagement;
 
 namespace XRMultiplayer
 {
+    public enum SceneListEnum
+    {
+        Entrance = 0,
+        Lobby = 1,
+        Construction = 2,
+        Manufacturing = 3,
+        Prevention_Basic = 4,
+        Medical = 5,
+    }
+
     public class NetworkSceneManager : NetworkBehaviour
     {
         [System.Serializable]
@@ -20,6 +29,8 @@ namespace XRMultiplayer
         }
 
         [SerializeField] private List<SceneRoomInfo> sceneList = new List<SceneRoomInfo>();
+
+        public List<SceneRoomInfo> SceneList { get => sceneList; }
 
         [SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Single;
 

@@ -1,0 +1,20 @@
+{
+    "name": "PXR.Construction.Runtime",
+    "rootNamespace": "PXR.Construction.Runtime",
+    "references": [
+        "GUID:ca1ac4ba96d19844aaa57654ffdd4f54",
+        "GUID:fe685ec1767f73d42b749ea8045bfe43",
+        "GUID:dc960734dc080426fa6612f1c5fe95f3",
+        "GUID:1e1f826984429fe4984c920feb90cece",
+        "GUID:1491147abca9d7d4bb7105af628b223e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
