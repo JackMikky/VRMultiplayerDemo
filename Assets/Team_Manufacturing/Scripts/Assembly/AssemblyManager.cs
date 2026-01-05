@@ -77,14 +77,15 @@ namespace Manufacturing
 				return;
             }
 
-            // オーナー側で処理を実行
-            OnReleaseOwnerRpc(index);
+            // サーバー側で処理を実行
+            OnReleaseServerRpc(index);
         }
 
         /// <summary>
-        /// オブジェクトを離した時にオーナー側で呼び出されます
+        /// オブジェクトを離した時にサーバー側で呼び出されます
         /// </summary>
-        void OnReleaseOwnerRpc(int releasePartsIndex)
+        [Rpc(SendTo.Server)]
+        void OnReleaseServerRpc(int releasePartsIndex)
         {
             // 離されたオブジェクト情報を取得
             var releaseParts = AssemblyPartsList[releasePartsIndex];
@@ -140,7 +141,7 @@ namespace Manufacturing
                 releaseParts.IsKinematicNetwork.Value = false;
                 releaseParts.UseGravityNetwork.Value = true;
 
-                // オーナー以外に通知
+                // サーバー以外に通知
                 OnReleaseRpc(releasePartsIndex, -1, false, true);
 
                 return;
@@ -162,14 +163,14 @@ namespace Manufacturing
             releaseParts.ConnectGuidePartsIndex = nearPartsIndex;
             releaseParts.ConnectGuidePartsIndexNetwork.Value = nearPartsIndex;
 
-            Debug.Log($"オーナー側…isKinematic：{releaseObject.GetComponent<Rigidbody>().isKinematic}, useGravity：{releaseObject.GetComponent<Rigidbody>().useGravity}");
+            Debug.Log($"サーバー側…isKinematic：{releaseObject.GetComponent<Rigidbody>().isKinematic}, useGravity：{releaseObject.GetComponent<Rigidbody>().useGravity}");
 
-            // オーナー以外に通知
+            // サーバー以外に通知
             OnReleaseRpc(releasePartsIndex, nearPartsIndex, true, false);
         }
 
         /// <summary>
-        /// オブジェクトを離した時にオーナー以外で呼び出されます
+        /// オブジェクトを離した時にサーバー以外で呼び出されます
         /// </summary>
         [Rpc(SendTo.Everyone)]
         void OnReleaseRpc(int releasePartsIndex, int nearPartsIndex, bool isKinematic, bool useGravity)

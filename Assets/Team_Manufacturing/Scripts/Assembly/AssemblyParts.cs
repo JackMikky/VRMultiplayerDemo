@@ -47,33 +47,33 @@ namespace Manufacturing
         /// <summary>
         /// 接続先のガイド用オブジェクトのGuidePartsインデックス（ネットワーク上）
         /// </summary>
-        public NetworkVariable<int> ConnectGuidePartsIndexNetwork = new NetworkVariable<int>(-1, writePerm: NetworkVariableWritePermission.Owner);
+        public NetworkVariable<int> ConnectGuidePartsIndexNetwork = new NetworkVariable<int>(-1, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// isKinematicの状態（ネットワーク上）
         /// </summary>
-        public NetworkVariable<bool> IsKinematicNetwork = new NetworkVariable<bool>(false, writePerm: NetworkVariableWritePermission.Owner);
+        public NetworkVariable<bool> IsKinematicNetwork = new NetworkVariable<bool>(false, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// useGravityの状態（ネットワーク上）
         /// </summary>
-        public NetworkVariable<bool> UseGravityNetwork = new NetworkVariable<bool>(true, writePerm: NetworkVariableWritePermission.Owner);
+        public NetworkVariable<bool> UseGravityNetwork = new NetworkVariable<bool>(true, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// 初期座標
         /// </summary>
-        private NetworkVariable<Vector3> initialPosition = new NetworkVariable<Vector3>(Vector3.zero, writePerm: NetworkVariableWritePermission.Owner);
+        private NetworkVariable<Vector3> initialPosition = new NetworkVariable<Vector3>(Vector3.zero, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// 初期回転
         /// </summary>
-        private NetworkVariable<Vector3> initialRotation = new NetworkVariable<Vector3>(Vector3.zero, writePerm: NetworkVariableWritePermission.Owner);
+        private NetworkVariable<Vector3> initialRotation = new NetworkVariable<Vector3>(Vector3.zero, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// Unity:Awake
         /// </summary>
-        private void Awake()
-		{
+        public override void OnNetworkSpawn()
+        {
 			// インスタンスを取得
 			grabInteractable = GetComponent<XRGrabInteractable>();
 
@@ -123,14 +123,14 @@ namespace Manufacturing
 				return;
 			}
 
-            OnReleaseOwnerRpc();
+            OnReleaseServerRpc();
         }
 
         /// <summary>
-        /// オブジェクトを離した時にオーナーで呼ばれます
+        /// オブジェクトを離した時にサーバーで呼ばれます
         /// </summary>
-        [Rpc(SendTo.Owner)]
-        void OnReleaseOwnerRpc()
+        [Rpc(SendTo.Server)]
+        void OnReleaseServerRpc()
         {
             // イベント発火
             OnReleaseEvent.Invoke(this);
