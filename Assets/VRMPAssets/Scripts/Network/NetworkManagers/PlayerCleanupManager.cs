@@ -5,12 +5,12 @@ namespace XRMultiplayer
 {
     public class PlayerCleanupManager : MonoBehaviour
     {
-        void OnEnable()
+        private void Start()
         {
             NetworkManager.Singleton.OnClientDisconnectCallback += HandleDisconnect;
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (NetworkManager.Singleton)
             {
@@ -18,7 +18,7 @@ namespace XRMultiplayer
             }
         }
 
-        void HandleDisconnect(ulong clientId)
+        private void HandleDisconnect(ulong clientId)
         {
             Debug.Log($"Client {clientId} disconnected.");
 

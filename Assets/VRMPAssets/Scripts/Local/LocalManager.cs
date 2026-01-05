@@ -1,6 +1,5 @@
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
