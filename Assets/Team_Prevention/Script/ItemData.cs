@@ -55,7 +55,6 @@ namespace Assets.Team_Prevention.Script
             get { return _point; }
         }
     }
-
 }
 
 /// <summary>

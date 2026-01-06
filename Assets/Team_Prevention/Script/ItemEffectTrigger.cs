@@ -1,8 +1,8 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
-using UnityEngine.InputSystem;
 
 namespace Assets.Team_Prevention.Script
 {
@@ -39,7 +39,7 @@ namespace Assets.Team_Prevention.Script
         private float _lastTriggerTime = 0f;
         private InputAction _triggerAction;
 
-        void Awake()
+        private void Awake()
         {
             // XRGrabInteractable を取得
             _grabInteractable = GetComponent<XRGrabInteractable>();
@@ -57,7 +57,7 @@ namespace Assets.Team_Prevention.Script
             }
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             if (_grabInteractable != null)
             {
@@ -76,7 +76,7 @@ namespace Assets.Team_Prevention.Script
             }
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (_grabInteractable != null)
             {
@@ -130,7 +130,7 @@ namespace Assets.Team_Prevention.Script
             }
         }
 
-        void Update()
+        private void Update()
         {
             // オブジェクトが掴まれていない場合は処理しない
             if (_currentInteractor == null)
@@ -224,7 +224,7 @@ namespace Assets.Team_Prevention.Script
             Debug.Log($"[ItemEffectTrigger] エフェクト再生: {gameObject.name}", this);
         }
 
-        void OnValidate()
+        private void OnValidate()
         {
             // Inspector での設定ミスを防ぐ
             _triggerThreshold = Mathf.Clamp01(_triggerThreshold);

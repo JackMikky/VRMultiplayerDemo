@@ -1,12 +1,14 @@
+using System.Collections.Generic; // Listを使用するため
 using TMPro;
 using UnityEngine;
-using System.Collections.Generic; // Listを使用するため
 
 public class UseStageManager : MonoBehaviour
 {
     #region <設定可能パラメータ>
+
     [Tooltip("最大体力")]
     public float maxHealth;
+
     #endregion <設定可能パラメータ>
 
     [Tooltip("体力表示Text")]
@@ -16,10 +18,12 @@ public class UseStageManager : MonoBehaviour
     public GameObject sceneObject;
 
     #region <変数>
+
     public float currentHealth;
 
     // 処理済みアイテムを記録するリスト
     public HashSet<GameObject> processedItems;
+
     #endregion <変数>
 
     private void Start()

@@ -1,12 +1,11 @@
 ﻿#if UNITY_EDITOR
-using System.IO;
+
+using Assets.Team_Prevention.Script;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
-using Assets.Team_Prevention.Script;
 
 /// <summary>
 /// ヒエラルキーの "Items" 配下の子オブジェクトに対して以下を行うエディタユーティリティ:
@@ -147,4 +146,5 @@ public static class AddInteractableAndProperty
         Debug.Log($"[AddInteractableAndProperty] 完了: ItemProperty追加={addedItemProperty}, XRGrabInteractable追加={addedInteractable}, ItemEffectTrigger追加={addedEffectTrigger}, Rigidbody追加={addedRigidbody}, Collider追加={addedCollider}");
     }
 }
+
 #endif

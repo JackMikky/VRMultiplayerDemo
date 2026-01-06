@@ -1,9 +1,8 @@
 using TMPro;
 using UnityEngine;
 
-public class SceneProperty:MonoBehaviour
+public class SceneProperty : MonoBehaviour
 {
-
     [Tooltip("ó‹µ•\¦Text")]
     public TMP_Text situationText;
 
@@ -17,7 +16,6 @@ public class SceneProperty:MonoBehaviour
         Escape // ”ğ“ï
     }
 
-
     [Tooltip("Scene‘®«")]
     public SceneAttribute sceneAttribute;
 
@@ -25,5 +23,4 @@ public class SceneProperty:MonoBehaviour
     {
         situationText.text = sceneAttribute.ToString();
     }
-
 }

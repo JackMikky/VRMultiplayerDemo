@@ -6,7 +6,7 @@ public class SceneManager : MonoBehaviour
     public GameObject hpBarObject; // 非アクティブ化する対象のGameObjectをインスペクターで設定
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         //if (hpBarObject != null)
         //{
@@ -19,8 +19,7 @@ public class SceneManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
     }
 }

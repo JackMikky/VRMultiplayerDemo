@@ -1,13 +1,8 @@
 ﻿using Assets.Team_Prevention.Script.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 namespace Assets.Team_Prevention.Script
 {
@@ -27,6 +22,7 @@ namespace Assets.Team_Prevention.Script
         // フェーズ判定用の参照
         [Header("スポット判定用")]
         public GameObject Phase1Object;
+
         public GameObject Phase2Object;
         public GameObject Phase3Object;
 
@@ -49,7 +45,6 @@ namespace Assets.Team_Prevention.Script
         /// </summary>
         public List<ItemInfo> ItemsList = new List<ItemInfo>(5);
 
-
         /// <summary>
         /// HP通知(CurrentHP, MaxHP)
         /// </summary>
@@ -59,7 +54,6 @@ namespace Assets.Team_Prevention.Script
         /// スコア通知(Score)
         /// </summary>
         public event System.Action<float> OnScoreChanged;
-
 
         public event System.Action<float> OnItemUsed;
 
@@ -86,6 +80,7 @@ namespace Assets.Team_Prevention.Script
 
         // 追加: スポット到達状態のトラッキング
         private bool visitedSpot1 = false;
+
         private bool visitedSpot2 = false;
         private bool visitedSpot3 = false;
 
@@ -95,6 +90,7 @@ namespace Assets.Team_Prevention.Script
 
         // 追加: 再生するサウンド
         [SerializeField] private AudioSource audioSource;           // 再生に使う AudioSource（任意のGameObjectにアタッチ）
+
         [SerializeField] private AudioSource loopAudioSource;       // ループ用の別のAudioSource
         [SerializeField] private AudioClip correctClip;             // 正解時のクリップ
         [SerializeField] private AudioClip wrongClip;               // 誤り時のクリップ
@@ -119,7 +115,7 @@ namespace Assets.Team_Prevention.Script
                 {
                     spot = 1;
                     visitedSpot1 = true;
-                }            
+                }
             }
             bool inPhase2 = false;
             if (Phase2Object != null)
@@ -173,6 +169,7 @@ namespace Assets.Team_Prevention.Script
                 allSpotsCompletedObject.SetActive(false);
             }
         }
+
         // -----------------------------------------------
 
         /// <summary>
@@ -184,7 +181,6 @@ namespace Assets.Team_Prevention.Script
             OnHPChanged?.Invoke(CurrentHP, MaxHP);
 
             healthText.text = CurrentHP.ToString();
-
         }
 
         /// <summary>
@@ -236,7 +232,6 @@ namespace Assets.Team_Prevention.Script
 
             OnScoreChanged?.Invoke(Score);
         }
-
 
         /// <summary>
         /// アイテム取得（ListViewで選択されたアイテムデータを所持に追加）
@@ -300,7 +295,6 @@ namespace Assets.Team_Prevention.Script
             return false;
         }
 
-
         /// <summary>
         /// アイテム使用（正しいスポットなら加点、違えば減点）
         /// </summary>
@@ -351,7 +345,5 @@ namespace Assets.Team_Prevention.Script
             Debug.Log($"Used item: {data.Name}, spot={currentSpotId}, point change={applied}");
             return true;
         }
-
     }
 }
-
