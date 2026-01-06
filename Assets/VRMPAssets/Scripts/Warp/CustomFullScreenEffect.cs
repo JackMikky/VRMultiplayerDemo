@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -16,9 +14,9 @@ public class CustomFullScreenEffect : ScriptableRendererFeature
         private RTHandle source;
         private RTHandle destination;
 
-        RTHandle m_TemporaryColorTexture;
-        RTHandle m_DestinationTexture;
-        string m_ProfilerTag;
+        private RTHandle m_TemporaryColorTexture;
+        private RTHandle m_DestinationTexture;
+        private string m_ProfilerTag;
 
         private ScriptableRenderer renderer;
 
@@ -176,7 +174,6 @@ public class CustomFullScreenEffect : ScriptableRendererFeature
         TextureID,
         RenderTextureObject
     }
-
 
     public BlitSettings settings = new BlitSettings();
     public BlitPass blitPass;

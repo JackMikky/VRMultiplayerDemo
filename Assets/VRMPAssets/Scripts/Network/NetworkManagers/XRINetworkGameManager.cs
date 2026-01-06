@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Services.Multiplayer;
 using Unity.XR.CoreUtils.Bindings.Variables;
 using UnityEngine;
-using UnityEditor;
-using Unity.Services.Multiplayer;
-using Unity.Netcode.Transports.UTP;
-using System.Net.Sockets;
-using System.Net;
 
 #if UNITY_EDITOR && HAS_MPPM
-using Unity.Multiplayer.Playmode;
 #endif
 
 namespace XRMultiplayer
@@ -39,6 +37,7 @@ namespace XRMultiplayer
             //Authenticating,
             //Authenticated,
             Connecting,
+
             Connected
         }
 
@@ -52,7 +51,7 @@ namespace XRMultiplayer
         /// </summary>
         public static XRINetworkGameManager Instance => s_Instance;
 
-        static XRINetworkGameManager s_Instance;
+        private static XRINetworkGameManager s_Instance;
 
         /// <summary>
         /// OwnerClientId that gets set for the local player when connecting to a game.
@@ -97,7 +96,7 @@ namespace XRMultiplayer
             get => m_Connected;
         }
 
-        static BindableVariable<bool> m_Connected = new BindableVariable<bool>(false);
+        private static BindableVariable<bool> m_Connected = new BindableVariable<bool>(false);
 
         /// <summary>
         /// Bindable Variable that gets updated throughout the authentication and connection process.
@@ -108,7 +107,7 @@ namespace XRMultiplayer
             get => m_ConnectionState;
         }
 
-        static BindableEnum<ConnectionState>
+        private static BindableEnum<ConnectionState>
             m_ConnectionState = new BindableEnum<ConnectionState>(ConnectionState.None);
 
         /// <summary>
@@ -155,7 +154,7 @@ namespace XRMultiplayer
             get => m_AutoConnectOnLobbyJoin;
         }
 
-        [SerializeField] bool m_AutoConnectOnLobbyJoin = true;
+        [SerializeField] private bool m_AutoConnectOnLobbyJoin = true;
 
         ///// <summary>
         ///// Flag for updating positional voice chat.
@@ -192,7 +191,7 @@ namespace XRMultiplayer
         /// </summary>
         public SessionManager sessionManager => m_SessionManager;
 
-        SessionManager m_SessionManager;
+        private SessionManager m_SessionManager;
 
         [SerializeField] public NetworkSceneManager networkSceneManager;
 
@@ -203,14 +202,14 @@ namespace XRMultiplayer
         /// Useful for getting specific players.
         /// See <see cref="TryGetPlayerByID"/>
         /// </summary>
-        readonly List<ulong> m_CurrentPlayerIDs = new();
+        private readonly List<ulong> m_CurrentPlayerIDs = new();
 
         /// <summary>
         /// Flagged whenever the application is in the process of shutting down.
         /// </summary>
-        bool m_IsShuttingDown = false;
+        private bool m_IsShuttingDown = false;
 
-        const string k_DebugPrepend = "<color=#FAC00C>[Network Game Manager]</color> ";
+        private const string k_DebugPrepend = "<color=#FAC00C>[Network Game Manager]</color> ";
 
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
@@ -263,7 +262,7 @@ namespace XRMultiplayer
             NetworkManager.Singleton.OnSessionOwnerPromoted += SessionOwnerPromoted;
         }
 
-        void SessionOwnerPromoted(ulong sessionOwnerId)
+        private void SessionOwnerPromoted(ulong sessionOwnerId)
         {
             OnSessionOwnerPromoted?.Invoke(sessionOwnerId);
             if (TryGetPlayerByID(sessionOwnerId, out XRINetworkPlayer player))
@@ -288,7 +287,7 @@ namespace XRMultiplayer
             ShutDown();
         }
 
-        async void ShutDown()
+        private async void ShutDown()
         {
             if (m_IsShuttingDown) return;
             m_IsShuttingDown = true;
@@ -376,7 +375,7 @@ namespace XRMultiplayer
         }
 
         [ContextMenu("Show All NetworkClients")]
-        void ShowAllNetworkClients()
+        private void ShowAllNetworkClients()
         {
             foreach (var client in NetworkManager.Singleton.ConnectedClients)
             {
@@ -638,7 +637,6 @@ namespace XRMultiplayer
         {
             NetworkManager.Singleton?.Shutdown();
         }
-
 
         /// <summary>
         /// Gets the local IP address.

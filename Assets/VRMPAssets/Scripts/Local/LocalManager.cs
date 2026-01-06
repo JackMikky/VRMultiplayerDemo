@@ -1,9 +1,5 @@
-using Unity.Netcode;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using XRMultiplayer;
 
 public class LocalManager : MonoBehaviour
