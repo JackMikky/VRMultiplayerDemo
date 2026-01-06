@@ -6021,7 +6021,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8534e17a0f90604c9afd4f5c73d829f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Id: 3c1d9538-a5d2-4c72-84c8-b2061da39b61
 --- !u!1001 &1688267071
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6508,10 +6507,24 @@ PrefabInstance:
       propertyPath: m_Name
       value: XR Device Simulator
       objectReference: {fileID: 0}
+    - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8477477680821523469, guid: 18ddb545287c546e19cc77dc9fbb2189,
+        type: 3}
+      propertyPath: m_RemoveOtherHMDDevices
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
+        type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 2067810484}
     - targetCorrespondingSourceObject: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       insertIndex: -1
@@ -6535,6 +6548,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a56001be1c47c4a4f88ad772dde7b901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &2067810484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067810478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b33bcb130c5cfcb4bba8902195b638a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::EditorComponent
+  deviceTestMode: 1
 --- !u!1 &2097712816
 GameObject:
   m_ObjectHideFlags: 0
