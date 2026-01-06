@@ -24,8 +24,6 @@ EditorBuildSettings:
     path: Assets/Team_Prevention/Scene/Prevention_Basic.unity
     guid: 26edbb604409bb046a9fc6b6dc6fbe4a
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f,
-      type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 33491290b38a6094fbf61d3c24a308a5,
       type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e3aee76b9372917449aef639e2f74814,
