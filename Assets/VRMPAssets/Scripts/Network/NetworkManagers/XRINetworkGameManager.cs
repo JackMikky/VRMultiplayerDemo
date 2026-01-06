@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Services.Multiplayer;
@@ -602,6 +603,21 @@ namespace XRMultiplayer
             Utils.Log($"{k_DebugPrepend}Disconnected from Game.");
         }
 
+        [SerializeField] private TMP_Text debugText;
+
+        public string GetLocalIPv4()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new System.Exception("No network adapters with an IPv4 address in the system!");
+        }
+
         /// <summary>
         /// Hosts a local connection.
         /// This will use the local IP address of the device to connect.
@@ -609,10 +625,10 @@ namespace XRMultiplayer
         public virtual bool HostLocalConnection()
         {
             string localIP = GetLocalIPAddress();
+            debugText.text = $"Hosting on IP: {GetLocalIPv4()}";
+            // var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
+            // transport.ConnectionData.Address = localIP;
 
-            var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
-
-            transport.ConnectionData.Address = localIP;
             ConnectedRoomName.Value = "Local Room";
             ConnectedRoomCode = localIP;
             return NetworkManager.Singleton.StartHost();
@@ -645,25 +661,71 @@ namespace XRMultiplayer
         /// <remarks>This may not work in all environments, especially if the device has multiple network interfaces.</remarks>
         public virtual string GetLocalIPAddress()
         {
-            string localIP = "127.0.0.1";
             try
             {
-                string host = "8.8.8.8"; // Google's public DNS server, used to determine the local IP address.
-                int port = 65530; // Arbitrary port number, not used for actual communication.
-
-                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
                 {
-                    socket.Connect(host, port);
-                    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
-                    localIP = endPoint.Address.ToString();
+                    socket.Connect("8.8.8.8", 65530);
+                    if (socket.LocalEndPoint is IPEndPoint ep)
+                        return ep.Address.ToString();
                 }
             }
             catch (Exception e)
             {
-                Utils.Log($"{k_DebugPrepend}Failed to get local IP: {e.Message}", 1);
+                Utils.Log($"{k_DebugPrepend}Fallback to NIC enumeration. UDP probe failed: {e.Message}", 1);
             }
 
-            return localIP;
+            try
+            {
+                foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (ni.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)
+                        continue;
+                    var type = ni.NetworkInterfaceType;
+                    if (type == System.Net.NetworkInformation.NetworkInterfaceType.Loopback ||
+                        type == System.Net.NetworkInformation.NetworkInterfaceType.Tunnel)
+                        continue;
+
+                    bool prefer = type == System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211 ||
+                                  ni.Name.IndexOf("wlan", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                  ni.Description.IndexOf("wifi", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    var props = ni.GetIPProperties();
+                    foreach (var ua in props.UnicastAddresses)
+                    {
+                        if (ua.Address.AddressFamily == AddressFamily.InterNetwork &&
+                            !IPAddress.IsLoopback(ua.Address))
+                        {
+                            if (prefer) return ua.Address.ToString();
+                        }
+                    }
+                }
+
+                foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (ni.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)
+                        continue;
+                    if (ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Loopback ||
+                        ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Tunnel)
+                        continue;
+
+                    var props = ni.GetIPProperties();
+                    foreach (var ua in props.UnicastAddresses)
+                    {
+                        if (ua.Address.AddressFamily == AddressFamily.InterNetwork &&
+                            !IPAddress.IsLoopback(ua.Address))
+                        {
+                            return ua.Address.ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception e2)
+            {
+                Utils.Log($"{k_DebugPrepend}Failed to enumerate NICs: {e2.Message}", 1);
+            }
+
+            return "127.0.0.1";
         }
     }
 }
