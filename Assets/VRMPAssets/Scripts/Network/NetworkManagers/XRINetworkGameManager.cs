@@ -626,8 +626,8 @@ namespace XRMultiplayer
         {
             string localIP = GetLocalIPAddress();
             hostIP.text = localIP;
-            // var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
-            // transport.ConnectionData.Address = localIP;
+            var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
+            transport.ConnectionData.Address = localIP;
 
             ConnectedRoomName.Value = "Local Room";
             ConnectedRoomCode = localIP;

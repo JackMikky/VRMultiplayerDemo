@@ -5943,7 +5943,12 @@ PrefabInstance:
     - target: {fileID: 3777163311441436064, guid: 8605187a018b7614292eb14329a78d70,
         type: 3}
       propertyPath: ConnectionData.Address
-      value: 192.168.1.5
+      value: 127.0.0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3777163311441436064, guid: 8605187a018b7614292eb14329a78d70,
+        type: 3}
+      propertyPath: ConnectionData.ServerListenAddress
+      value: 0.0.0.0
       objectReference: {fileID: 0}
     - target: {fileID: 4145292139985048678, guid: 8605187a018b7614292eb14329a78d70,
         type: 3}
