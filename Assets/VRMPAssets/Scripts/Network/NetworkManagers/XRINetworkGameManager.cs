@@ -603,7 +603,7 @@ namespace XRMultiplayer
             Utils.Log($"{k_DebugPrepend}Disconnected from Game.");
         }
 
-        [SerializeField] private TMP_Text debugText;
+        [SerializeField] private TMP_Text hostIP;
 
         public string GetLocalIPv4()
         {
@@ -625,7 +625,7 @@ namespace XRMultiplayer
         public virtual bool HostLocalConnection()
         {
             string localIP = GetLocalIPAddress();
-            debugText.text = $"Hosting on IP: {GetLocalIPv4()}";
+            hostIP.text = localIP;
             // var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
             // transport.ConnectionData.Address = localIP;
 
