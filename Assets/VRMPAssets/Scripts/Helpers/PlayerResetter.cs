@@ -38,7 +38,6 @@ namespace XRMultiplayer
             }
         }
 
-        // テスト用のコンテキストメニュー
         [ContextMenu("Reset Player Position Now")]
         private void ResetPlayerPositionNow()
         {
