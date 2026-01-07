@@ -7,8 +7,9 @@ public class EditorComponent : MonoBehaviour
     private void Awake()
     {
 #if UNITY_EDITOR
-        this.gameObject.SetActive(true);
-#endif
         this.gameObject.SetActive(!deviceTestMode);
+#else
+        this.gameObject.SetActive(false);
+#endif
     }
 }

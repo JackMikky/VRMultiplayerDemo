@@ -5,7 +5,6 @@ using TMPro;
 using Unity.Services.Multiplayer;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
-using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 
 namespace XRMultiplayer
