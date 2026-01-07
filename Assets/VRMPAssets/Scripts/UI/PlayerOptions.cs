@@ -16,47 +16,50 @@ namespace XRMultiplayer
     [DefaultExecutionOrder(100)]
     public class PlayerOptions : MonoBehaviour
     {
-        [SerializeField] InputActionReference m_ToggleMenuAction;
-        [SerializeField] AudioMixer m_Mixer;
+        [SerializeField] private InputActionReference m_ToggleMenuAction;
+        [SerializeField] private AudioMixer m_Mixer;
 
-        [Header("Panels")] [SerializeField] GameObject m_HostRoomPanel;
-        [SerializeField] GameObject m_ClientRoomPanel;
-        [SerializeField] GameObject[] m_OfflineWarningPanels;
-        [SerializeField] GameObject[] m_OnlinePanels;
-        [SerializeField] GameObject[] m_Panels;
-        [SerializeField] Toggle[] m_PanelToggles;
+        [Header("Panels")][SerializeField] private GameObject m_HostRoomPanel;
+        [SerializeField] private GameObject m_ClientRoomPanel;
+        [SerializeField] private GameObject[] m_OfflineWarningPanels;
+        [SerializeField] private GameObject[] m_OnlinePanels;
+        [SerializeField] private GameObject[] m_Panels;
+        [SerializeField] private Toggle[] m_PanelToggles;
 
-        [Header("Text Components")] [SerializeField]
-        TMP_Text m_SnapTurnText;
+        [Header("Text Components")]
+        [SerializeField]
+        private TMP_Text m_SnapTurnText;
 
-        [SerializeField] TMP_Text m_RoomCodeText;
-        [SerializeField] TMP_Text m_TimeText;
-        [SerializeField] TMP_Text[] m_RoomNameText;
-        [SerializeField] TMP_InputField m_RoomNameInputField;
-        [SerializeField] TMP_Text[] m_PlayerCountText;
+        [SerializeField] private TMP_Text m_RoomCodeText;
+        [SerializeField] private TMP_Text m_TimeText;
+        [SerializeField] private TMP_Text[] m_RoomNameText;
+        [SerializeField] private TMP_InputField m_RoomNameInputField;
+        [SerializeField] private TMP_Text[] m_PlayerCountText;
 
-        [Header("Voice Chat")] [SerializeField]
-        Button m_MicPermsButton;
+        [Header("Voice Chat")]
+        [SerializeField]
+        private Button m_MicPermsButton;
 
-        [SerializeField] Slider m_InputVolumeSlider;
-        [SerializeField] Slider m_OutputVolumeSlider;
-        [SerializeField] Image m_LocalPlayerAudioVolume;
-        [SerializeField] Image m_MutedIcon;
-        [SerializeField] Image m_MicOnIcon;
-        [SerializeField] TMP_Text m_VoiceChatStatus;
+        [SerializeField] private Slider m_InputVolumeSlider;
+        [SerializeField] private Slider m_OutputVolumeSlider;
+        [SerializeField] private Image m_LocalPlayerAudioVolume;
+        [SerializeField] private Image m_MutedIcon;
+        [SerializeField] private Image m_MicOnIcon;
+        [SerializeField] private TMP_Text m_VoiceChatStatus;
 
-        [Header("Player Options")] [SerializeField]
-        Vector2 m_MinMaxMoveSpeed = new Vector2(2.0f, 10.0f);
+        [Header("Player Options")]
+        [SerializeField]
+        private Vector2 m_MinMaxMoveSpeed = new Vector2(2.0f, 10.0f);
 
-        [SerializeField] Vector2 m_MinMaxTurnAmount = new Vector2(15.0f, 180.0f);
-        [SerializeField] float m_SnapTurnUpdateAmount = 15.0f;
+        [SerializeField] private Vector2 m_MinMaxTurnAmount = new Vector2(15.0f, 180.0f);
+        [SerializeField] private float m_SnapTurnUpdateAmount = 15.0f;
 
-        VoiceChatManager m_VoiceChatManager;
-        DynamicMoveProvider m_MoveProvider;
-        SnapTurnProvider m_TurnProvider;
-        UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort.TunnelingVignetteController m_TunnelingVignetteController;
+        private VoiceChatManager m_VoiceChatManager;
+        private DynamicMoveProvider m_MoveProvider;
+        private SnapTurnProvider m_TurnProvider;
+        private UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort.TunnelingVignetteController m_TunnelingVignetteController;
 
-        PermissionCallbacks permCallbacks;
+        private PermissionCallbacks permCallbacks;
 
         private void Awake()
         {
@@ -109,7 +112,7 @@ namespace XRMultiplayer
             Utils.Log($"{permissionName} PermissionCallbacks_PermissionDenied");
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             TogglePanel(0);
 
@@ -128,7 +131,8 @@ namespace XRMultiplayer
             XRINetworkGameManager.Connected.Unsubscribe(ConnectOnline);
             XRINetworkGameManager.ConnectedRoomName.Unsubscribe(UpdateRoomName);
             XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
-            m_VoiceChatManager.selfMuted.Unsubscribe(MutedChanged);
+
+            m_VoiceChatManager?.selfMuted.Unsubscribe(MutedChanged);
 
             m_VoiceChatManager.connectionStatus.Unsubscribe(UpdateVoiceChatStatus);
             m_InputVolumeSlider.onValueChanged.RemoveListener(SetInputVolume);
@@ -148,7 +152,7 @@ namespace XRMultiplayer
             //}
         }
 
-        void ConnectOnline(bool connected)
+        private void ConnectOnline(bool connected)
         {
             foreach (var go in m_OfflineWarningPanels)
             {
@@ -162,8 +166,8 @@ namespace XRMultiplayer
 
             if (connected)
             {
-                m_HostRoomPanel.SetActive(XRINetworkPlayer.LocalPlayer.IsSessionOwner);
-                m_ClientRoomPanel.SetActive(!XRINetworkPlayer.LocalPlayer.IsSessionOwner);
+                m_HostRoomPanel.SetActive(XRINetworkPlayer.LocalPlayer.IsHost);
+                m_ClientRoomPanel.SetActive(!XRINetworkPlayer.LocalPlayer.IsHost);
                 UpdateRoomName(XRINetworkGameManager.ConnectedRoomName.Value);
                 m_MutedIcon.enabled = false;
                 m_MicOnIcon.enabled = true;
@@ -227,7 +231,7 @@ namespace XRMultiplayer
 #endif
         }
 
-        void UpdateVoiceChatStatus(string statusMessage)
+        private void UpdateVoiceChatStatus(string statusMessage)
         {
             m_VoiceChatStatus.text = $"<b>Voice Chat:</b> {statusMessage}";
         }
@@ -254,7 +258,7 @@ namespace XRMultiplayer
             m_VoiceChatManager.ToggleSelfMute();
         }
 
-        void MutedChanged(bool muted)
+        private void MutedChanged(bool muted)
         {
             m_MutedIcon.enabled = muted;
             m_MicOnIcon.enabled = !muted;
@@ -273,7 +277,7 @@ namespace XRMultiplayer
             XRINetworkGameManager.Instance.sessionManager.UpdateLobbyName(text);
         }
 
-        void UpdateRoomName(string newValue)
+        private void UpdateRoomName(string newValue)
         {
             m_RoomCodeText.text = $"Room Code: {XRINetworkGameManager.ConnectedRoomCode}";
             foreach (var t in m_RoomNameText)
