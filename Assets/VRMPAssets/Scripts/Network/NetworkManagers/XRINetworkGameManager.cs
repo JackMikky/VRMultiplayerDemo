@@ -212,6 +212,12 @@ namespace XRMultiplayer
 
         private const string k_DebugPrepend = "<color=#FAC00C>[Network Game Manager]</color> ";
 
+        [SerializeField] private TMP_Text hostIP;
+
+        [SerializeField] private TMP_Text testText;
+
+        [SerializeField] private bool isLocalTest = true;
+
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
         /// </summary>
@@ -603,8 +609,6 @@ namespace XRMultiplayer
             Utils.Log($"{k_DebugPrepend}Disconnected from Game.");
         }
 
-        [SerializeField] private TMP_Text hostIP;
-
         public string GetLocalIPv4()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -628,6 +632,7 @@ namespace XRMultiplayer
             hostIP.text = localIP;
             var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
             transport.ConnectionData.Address = localIP;
+            testText.text = transport.ConnectionData.ServerListenAddress;
 
             ConnectedRoomName.Value = "Local Room";
             ConnectedRoomCode = localIP;
