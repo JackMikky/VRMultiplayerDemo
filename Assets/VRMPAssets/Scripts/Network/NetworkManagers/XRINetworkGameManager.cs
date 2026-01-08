@@ -216,7 +216,7 @@ namespace XRMultiplayer
 
         [SerializeField] private TMP_Text testText;
 
-        [SerializeField] private bool isLocalTest = true;
+        public bool isLocalTest = true;
 
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
@@ -609,30 +609,29 @@ namespace XRMultiplayer
             Utils.Log($"{k_DebugPrepend}Disconnected from Game.");
         }
 
-        public string GetLocalIPv4()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            throw new System.Exception("No network adapters with an IPv4 address in the system!");
-        }
-
         /// <summary>
         /// Hosts a local connection.
         /// This will use the local IP address of the device to connect.
         /// </summary>
-        public virtual bool HostLocalConnection()
+        public virtual bool HostConnection()
         {
             string localIP = GetLocalIPAddress();
             hostIP.text = localIP;
             var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
-            transport.ConnectionData.Address = localIP;
-            testText.text = transport.ConnectionData.ServerListenAddress;
+            if (transport == null)
+            {
+                Utils.Log($"{k_DebugPrepend}No UnityTransport found on NetworkManager!", 2);
+                return false;
+            }
+
+            var port = transport.ConnectionData.Port;
+            transport.SetConnectionData(
+                ipv4Address: "127.0.0.1",
+                port: port,
+                listenAddress: "0.0.0.0"
+            );
+
+            testText.text = $"Host ip:{localIP} ServerListenAddress:{transport.ConnectionData.ServerListenAddress}";
 
             ConnectedRoomName.Value = "Local Room";
             ConnectedRoomCode = localIP;

@@ -326,7 +326,7 @@ namespace XRMultiplayer
 
         public void HostLocalRoom(UnityAction onNetworkConnected)
         {
-            if (XRINetworkGameManager.Instance.HostLocalConnection())
+            if (XRINetworkGameManager.Instance.HostConnection())
             {
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionSuccessPanel);
                 onNetworkConnected.Invoke();
@@ -405,6 +405,9 @@ namespace XRMultiplayer
                     $"Multiple IP addresses found for {address}. Using the first one: {hostEntry.AddressList[0]}");
 
             var ipAddress = hostEntry.AddressList[0].ToString();
+#if UNITY_EDITOR
+            if (XRINetworkGameManager.Instance.isLocalTest) ipAddress = address;
+#endif
             var transport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
             transport.SetConnectionData(ipAddress,
                 transport.ConnectionData.Port); // Assuming default port is 7777, change as needed

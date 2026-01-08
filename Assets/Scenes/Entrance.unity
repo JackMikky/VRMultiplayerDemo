@@ -6525,6 +6525,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1149903581173863409, guid: 0267a1d338db2bf4c9625e450bbaaad0,
         type: 3}
+      propertyPath: isLocalTest
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1149903581173863409, guid: 0267a1d338db2bf4c9625e450bbaaad0,
+        type: 3}
       propertyPath: networkController
       value: 
       objectReference: {fileID: 0}
