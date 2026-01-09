@@ -247,6 +247,17 @@ namespace XRMultiplayer
 
             m_Connected.Value = false;
 
+#if UNITY_EDITOR
+            if (isLocalTest)
+            {
+                testText.gameObject.SetActive(true);
+            }
+            else
+            {
+                testText.gameObject.SetActive(false);
+            }
+#endif
+
             //if (CurrentSessionType == SessionType.DistributedAuthority)
             //{
             //    bool signedIn = await m_AuthenticationManager.Authenticate();
@@ -630,9 +641,12 @@ namespace XRMultiplayer
                 port: port,
                 listenAddress: "0.0.0.0"
             );
-
-            testText.text = $"Host ip:{localIP} ServerListenAddress:{transport.ConnectionData.ServerListenAddress}";
-
+#if UNITY_EDITOR
+            if (isLocalTest)
+            {
+                testText.text = $"Host ip:{localIP} ServerListenAddress:{transport.ConnectionData.ServerListenAddress}";
+            }
+#endif
             ConnectedRoomName.Value = "Local Room";
             ConnectedRoomCode = localIP;
             return NetworkManager.Singleton.StartHost();

@@ -43,6 +43,8 @@ namespace VRMPAssets.Scripts.UI
                         pos.z = originalZPosition;
                         buttonImage.transform.localPosition = pos;
                         this.subDialog.SetActive(false);
+                        SetStandbyObjects(false);
+                        HideAllStandbyObjectClientRpc();
                     }
                 }
             });
@@ -172,6 +174,12 @@ namespace VRMPAssets.Scripts.UI
         {
             SetStandbyObjects(false);
             this.currentSubGraphicSetting.standbyObject.SetActive(true);
+        }
+
+        [ClientRpc]
+        private void HideAllStandbyObjectClientRpc()
+        {
+            SetStandbyObjects(false);
         }
 
         private void SetStandbyObjects(bool value)
