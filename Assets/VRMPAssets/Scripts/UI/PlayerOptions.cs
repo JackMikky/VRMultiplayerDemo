@@ -134,7 +134,7 @@ namespace XRMultiplayer
 
             m_VoiceChatManager?.selfMuted.Unsubscribe(MutedChanged);
 
-            m_VoiceChatManager.connectionStatus.Unsubscribe(UpdateVoiceChatStatus);
+            m_VoiceChatManager?.connectionStatus.Unsubscribe(UpdateVoiceChatStatus);
             m_InputVolumeSlider.onValueChanged.RemoveListener(SetInputVolume);
             m_OutputVolumeSlider.onValueChanged.RemoveListener(SetOutputVolume);
         }

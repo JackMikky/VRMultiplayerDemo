@@ -14,7 +14,9 @@ namespace VRMPAssets.Scripts.UI
         [SerializeField] private Button mainGraphicButton;
 
         [Header("SubGraphics")]
-        [SerializeField] private List<SceneChangeSubGraphic> subGraphics;
+        [SerializeField] private List<SubGraphicSetting> subGraphics;
+
+        private SubGraphicSetting currentSubGraphicSetting;
 
         [Header("SubDialog")]
         [SerializeField] private GameObject subDialog;
@@ -41,6 +43,8 @@ namespace VRMPAssets.Scripts.UI
                         pos.z = originalZPosition;
                         buttonImage.transform.localPosition = pos;
                         this.subDialog.SetActive(false);
+                        SetStandbyObjects(false);
+                        HideAllStandbyObjectClientRpc();
                     }
                 }
             });
@@ -51,10 +55,15 @@ namespace VRMPAssets.Scripts.UI
                     if (IsHost)
                     {
                         this.subDialog.SetActive(true);
+                        ShowStandbyObjectClientRpc();
                     }
                 }
             });
             this.subDialog.SetActive(false);
+            foreach (var item in subGraphics)
+            {
+                item.standbyObject.SetActive(false);
+            }
         }
 
         private void Start()
@@ -72,11 +81,12 @@ namespace VRMPAssets.Scripts.UI
         private void SelectDefaultSubGraphic()
         {
             int index = 0;
-            SceneChangeSubGraphic defaultSubGraphic = subGraphics[index];
+            SceneChangeSubGraphic defaultSubGraphic = subGraphics[index].graphic;
 
             if (defaultSubGraphic != null)
             {
                 defaultSubGraphic.SetDefaultGraphic();
+                currentSubGraphicSetting = subGraphics[index];
                 Debug.Log($"SubGraphic selected: {index}");
             }
         }
@@ -84,11 +94,12 @@ namespace VRMPAssets.Scripts.UI
         private void SelectRandomSubGraphic()
         {
             int randomIndex = Random.Range(0, subGraphics.Count);
-            SceneChangeSubGraphic randomSubGraphic = subGraphics[randomIndex];
+            SceneChangeSubGraphic randomSubGraphic = subGraphics[randomIndex].graphic;
 
             if (randomSubGraphic != null)
             {
                 randomSubGraphic.SetDefaultGraphic();
+                currentSubGraphicSetting = subGraphics[randomIndex];
                 Debug.Log($"Random SubGraphic selected: {randomIndex}");
             }
         }
@@ -101,9 +112,23 @@ namespace VRMPAssets.Scripts.UI
             {
                 if (IsHost)
                 {
-                    int subGraphicIndex = subGraphics != null ? subGraphics.IndexOf(subGraphic) : -1;
+                    int subGraphicIndex = -1;
+                    if (subGraphics != null)
+                    {
+                        for (int i = 0; i < subGraphics.Count; i++)
+                        {
+                            if (subGraphics[i].graphic == subGraphic)
+                            {
+                                subGraphicIndex = i;
+                                break;
+                            }
+                        }
+                    }
                     if (subGraphicIndex >= 0)
                     {
+                        this.subDialog.SetActive(false);
+                        SetStandbyObjects(false);
+                        currentSubGraphicSetting = subGraphics[subGraphicIndex];
                         UpdateMainGraphicClientRpc(subGraphicIndex, roomName);
                     }
                 }
@@ -122,7 +147,7 @@ namespace VRMPAssets.Scripts.UI
                     mainGraphicButton.interactable = false;
                     foreach (var subGraphic in subGraphics)
                     {
-                        subGraphic.UpdateInteractable(false);
+                        subGraphic.graphic.UpdateInteractable(false);
                     }
                     XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(roomName);
                 }
@@ -136,10 +161,30 @@ namespace VRMPAssets.Scripts.UI
             {
                 if (subGraphicIndex >= 0 && subGraphicIndex < subGraphics.Count)
                 {
-                    Texture2D texture = subGraphics[subGraphicIndex].GraphicTexture;
+                    Texture2D texture = subGraphics[subGraphicIndex].graphic.GraphicTexture;
                     ApplyMainGraphicUpdate(texture, roomName);
+                    currentSubGraphicSetting = subGraphics[subGraphicIndex];
+                    SetStandbyObjects(false);
                 }
             }
+        }
+
+        [ClientRpc]
+        private void ShowStandbyObjectClientRpc()
+        {
+            SetStandbyObjects(false);
+            this.currentSubGraphicSetting.standbyObject.SetActive(true);
+        }
+
+        [ClientRpc]
+        private void HideAllStandbyObjectClientRpc()
+        {
+            SetStandbyObjects(false);
+        }
+
+        private void SetStandbyObjects(bool value)
+        {
+            this.subGraphics.ForEach(sg => sg.standbyObject.SetActive(value));
         }
 
         [ClientRpc]
@@ -165,9 +210,9 @@ namespace VRMPAssets.Scripts.UI
 
             foreach (var subGraphic in subGraphics)
             {
-                if (subGraphic != activeSubGraphic)
+                if (subGraphic.graphic != activeSubGraphic)
                 {
-                    subGraphic.HideBackground();
+                    subGraphic.graphic.HideBackground();
                 }
             }
         }

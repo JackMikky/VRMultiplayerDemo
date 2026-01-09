@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class NetworkUI : MonoBehaviour
 {
-    string ipAddress = "127.0.0.1";
-    ushort port = 7777;
+    private string ipAddress = "127.0.0.1";
+    private ushort port = 7777;
 
-    void OnGUI()
+    private void OnGUI()
     {
         GUI.Label(new Rect(10, 10, 100, 30), "IP Address:");
         ipAddress = GUI.TextField(new Rect(120, 10, 150, 30), ipAddress);
@@ -19,14 +19,14 @@ public class NetworkUI : MonoBehaviour
             if (GUI.Button(new Rect(10, 100, 200, 40), "Start Host"))
             {
                 NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>()
-                    .SetConnectionData("0.0.0.0", port); // Host 本机监听
+                    .SetConnectionData("0.0.0.0", port);
                 NetworkManager.Singleton.StartHost();
             }
 
             if (GUI.Button(new Rect(10, 150, 200, 40), "Start Client"))
             {
                 NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>()
-                    .SetConnectionData(ipAddress, port); // 连接到 Host
+                    .SetConnectionData(ipAddress, port);
                 NetworkManager.Singleton.StartClient();
             }
         }

@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 5694365418013085327}
   - component: {fileID: 7433502317722190708}
   - component: {fileID: 1218079587948139456}
+  - component: {fileID: 7715589145242965612}
   m_Layer: 5
   m_Name: SubGraphic
   m_TagString: Untagged
@@ -308,6 +309,20 @@ MonoBehaviour:
   roomGraphicImage: {fileID: 53582574937955864}
   graphicTexture: {fileID: 2800000, guid: a70ad8c72e74c4443b4c28f1cfc8e2a7, type: 3}
   background: {fileID: 553406808766659267}
+--- !u!114 &7715589145242965612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2580717880283228393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 687fd644547d7914fb5b54611da5a3fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRMP::VRMPAssets.Scripts.UI.SubGraphicSetting
+  graphic: {fileID: 1218079587948139456}
+  standbyObject: {fileID: 0}
 --- !u!1 &6626415878900256164
 GameObject:
   m_ObjectHideFlags: 0
