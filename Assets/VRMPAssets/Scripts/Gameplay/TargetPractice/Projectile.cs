@@ -43,6 +43,8 @@ namespace XRMultiplayer
 
         private Action<Projectile> m_OnReturnToPool;
 
+        private Action<int, bool> hitAction;
+
         private Rigidbody m_Rigidybody;
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace XRMultiplayer
         /// </summary>
         /// <param name="localPlayer">Indicates whether the projectile belongs to the local player.</param>
         /// <param name="playerColor">The color of the player.</param>
-        public void Setup(bool localPlayer, Color playerColor, Action<Projectile> returnToPoolAction = null)
+        public void Setup(bool localPlayer, Color playerColor, Action<Projectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
         {
             if (m_Rigidybody == null)
             {
@@ -66,6 +68,11 @@ namespace XRMultiplayer
             {
                 m_OnReturnToPool = returnToPoolAction;
                 StartCoroutine(ResetProjectileAfterTime());
+            }
+
+            if (hitTargetAction != null)
+            {
+                hitAction = hitTargetAction;
             }
         }
 
@@ -124,6 +131,12 @@ namespace XRMultiplayer
         {
             target.TargetHitLocal();
             m_HasHitTarget = true;
+        }
+
+        public void HitTarget(int score, bool isLocalPlayer)
+        {
+            hitAction?.Invoke(score, isLocalPlayer);
+            ResetProjectile();
         }
 
         public void ResetProjectile()

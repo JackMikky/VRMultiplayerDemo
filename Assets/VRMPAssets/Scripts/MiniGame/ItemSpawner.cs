@@ -7,62 +7,66 @@ namespace XRMultiplayer.MiniGames
 {
     public enum ColliderType
     {
-        Box,
-        Sphere,
+        Box = 0,
+        Sphere = 1
     }
 
     /// <summary>
-    /// ネットワーク対応のアイテムスポナー
+    /// Network-enabled item spawner
     /// </summary>
     public class ItemSpawner : NetworkBehaviour
     {
         [SerializeField]
-        [Tooltip("生成するアイテムのプレハブ")]
+        [Tooltip("Item prefabs to spawn")]
         private List<GameObject> m_ItemPrefabs;
 
         [SerializeField]
-        [Tooltip("コライダーの種類")]
+        [Tooltip("Collider type")]
         private ColliderType m_ColliderType = ColliderType.Box;
 
         [SerializeField]
-        [Tooltip("スポーンエリアのサイズ")]
+        [Tooltip("Spawn area size")]
         private Vector3 m_SpawnAreaSize = new Vector3(5f, 2f, 5f);
 
         [SerializeField]
-        [Tooltip("スポーン球体の半径")]
+        [Tooltip("Spawn sphere radius")]
         private float m_SpawnSphereRadius = 2.5f;
 
         [SerializeField]
-        [Tooltip("スポーンエリアの中心オフセット")]
+        [Tooltip("Spawn area center offset")]
         private Vector3 m_SpawnAreaCenter = Vector3.zero;
 
         [SerializeField]
-        [Tooltip("アイテムの生成位置")]
+        [Tooltip("Item spawn position")]
         private Transform m_SpawnTransform;
 
         [SerializeField]
-        [Tooltip("生成間隔（秒）")]
+        [Tooltip("Spawn interval (seconds)")]
         private float m_SpawnInterval = 2f;
 
         [SerializeField]
-        [Tooltip("最大生成数")]
+        [Tooltip("Maximum spawn count")]
         private int m_MaxSpawnCount = 10;
 
         [SerializeField]
-        [Tooltip("ランダムな位置に生成")]
+        [Tooltip("Spawn at random positions")]
         private bool m_RandomSpawnPosition = false;
 
         [SerializeField]
-        [Tooltip("NavMeshを使用してスポーン位置を検証")]
+        [Tooltip("Validate spawn position using NavMesh")]
         private bool UseNavMesh = false;
 
         [SerializeField]
-        [Tooltip("NavMesh検索の最大距離")]
+        [Tooltip("Maximum distance for NavMesh search")]
         private float m_NavMeshSearchDistance = 10f;
 
         [SerializeField]
-        [Tooltip("真下判定の水平許容範囲（メートル）")]
+        [Tooltip("Horizontal tolerance for directly below check (meters)")]
         private float m_HorizontalTolerance = 1f;
+
+        [SerializeField]
+        [Tooltip("Maximum retry attempts when NavMesh validation fails")]
+        private int m_MaxRetryAttempts = 5;
 
         [Header("Gizmo Settings")]
         [SerializeField]
@@ -83,6 +87,9 @@ namespace XRMultiplayer.MiniGames
         private float m_SpawnTimer = 0f;
         private int m_CurrentSpawnCount = 0;
 
+        // List to track spawned instances
+        private List<GameObject> m_SpawnedInstances = new List<GameObject>();
+
         public bool readyForSpawn = false;
 
         public ColliderType VisualColliderType
@@ -92,7 +99,7 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// 生成位置
+        /// Spawn position
         /// </summary>
         public Transform spawnTransform
         {
@@ -104,11 +111,16 @@ namespace XRMultiplayer.MiniGames
             }
         }
 
+        /// <summary>
+        /// Get the list of spawned instances (read-only)
+        /// </summary>
+        public IReadOnlyList<GameObject> SpawnedInstances => m_SpawnedInstances.AsReadOnly();
+
         private void Awake()
         {
             if (m_ItemPrefabs == null || m_ItemPrefabs.Count == 0)
             {
-                Debug.LogError("ItemSpawner: アイテムプレハブが設定されていません。", this);
+                Debug.LogError("ItemSpawner: No item prefabs are set.", this);
                 enabled = false;
                 return;
             }
@@ -117,21 +129,21 @@ namespace XRMultiplayer.MiniGames
             {
                 if (prefab == null)
                 {
-                    Debug.LogError("ItemSpawner: リスト内にnullのプレハブが含まれています。", this);
+                    Debug.LogError("ItemSpawner: The list contains null prefabs.", this);
                     enabled = false;
                     return;
                 }
 
                 if (!prefab.TryGetComponent<NetworkObject>(out _))
                 {
-                    Debug.LogError("ItemSpawner: プレハブにNetworkObjectコンポーネントが必要です。", this);
+                    Debug.LogError("ItemSpawner: Prefab requires a NetworkObject component.", this);
                     enabled = false;
                     return;
                 }
             }
 
 #if UNITY_EDITOR
-            // Editor上でのみ可視化用コライダーを初期化
+            // Initialize visualization collider only in Editor
             InitializeSpawnAreaCollider();
 #endif
         }
@@ -139,7 +151,7 @@ namespace XRMultiplayer.MiniGames
 #if UNITY_EDITOR
 
         /// <summary>
-        /// スポーンエリアのコライダーを初期化（Editor専用）
+        /// Initialize spawn area collider (Editor only)
         /// </summary>
         private void InitializeSpawnAreaCollider()
         {
@@ -147,11 +159,11 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// コライダータイプに応じてコライダーを更新（Editor専用）
+        /// Update collider according to collider type (Editor only)
         /// </summary>
         public void UpdateColliderType()
         {
-            // 既存のコライダーを削除
+            // Remove existing collider
             if (visualizeCollider != null)
             {
                 if (!Application.isPlaying)
@@ -160,7 +172,7 @@ namespace XRMultiplayer.MiniGames
                     Destroy(visualizeCollider);
             }
 
-            // 新しいコライダーを作成
+            // Create new collider
             switch (m_ColliderType)
             {
                 case ColliderType.Box:
@@ -184,16 +196,16 @@ namespace XRMultiplayer.MiniGames
 #endif
 
         /// <summary>
-        /// スポーンエリア内のランダムな位置を取得
+        /// Get a random position within the spawn area
         /// </summary>
-        /// <returns>ワールド座標でのランダムな位置</returns>
+        /// <returns>Random position in world coordinates</returns>
         private Vector3 GetRandomPositionInSpawnArea()
         {
             Vector3 localRandomPoint = Vector3.zero;
 
             if (m_ColliderType == ColliderType.Box)
             {
-                // ボックス内のランダムな位置を計算
+                // Calculate random position inside box
                 localRandomPoint = m_SpawnAreaCenter + new Vector3(
                     Random.Range(-m_SpawnAreaSize.x * 0.5f, m_SpawnAreaSize.x * 0.5f),
                     Random.Range(-m_SpawnAreaSize.y * 0.5f, m_SpawnAreaSize.y * 0.5f),
@@ -202,24 +214,24 @@ namespace XRMultiplayer.MiniGames
             }
             else if (m_ColliderType == ColliderType.Sphere)
             {
-                // 球体内のランダムな位置を計算
+                // Calculate random position inside sphere
                 Vector3 randomInsideSphere = Random.insideUnitSphere * m_SpawnSphereRadius;
                 localRandomPoint = m_SpawnAreaCenter + randomInsideSphere;
             }
 
-            // ローカル座標からワールド座標に変換
+            // Convert from local to world coordinates
             return transform.TransformPoint(localRandomPoint);
         }
 
         /// <summary>
-        /// スポーンエリアのサイズを設定
+        /// Set spawn area size
         /// </summary>
-        /// <param name="size">新しいサイズ</param>
+        /// <param name="size">New size</param>
         public void SetSpawnAreaSize(Vector3 size)
         {
             m_SpawnAreaSize = size;
 #if UNITY_EDITOR
-            // Editor上のコライダーも更新
+            // Update collider in Editor
             if (visualizeCollider is BoxCollider boxCollider)
             {
                 boxCollider.size = size;
@@ -228,14 +240,14 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// スポーン球体の半径を設定
+        /// Set spawn sphere radius
         /// </summary>
-        /// <param name="radius">新しい半径</param>
+        /// <param name="radius">New radius</param>
         public void SetSpawnSphereRadius(float radius)
         {
             m_SpawnSphereRadius = radius;
 #if UNITY_EDITOR
-            // Editor上のコライダーも更新
+            // Update collider in Editor
             if (visualizeCollider is SphereCollider sphereCollider)
             {
                 sphereCollider.radius = radius;
@@ -244,14 +256,14 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// スポーンエリアの中心オフセットを設定
+        /// Set spawn area center offset
         /// </summary>
-        /// <param name="center">新しい中心オフセット</param>
+        /// <param name="center">New center offset</param>
         public void SetSpawnAreaCenter(Vector3 center)
         {
             m_SpawnAreaCenter = center;
 #if UNITY_EDITOR
-            // Editor上のコライダーも更新
+            // Update collider in Editor
             if (visualizeCollider != null)
             {
                 if (visualizeCollider is BoxCollider boxCollider)
@@ -266,19 +278,22 @@ namespace XRMultiplayer.MiniGames
         {
             if (!readyForSpawn)
                 return;
-            // ネットワーク接続確認
+            // Check network connection
             if (!NetworkManager.Singleton.IsConnectedClient)
                 return;
 
-            // オーナーのみが生成を管理
+            // Only owner manages spawning
             if (!IsServer)
                 return;
 
-            // 最大数チェック
-            if (m_CurrentSpawnCount >= m_MaxSpawnCount)
+            // Clean up null references from the list
+            m_SpawnedInstances.RemoveAll(item => item == null);
+
+            // Check maximum count
+            if (m_SpawnedInstances.Count >= m_MaxSpawnCount)
                 return;
 
-            // タイマー更新
+            // Update timer
             m_SpawnTimer += Time.deltaTime;
             if (m_SpawnTimer >= m_SpawnInterval)
             {
@@ -288,17 +303,17 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// ランダムに選択したアイテムを生成
+        /// Spawn a randomly selected item
         /// </summary>
         private void SpawnRandomItem()
         {
             if (m_ItemPrefabs == null || m_ItemPrefabs.Count == 0)
             {
-                Debug.LogWarning("ItemSpawner: 生成可能なアイテムプレハブがありません。");
+                Debug.LogWarning("ItemSpawner: No item prefabs available to spawn.");
                 return;
             }
 
-            // リストからランダムに1つ選択
+            // Select one randomly from the list
             int randomIndex = Random.Range(0, m_ItemPrefabs.Count);
             GameObject selectedPrefab = m_ItemPrefabs[randomIndex];
 
@@ -306,66 +321,83 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// アイテムを生成してクライアントに共有
+        /// Spawn item and share with clients
         /// </summary>
         private void SpawnItem(GameObject itemPrefab)
         {
-            Vector3 spawnPosition = m_RandomSpawnPosition
-                ? GetRandomPositionInSpawnArea()
-                : transform.position;
+            int retryCount = 0;
+            bool spawnSuccessful = false;
 
-            // UseNavMeshが有効な場合、真下にNavMeshがあるか確認
-            if (UseNavMesh)
+            while (!spawnSuccessful && retryCount < m_MaxRetryAttempts)
             {
-                if (!IsNavMeshBelowPosition(spawnPosition))
+                Vector3 spawnPosition = m_RandomSpawnPosition
+                    ? GetRandomPositionInSpawnArea()
+                    : transform.position;
+
+                // If UseNavMesh is enabled, check if there's a NavMesh directly below
+                if (UseNavMesh)
                 {
-                    Debug.LogWarning($"ItemSpawner: スポーン位置 {spawnPosition} の真下にNavMeshが見つかりませんでした。オブジェクトの生成をスキップします。", this);
-                    return;
+                    if (!IsNavMeshBelowPosition(spawnPosition))
+                    {
+                        retryCount++;
+                        Debug.LogWarning($"ItemSpawner: No NavMesh found directly below spawn position {spawnPosition}. Retry attempt {retryCount}/{m_MaxRetryAttempts}.", this);
+                        continue;
+                    }
+                }
+
+                GameObject spawnedObject = Instantiate(
+                    itemPrefab,
+                    spawnPosition,
+                    spawnTransform.rotation
+                );
+
+                // Get NetworkObject and Spawn (share with all clients)
+                if (spawnedObject.TryGetComponent(out NetworkObject networkObject))
+                {
+                    networkObject.Spawn();
+                    m_CurrentSpawnCount++;
+
+                    // Add to spawned instances list
+                    m_SpawnedInstances.Add(spawnedObject);
+                    spawnSuccessful = true;
+                }
+                else
+                {
+                    Debug.LogError("ItemSpawner: NetworkObject not found on spawned object.", this);
+                    Destroy(spawnedObject);
+                    break;
                 }
             }
 
-            GameObject spawnedObject = Instantiate(
-                itemPrefab,
-                spawnPosition,
-                spawnTransform.rotation
-            );
-
-            // NetworkObjectを取得してSpawn（全クライアントに共有）
-            if (spawnedObject.TryGetComponent(out NetworkObject networkObject))
+            if (!spawnSuccessful && retryCount >= m_MaxRetryAttempts)
             {
-                networkObject.Spawn();
-                m_CurrentSpawnCount++;
-            }
-            else
-            {
-                Debug.LogError("ItemSpawner: 生成されたオブジェクトにNetworkObjectが見つかりません。", this);
-                Destroy(spawnedObject);
+                Debug.LogError($"ItemSpawner: Failed to spawn item after {m_MaxRetryAttempts} attempts. No valid NavMesh positions found.", this);
             }
         }
 
         /// <summary>
-        /// 指定位置の真下にNavMeshが存在するかを確認
+        /// Check if NavMesh exists directly below the specified position
         /// </summary>
-        /// <param name="position">確認する位置</param>
-        /// <returns>NavMeshが存在する場合はtrue、存在しない場合はfalse</returns>
+        /// <param name="position">Position to check</param>
+        /// <returns>True if NavMesh exists, false otherwise</returns>
         private bool IsNavMeshBelowPosition(Vector3 position)
         {
             NavMeshHit hit;
 
-            // 指定位置から真下にNavMeshを検索
+            // Search for NavMesh directly below the specified position
             if (NavMesh.SamplePosition(position, out hit, m_NavMeshSearchDistance, NavMesh.AllAreas))
             {
-                // ヒット位置が指定位置の真下かどうかを確認
-                // Y座標が指定位置以下であることを確認
+                // Check if hit position is directly below the specified position
+                // Confirm Y coordinate is at or below the specified position
                 if (hit.position.y <= position.y)
                 {
-                    // 水平距離の許容範囲をチェック（真下かどうか）
+                    // Check horizontal distance tolerance (whether it's directly below)
                     float horizontalDistance = Vector3.Distance(
                         new Vector3(position.x, 0, position.z),
                         new Vector3(hit.position.x, 0, hit.position.z)
                     );
 
-                    // 許容範囲内であればNavMeshが真下に存在すると判断
+                    // If within tolerance, determine NavMesh exists directly below
                     return horizontalDistance <= m_HorizontalTolerance;
                 }
             }
@@ -374,16 +406,19 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// 手動で1つアイテムを生成
+        /// Manually spawn one item
         /// </summary>
         public void SpawnItemManually()
         {
             if (!IsOwner)
                 return;
 
-            if (m_CurrentSpawnCount >= m_MaxSpawnCount)
+            // Clean up null references
+            m_SpawnedInstances.RemoveAll(item => item == null);
+
+            if (m_SpawnedInstances.Count >= m_MaxSpawnCount)
             {
-                Debug.LogWarning("ItemSpawner: 最大生成数に達しています。");
+                Debug.LogWarning("ItemSpawner: Maximum spawn count reached.");
                 return;
             }
 
@@ -391,7 +426,7 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// 生成カウントをリセット
+        /// Reset spawn count
         /// </summary>
         public void ResetSpawnCount()
         {
@@ -401,7 +436,59 @@ namespace XRMultiplayer.MiniGames
             m_CurrentSpawnCount = 0;
         }
 
-        // 常に表示されるGizmos（オブジェクトが選択されていない時も表示）
+        /// <summary>
+        /// Clear all spawned instances (only call on server)
+        /// </summary>
+        public void ClearAllSpawnedInstances()
+        {
+            if (!IsServer)
+            {
+                Debug.LogWarning("ItemSpawner: ClearAllSpawnedInstances can only be called on the server.");
+                return;
+            }
+
+            // Clean up null references first
+            m_SpawnedInstances.RemoveAll(item => item == null);
+
+            // Destroy all spawned instances
+            foreach (var instance in m_SpawnedInstances)
+            {
+                if (instance != null)
+                {
+                    if (instance.TryGetComponent(out NetworkObject networkObject))
+                    {
+                        // Despawn network object
+                        if (networkObject.IsSpawned)
+                        {
+                            networkObject.Despawn();
+                        }
+                    }
+
+                    Destroy(instance);
+                }
+            }
+
+            // Clear the list
+            m_SpawnedInstances.Clear();
+            m_CurrentSpawnCount = 0;
+            m_SpawnTimer = 0f;
+
+            Debug.Log("ItemSpawner: All spawned instances cleared.");
+        }
+
+        /// <summary>
+        /// Remove a specific instance from the tracking list
+        /// </summary>
+        /// <param name="instance">The instance to remove</param>
+        public void RemoveInstance(GameObject instance)
+        {
+            if (m_SpawnedInstances.Contains(instance))
+            {
+                m_SpawnedInstances.Remove(instance);
+            }
+        }
+
+        // Gizmos always displayed (even when object is not selected)
         private void OnDrawGizmos()
         {
             Vector3 position = (m_SpawnTransform != null) ? m_SpawnTransform.position : transform.position;
@@ -411,10 +498,10 @@ namespace XRMultiplayer.MiniGames
                 Gizmos.DrawWireSphere(position, 0.1f);
             }
 
-            // スポーンエリアの表示
+            // Display spawn area
             if (m_GizmoSettings.showSpawnArea)
             {
-                // ワールド座標での中心位置を計算
+                // Calculate center position in world coordinates
                 Vector3 worldCenter = transform.position;
 
                 Gizmos.color = m_GizmoSettings.spawnAreaColor;
@@ -423,7 +510,7 @@ namespace XRMultiplayer.MiniGames
                 {
                     var size = this.visualizeCollider.bounds.size;
                     var center = this.visualizeCollider.bounds.center + transform.position;
-                    // ボックスの描画（回転を考慮）
+                    // Draw box (considering rotation)
                     Gizmos.matrix = Matrix4x4.TRS(worldCenter, transform.rotation, Vector3.one);
                     Gizmos.DrawCube(center, size);
 
@@ -440,7 +527,7 @@ namespace XRMultiplayer.MiniGames
                 }
             }
 
-            // 軸の表示
+            // Display axes
             if (m_GizmoSettings.showAxis)
             {
                 Gizmos.color = Color.red;
@@ -458,8 +545,8 @@ namespace XRMultiplayer.MiniGames
 
         private void OnValidate()
         {
-            // Inspector での値変更時にコライダーを更新
-            // OnValidateではDestroyImmediateが使えないため、EditorApplication.delayCallで遅延実行
+            // Update collider when values change in Inspector
+            // DestroyImmediate cannot be used in OnValidate, so use EditorApplication.delayCall for delayed execution
             if (!Application.isPlaying)
             {
                 UnityEditor.EditorApplication.delayCall += () =>
@@ -477,22 +564,22 @@ namespace XRMultiplayer.MiniGames
         [System.Serializable]
         public class GizmoSettings
         {
-            [Tooltip("スポーンエリアを表示")]
+            [Tooltip("Display spawn area")]
             public bool showSpawnArea = true;
 
-            [Tooltip("スポーンエリアの色")]
+            [Tooltip("Spawn area color")]
             public Color spawnAreaColor = new Color(0f, 1f, 1f, 0.3f);
 
-            [Tooltip("スポーンポイントを表示")]
+            [Tooltip("Display spawn point")]
             public bool showSpawnPoint = true;
 
-            [Tooltip("スポーンポイントの色")]
+            [Tooltip("Spawn point color")]
             public Color spawnPointColor = Color.yellow;
 
-            [Tooltip("軸を表示")]
+            [Tooltip("Display axes")]
             public bool showAxis = true;
 
-            [Tooltip("軸の長さ")]
+            [Tooltip("Axis length")]
             public float axisLength = 0.5f;
         }
     }

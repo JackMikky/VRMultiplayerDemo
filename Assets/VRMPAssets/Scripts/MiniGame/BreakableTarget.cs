@@ -41,14 +41,20 @@ namespace UnityEngine.XR.Content.Interaction
             collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
             if (projectile != null && projectile.isLocalPlayerProjectile)
             {
+                projectile.HitTarget(pointValue, true);
             }
             var brokenObject = Instantiate(m_BrokenVersion, transform.position, transform.rotation);
             brokenObject.transform.localScale = transform.localScale;
             onBreak?.Invoke();
             if (!isDisplayObject)
+            {
                 Destroy(gameObject);
+            }
             else
+            {
+                m_Destroyed = false;
                 gameObject.SetActive(false);
+            }
         }
     }
 }

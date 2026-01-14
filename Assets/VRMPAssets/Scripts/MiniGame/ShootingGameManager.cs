@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -30,9 +32,11 @@ public class ShootingGameManager : NetworkBehaviour
     [Tooltip("Seconds")]
     [SerializeField] private int maxTime = 90;
 
-    [SerializeField] private float time; // ’u‚«Š·‚¦
+    [SerializeField] private float time;
 
     [SerializeField] private ItemSpawner spawner;
+
+    [SerializeField] private List<NetworkProjectileLauncher> launchers;
 
     [Header("UI")]
     [Header("Board UI")]
@@ -54,8 +58,7 @@ public class ShootingGameManager : NetworkBehaviour
     [Header("Audios")]
     [SerializeField] private EventAudioSource eventAudio;
 
-    [SerializeField] private AudioSource bgmAudioSource;
-    [SerializeField] private AudioClip[] bgmAudioClips;
+    [SerializeField] private BGMController bgmController;
 
     [SerializeField] private AudioClip gameOverAudioClip;
     [SerializeField] private AudioClip gameStartAudioClip;
@@ -71,6 +74,10 @@ public class ShootingGameManager : NetworkBehaviour
         scoreUI.text = "0";
         gameUIGroup.alpha = 0;
         time = maxTime;
+        foreach (var launcher in launchers)
+        {
+            launcher.HitTargetAction = this.SetScore;
+        }
 
         localPlayer = new PlayerStats { name = XRINetworkGameManager.LocalPlayerName.Value, score = 0, playerId = NetworkManager.Singleton.LocalClientId };
     }
@@ -109,31 +116,41 @@ public class ShootingGameManager : NetworkBehaviour
         boardUIGroup.alpha = 0;
         subUI.SetActive(false);
         time = maxTime;
+        localPlayer.score = 0;
+
         this.eventAudio.PlayOneShot(gameStartAudioClip, () =>
         {
             isStarted = true;
             spawner.gameObject.SetActive(true);
             spawner.readyForSpawn = true;
+
+            if (bgmController != null)
+            {
+                bgmController.PlayWithFadeIn();
+            }
         });
     }
 
     [Rpc(SendTo.Everyone)]
     public void GameOverRpc()
     {
-        if (IsServer)
+        spawner.readyForSpawn = false;
+
+        if (bgmController != null)
         {
-            spawner.readyForSpawn = false;
-            this.eventAudio.PlayOneShot(gameOverAudioClip, () =>
-            {
-                gameUIGroup.alpha = 0;
-                boardUIGroup.alpha = 1;
-                spawner.gameObject.SetActive(false);
-                displayObject.SetActive(true);
-                subUI.SetActive(true);
-            });
+            bgmController.StopWithFadeOut();
         }
 
-        SendPlayerDataToServerRpc(localPlayer);
+        this.eventAudio.PlayOneShot(gameOverAudioClip, () =>
+        {
+            gameUIGroup.alpha = 0;
+            boardUIGroup.alpha = 1;
+            SendPlayerDataToServerRpc(localPlayer);
+            spawner.ClearAllSpawnedInstances();
+            spawner.gameObject.SetActive(false);
+            displayObject.SetActive(true);
+            subUI.SetActive(true);
+        });
     }
 
     [Rpc(SendTo.Server)]
@@ -173,5 +190,14 @@ public class ShootingGameManager : NetworkBehaviour
     {
         topPlayerNameUI.text = topPlayer.name;
         topScoreUI.text = topPlayer.score.ToString();
+    }
+
+    private void SetScore(int score, bool isLocalPlayer)
+    {
+        if (isLocalPlayer)
+        {
+            this.localPlayer.score += score;
+            scoreUI.text = this.localPlayer.score.ToString();
+        }
     }
 }

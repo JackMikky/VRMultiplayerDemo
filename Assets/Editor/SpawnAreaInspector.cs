@@ -18,6 +18,7 @@ public class SpawnAreaInspector : Editor
     private SerializedProperty m_UseNavMeshProperty;
     private SerializedProperty m_NavMeshSearchDistanceProperty;
     private SerializedProperty m_HorizontalToleranceProperty;
+    private SerializedProperty m_MaxRetryAttemptsProperty;
     private SerializedProperty m_GizmoSettingsProperty;
 
     private void OnEnable()
@@ -35,6 +36,7 @@ public class SpawnAreaInspector : Editor
         m_UseNavMeshProperty = serializedObject.FindProperty("UseNavMesh");
         m_NavMeshSearchDistanceProperty = serializedObject.FindProperty("m_NavMeshSearchDistance");
         m_HorizontalToleranceProperty = serializedObject.FindProperty("m_HorizontalTolerance");
+        m_MaxRetryAttemptsProperty = serializedObject.FindProperty("m_MaxRetryAttempts");
         m_GizmoSettingsProperty = serializedObject.FindProperty("m_GizmoSettings");
     }
 
@@ -44,13 +46,11 @@ public class SpawnAreaInspector : Editor
 
         ItemSpawner spawner = (ItemSpawner)target;
 
-        // アイテムプレハブリスト
         EditorGUILayout.PropertyField(m_ItemPrefabsProperty, new GUIContent("Item Prefabs"), true);
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Spawn Area Settings", EditorStyles.boldLabel);
 
-        // コライダータイプ
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(m_ColliderTypeProperty, new GUIContent("Collider Type"));
         if (EditorGUI.EndChangeCheck())
@@ -60,7 +60,6 @@ public class SpawnAreaInspector : Editor
             serializedObject.Update();
         }
 
-        // コライダータイプに応じたプロパティ表示
         ColliderType colliderType = (ColliderType)m_ColliderTypeProperty.enumValueIndex;
 
         if (colliderType == ColliderType.Box)
@@ -101,7 +100,6 @@ public class SpawnAreaInspector : Editor
             }
         }
 
-        // Visualize Collider (読み取り専用)
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.PropertyField(m_VisualizeColliderProperty, new GUIContent("Visualize Collider (Auto)"));
         EditorGUI.EndDisabledGroup();
@@ -119,13 +117,13 @@ public class SpawnAreaInspector : Editor
 
         EditorGUILayout.PropertyField(m_UseNavMeshProperty, new GUIContent("Use NavMesh"));
 
-        // UseNavMeshが有効な場合の設定を表示
         if (m_UseNavMeshProperty != null && m_UseNavMeshProperty.boolValue)
         {
             EditorGUI.indentLevel++;
-            EditorGUILayout.HelpBox("スポーン位置の真下にNavMeshが存在するかを確認します。NavMeshがない場合、オブジェクトは生成されません。", MessageType.Info);
+            EditorGUILayout.HelpBox("When NavMesh validation is enabled, objects will only spawn on valid navigation mesh. If validation fails, the system will automatically retry.", MessageType.Info);
             EditorGUILayout.PropertyField(m_NavMeshSearchDistanceProperty, new GUIContent("Search Distance"));
             EditorGUILayout.PropertyField(m_HorizontalToleranceProperty, new GUIContent("Horizontal Tolerance"));
+            EditorGUILayout.PropertyField(m_MaxRetryAttemptsProperty, new GUIContent("Max Retry Attempts"));
             EditorGUI.indentLevel--;
         }
 
@@ -137,7 +135,6 @@ public class SpawnAreaInspector : Editor
 }
 
 public enum ColliderType
-
 {
     Box = 0,
     Sphere = 1

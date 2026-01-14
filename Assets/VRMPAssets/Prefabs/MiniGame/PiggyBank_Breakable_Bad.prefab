@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c0b47ad3167a81418340eb433d4de8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  pointValue: 5
+  pointValue: -10
   m_BrokenVersion: {fileID: 6397927468361126867, guid: c7a665724f0b444408bfa84cee2fa5ca,
     type: 3}
   m_ColliderTag: Projectile
