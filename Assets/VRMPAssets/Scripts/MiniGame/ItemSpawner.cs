@@ -83,6 +83,8 @@ namespace XRMultiplayer.MiniGames
         private float m_SpawnTimer = 0f;
         private int m_CurrentSpawnCount = 0;
 
+        public bool readyForSpawn = false;
+
         public ColliderType VisualColliderType
         {
             get => m_ColliderType;
@@ -262,12 +264,14 @@ namespace XRMultiplayer.MiniGames
 
         private void Update()
         {
+            if (!readyForSpawn)
+                return;
             // ネットワーク接続確認
             if (!NetworkManager.Singleton.IsConnectedClient)
                 return;
 
             // オーナーのみが生成を管理
-            if (!IsOwner)
+            if (!IsServer)
                 return;
 
             // 最大数チェック

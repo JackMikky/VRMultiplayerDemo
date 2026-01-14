@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+
 namespace XRMultiplayer
 {
     /// <summary>
@@ -18,27 +19,31 @@ namespace XRMultiplayer
         /// <summary>
         /// The previous position of the projectile.
         /// </summary>
-        Vector3 m_PrevPos = Vector3.zero;
+        private Vector3 m_PrevPos = Vector3.zero;
 
         /// <summary>
         /// The raycast hit for the projectile.
         /// </summary>
-        RaycastHit m_Hit;
+        private RaycastHit m_Hit;
 
         /// <summary>
         /// Indicates whether the projectile has hit a target.
         /// </summary>
-        bool m_HasHitTarget = false;
+        private bool m_HasHitTarget = false;
 
         /// <summary>
         /// Indicates whether the projectile belongs to the local player.
         /// </summary>
-        bool m_LocalPlayerProjectile;
+        private bool m_LocalPlayerProjectile;
 
-        Action<Projectile> m_OnReturnToPool;
+        public bool isLocalPlayerProjectile
+        {
+            get { return m_LocalPlayerProjectile; }
+        }
 
-        Rigidbody m_Rigidybody;
+        private Action<Projectile> m_OnReturnToPool;
 
+        private Rigidbody m_Rigidybody;
 
         /// <summary>
         /// Sets up the projectile with the specified parameters.
@@ -64,7 +69,7 @@ namespace XRMultiplayer
             }
         }
 
-        IEnumerator ResetProjectileAfterTime()
+        private IEnumerator ResetProjectileAfterTime()
         {
             yield return new WaitForSeconds(m_Lifetime);
             ResetProjectile();
@@ -88,7 +93,7 @@ namespace XRMultiplayer
         }
 
         /// <inheritdoc/>
-        void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Target"))
             {
@@ -96,13 +101,13 @@ namespace XRMultiplayer
             }
         }
 
-        void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter(Collision collision)
         {
             if (!m_LocalPlayerProjectile) return;
             CheckForInteractableHit(collision.transform);
         }
 
-        void CheckForInteractableHit(Transform t)
+        private void CheckForInteractableHit(Transform t)
         {
             NetworkPhysicsInteractable networkPhysicsInteractable = t.GetComponentInParent<NetworkPhysicsInteractable>();
             if (networkPhysicsInteractable != null)
