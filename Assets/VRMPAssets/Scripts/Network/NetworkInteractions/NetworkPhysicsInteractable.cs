@@ -39,6 +39,7 @@ namespace XRMultiplayer
         /// Used to get the current networked value of <see cref="m_LockedOnSpawn.Value"/>.
         /// </summary>
         public bool lockedOnSpawn => m_LockedOnSpawn.Value;
+
         protected NetworkVariable<bool> m_LockedOnSpawn = new(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         /// <summary>
@@ -64,12 +65,12 @@ namespace XRMultiplayer
         /// </summary>
         protected IEnumerator checkOwnershipRoutine;
 
-        bool m_PauseVelocityCalcuations = false;
-        Vector3 m_AverageVelocity;
-        Vector3[] m_CurrentCalculatedVelocity;
-        int m_FramesToCalculate = 3;
-        int m_CurrentFrame = 0;
-        Vector3 m_PrevPos;
+        private bool m_PauseVelocityCalcuations = false;
+        private Vector3 m_AverageVelocity;
+        private Vector3[] m_CurrentCalculatedVelocity;
+        private int m_FramesToCalculate = 3;
+        private int m_CurrentFrame = 0;
+        private Vector3 m_PrevPos;
 
         /// <inheritdoc/>
         public override void Awake()
@@ -88,7 +89,7 @@ namespace XRMultiplayer
             m_Collider = GetComponentInChildren<Collider>();
         }
 
-        void Update()
+        private void Update()
         {
             if (m_PauseVelocityCalcuations) return;
             Vector3 velocity = (transform.position - m_PrevPos) / Time.deltaTime;
@@ -99,7 +100,7 @@ namespace XRMultiplayer
             m_AverageVelocity = GetWorldVelocity();
         }
 
-        Vector3 GetWorldVelocity()
+        private Vector3 GetWorldVelocity()
         {
             Vector3 averageVelocity = Vector3.zero;
             for (int i = 0; i < m_FramesToCalculate; i++)
@@ -130,7 +131,7 @@ namespace XRMultiplayer
         public override void OnNetworkDespawn()
         {
             base.OnNetworkDespawn();
-            if (m_ResetObjectOnDisconnect & !m_Rigidbody.isKinematic)
+            if (m_ResetObjectOnDisconnect && !m_Rigidbody.isKinematic)
             {
                 ResetObjectPhysics();
             }
@@ -154,7 +155,7 @@ namespace XRMultiplayer
             }
         }
 
-        void OnLockedChanged(bool oldValue, bool newValue)
+        private void OnLockedChanged(bool oldValue, bool newValue)
         {
             if (newValue)
             {
@@ -169,7 +170,7 @@ namespace XRMultiplayer
         /// <summary>
         /// This function is called when the <see cref="m_ResettingObject"/> value changes.
         /// </summary>
-        void OnObjectPhysicsReset(bool oldValue, bool currentValue)
+        private void OnObjectPhysicsReset(bool oldValue, bool currentValue)
         {
             if (currentValue)
             {
@@ -196,7 +197,6 @@ namespace XRMultiplayer
         {
             m_CurrentCalculatedVelocity = new Vector3[m_FramesToCalculate];
 
-            // Take a snapshot of the current rigidbody
             int snapShotRigidbodyInterpolation = (int)m_Rigidbody.interpolation;
             bool wasKinematic = m_Rigidbody.isKinematic;
             if (!m_Rigidbody.isKinematic)
@@ -207,20 +207,19 @@ namespace XRMultiplayer
             m_Rigidbody.interpolation = RigidbodyInterpolation.None;
             m_Rigidbody.isKinematic = true;
 
-            if (IsOwner && NetworkManager.IsConnectedClient & !NetworkManager.Singleton.ShutdownInProgress)
+            if (IsOwner && NetworkManager.IsConnectedClient && !NetworkManager.Singleton.ShutdownInProgress && NetworkObject.IsSpawned)
                 m_ResettingObject.Value = true;
 
-            // Wait for a fixed update to reset the object.
             StartCoroutine(ResetPhysicsRoutine(wasKinematic, snapShotRigidbodyInterpolation));
         }
 
-        IEnumerator ResetPhysicsRoutine(bool wasKinematic, int interpolation)
+        private IEnumerator ResetPhysicsRoutine(bool wasKinematic, int interpolation)
         {
-            // Since the Rigidbody is using Interpolate, we need to disable Kinematic for a frame to reset the object.
             yield return new WaitForFixedUpdate();
             m_Rigidbody.interpolation = (RigidbodyInterpolation)interpolation;
             m_Rigidbody.isKinematic = wasKinematic;
-            if (IsOwner && NetworkManager.IsConnectedClient & !NetworkManager.Singleton.ShutdownInProgress)
+
+            if (IsOwner && NetworkManager.IsConnectedClient && !NetworkManager.Singleton.ShutdownInProgress && NetworkObject.IsSpawned)
                 m_ResettingObject.Value = false;
         }
 
@@ -233,7 +232,7 @@ namespace XRMultiplayer
             if (m_IgnoreSocketSelectedCallback && args.interactorObject.transform.GetComponent<XRSocketInteractor>() != null) return;
 
             // Disable the network transform to allow smooth interaction with high latency and wait for ownership or timeout to re-enable.
-            if (CanHold() & !IsOwner)
+            if (CanHold() && !IsOwner)
             {
                 m_ClientNetworkTransform.enabled = false;
                 if (m_LockedOnSpawn.Value)
@@ -281,7 +280,7 @@ namespace XRMultiplayer
                 m_RequestingOwnership = false;
                 m_ClientNetworkTransform.enabled = true;
                 m_IsInteracting.Value = baseInteractable.isSelected;
-                if (!baseInteractable.isSelected & !m_Rigidbody.isKinematic)
+                if (!baseInteractable.isSelected && !m_Rigidbody.isKinematic)
                 {
                     m_Rigidbody.linearVelocity = m_AverageVelocity;
                 }
@@ -300,7 +299,7 @@ namespace XRMultiplayer
         }
 
         /// <inheritdoc/>
-        void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter(Collision collision)
         {
             if (!IsOwner || !m_AllowCollisionOwnershipExchange) return;
             NetworkPhysicsInteractable networkPhysicsInteractable = collision.transform.GetComponentInParent<NetworkPhysicsInteractable>();
@@ -309,7 +308,6 @@ namespace XRMultiplayer
                 networkPhysicsInteractable.RequestOwnership();
             }
         }
-
 
         /// <summary>
         /// Checks if the current object is moving faster than the other object based on velocity magnitude.
@@ -352,17 +350,27 @@ namespace XRMultiplayer
             }
 
             RelinquishOwnershipAfterTime();
-            NetworkObject.ChangeOwnership(NetworkManager.Singleton.LocalClientId);
+            RequestOwnershipServerRpc(NetworkManager.Singleton.LocalClientId);
             if (checkOwnershipRoutine != null) StopCoroutine(checkOwnershipRoutine);
             checkOwnershipRoutine = CheckOwnershipRoutine();
             StartCoroutine(checkOwnershipRoutine);
         }
 
         /// <summary>
+        /// Server RPC to request ownership change from the server.
+        /// </summary>
+        /// <param name="newOwnerClientId">The client ID requesting ownership.</param>
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestOwnershipServerRpc(ulong newOwnerClientId)
+        {
+            NetworkObject.ChangeOwnership(newOwnerClientId);
+        }
+
+        /// <summary>
         /// Coroutine to check if ownership was granted based on the current RTT to the server.
         /// </summary>
         /// <returns></returns>
-        IEnumerator CheckOwnershipRoutine()
+        private IEnumerator CheckOwnershipRoutine()
         {
             // Get the current RTT to the server and wait for twice that time before checking if ownership was granted.
             float waitTime = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(NetworkManager.ServerClientId) * 2;

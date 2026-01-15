@@ -68,6 +68,9 @@ public class ShootingGameManager : NetworkBehaviour
 
     public GameObject displayObject;
 
+    [Header("Other GameObjects")]
+    [SerializeField] private List<GameObject> otherObjects;
+
     private void Start()
     {
         timeUI.text = maxTime.ToString();
@@ -111,12 +114,15 @@ public class ShootingGameManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void GameReadyRpc()
     {
-        if (!IsServer) return;
         gameUIGroup.alpha = 1;
         boardUIGroup.alpha = 0;
         subUI.SetActive(false);
         time = maxTime;
         localPlayer.score = 0;
+        foreach (var item in otherObjects)
+        {
+            item.SetActive(false);
+        }
 
         this.eventAudio.PlayOneShot(gameStartAudioClip, () =>
         {
@@ -150,6 +156,10 @@ public class ShootingGameManager : NetworkBehaviour
             spawner.gameObject.SetActive(false);
             displayObject.SetActive(true);
             subUI.SetActive(true);
+            foreach (var item in otherObjects)
+            {
+                item.SetActive(true);
+            }
         });
     }
 

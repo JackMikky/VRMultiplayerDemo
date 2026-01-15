@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 1197402364210891154}
   - component: {fileID: 7423182030646612051}
   - component: {fileID: 4951001008984334026}
-  - component: {fileID: 6806041630604653373}
   - component: {fileID: 5529137780364094527}
+  - component: {fileID: 6806041630604653373}
   m_Layer: 0
   m_Name: PiggyBank_Breakable_Bad
   m_TagString: Piggy
@@ -162,26 +162,6 @@ MonoBehaviour:
   floatFrequency: 2
   floatingSpace: 1
   floatingAxis: 2
---- !u!114 &6806041630604653373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2044474573068301505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0b47ad3167a81418340eb433d4de8c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  pointValue: -10
-  m_BrokenVersion: {fileID: 6397927468361126867, guid: c7a665724f0b444408bfa84cee2fa5ca,
-    type: 3}
-  m_ColliderTag: Projectile
-  onBreak:
-    m_PersistentCalls:
-      m_Calls: []
-  isDisplayObject: 0
 --- !u!114 &5529137780364094527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -207,3 +187,24 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &6806041630604653373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2044474573068301505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c0b47ad3167a81418340eb433d4de8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  ShowTopMostFoldoutHeaderGroup: 1
+  pointValue: -10
+  m_BrokenVersion: {fileID: 6397927468361126867, guid: c7a665724f0b444408bfa84cee2fa5ca,
+    type: 3}
+  m_ColliderTag: Projectile
+  onBreak:
+    m_PersistentCalls:
+      m_Calls: []
+  isDisplayObject: 0

@@ -6032,6 +6032,17 @@ PrefabInstance:
       propertyPath: networkSceneManager
       value: 
       objectReference: {fileID: 766572335}
+    - target: {fileID: 874452183138526564, guid: 8605187a018b7614292eb14329a78d70,
+        type: 3}
+      propertyPath: m_NetworkConfig.Prefabs.NetworkPrefabsLists.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 874452183138526564, guid: 8605187a018b7614292eb14329a78d70,
+        type: 3}
+      propertyPath: 'm_NetworkConfig.Prefabs.NetworkPrefabsLists.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 59c08d60c26922345903cb8cfd350f6c,
+        type: 2}
     - target: {fileID: 3777163311441436064, guid: 8605187a018b7614292eb14329a78d70,
         type: 3}
       propertyPath: ConnectionData.Port

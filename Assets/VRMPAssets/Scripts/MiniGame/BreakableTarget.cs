@@ -1,4 +1,4 @@
-using UnityEngine.Events;
+using Unity.Netcode;
 using XRMultiplayer;
 
 namespace UnityEngine.XR.Content.Interaction
@@ -6,7 +6,7 @@ namespace UnityEngine.XR.Content.Interaction
     /// <summary>
     /// Detects a collision with a tagged collider, replacing this object with a 'broken' version
     /// </summary>
-    public class BreakableTarget : MonoBehaviour
+    public class BreakableTarget : NetworkBehaviour
     {
         public int pointValue = 1;
 
@@ -38,22 +38,39 @@ namespace UnityEngine.XR.Content.Interaction
         {
             if (m_Destroyed) return;
             m_Destroyed = true;
+
             collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
             if (projectile != null && projectile.isLocalPlayerProjectile)
             {
                 projectile.HitTarget(pointValue, true);
             }
+
             var brokenObject = Instantiate(m_BrokenVersion, transform.position, transform.rotation);
             brokenObject.transform.localScale = transform.localScale;
+
             onBreak?.Invoke();
+
             if (!isDisplayObject)
             {
-                Destroy(gameObject);
+                RequestDestroyServerRpc();
             }
             else
             {
                 m_Destroyed = false;
                 gameObject.SetActive(false);
+            }
+        }
+
+        [Rpc(SendTo.Server)]
+        private void RequestDestroyServerRpc()
+        {
+            if (TryGetComponent<NetworkObject>(out var networkObject))
+            {
+                networkObject.Despawn();
+            }
+            else
+            {
+                Destroy(gameObject);
             }
         }
     }
