@@ -16552,6 +16552,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1494467628075285669, guid: 0a72014ba50b48646bb685e3778586aa,
         type: 3}
+      propertyPath: pointValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1494467628075285669, guid: 0a72014ba50b48646bb685e3778586aa,
+        type: 3}
       propertyPath: isDisplayObject
       value: 1
       objectReference: {fileID: 0}

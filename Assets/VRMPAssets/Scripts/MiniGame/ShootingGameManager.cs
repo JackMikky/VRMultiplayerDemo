@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
@@ -77,6 +76,12 @@ public class ShootingGameManager : NetworkBehaviour
         scoreUI.text = "0";
         gameUIGroup.alpha = 0;
         time = maxTime;
+
+        if (players == null || players.Length == 0)
+        {
+            players = new PlayerStats[0];
+        }
+
         foreach (var launcher in launchers)
         {
             launcher.HitTargetAction = this.SetScore;
@@ -118,6 +123,7 @@ public class ShootingGameManager : NetworkBehaviour
         boardUIGroup.alpha = 0;
         subUI.SetActive(false);
         time = maxTime;
+        timeUI.text = Mathf.CeilToInt(time).ToString();
         localPlayer.score = 0;
         foreach (var item in otherObjects)
         {
@@ -183,16 +189,19 @@ public class ShootingGameManager : NetworkBehaviour
             players[players.Length - 1] = playerData;
         }
 
-        PlayerStats topPlayer = players[0];
-        foreach (var player in players)
+        if (players.Length > 0)
         {
-            if (player.score > topPlayer.score)
+            PlayerStats topPlayer = players[0];
+            foreach (var player in players)
             {
-                topPlayer = player;
+                if (player.score > topPlayer.score)
+                {
+                    topPlayer = player;
+                }
             }
-        }
 
-        UpdateTopPlayerRpc(topPlayer);
+            UpdateTopPlayerRpc(topPlayer);
+        }
     }
 
     [Rpc(SendTo.Everyone)]
