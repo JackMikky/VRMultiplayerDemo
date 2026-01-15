@@ -23,6 +23,14 @@ namespace UnityEngine.XR.Content.Interaction
 
         [SerializeField] private bool isDisplayObject = false;
 
+        [SerializeField] private float dispearAfter = 5f;
+
+        private void Start()
+        {
+            if (!isDisplayObject)
+                Invoke(nameof(RequestDestroyServerRpc), dispearAfter + Random.Range(0f, 10f));
+        }
+
         private void OnCollisionEnter(Collision collision)
         {
             if (m_Destroyed)

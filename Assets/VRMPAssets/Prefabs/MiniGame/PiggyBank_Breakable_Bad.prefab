@@ -208,3 +208,4 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   isDisplayObject: 0
+  dispearAfter: 20

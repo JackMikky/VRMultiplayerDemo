@@ -188,6 +188,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   isDisplayObject: 0
+  dispearAfter: 22
 --- !u!114 &1191448783895065747
 MonoBehaviour:
   m_ObjectHideFlags: 0

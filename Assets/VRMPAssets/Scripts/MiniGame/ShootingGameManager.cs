@@ -123,6 +123,7 @@ public class ShootingGameManager : NetworkBehaviour
         boardUIGroup.alpha = 0;
         subUI.SetActive(false);
         time = maxTime;
+        scoreUI.text = "0";
         timeUI.text = Mathf.CeilToInt(time).ToString();
         localPlayer.score = 0;
         foreach (var item in otherObjects)
@@ -192,15 +193,27 @@ public class ShootingGameManager : NetworkBehaviour
         if (players.Length > 0)
         {
             PlayerStats topPlayer = players[0];
+            bool hasValidPlayer = false;
+
             foreach (var player in players)
             {
-                if (player.score > topPlayer.score)
+                if (!string.IsNullOrEmpty(player.name) || player.playerId != 0)
                 {
-                    topPlayer = player;
+                    if (!hasValidPlayer)
+                    {
+                        topPlayer = player;
+                        hasValidPlayer = true;
+                    }
+                    else if (player.score > topPlayer.score)
+                    {
+                        topPlayer = player;
+                    }
                 }
             }
-
-            UpdateTopPlayerRpc(topPlayer);
+            if (hasValidPlayer)
+            {
+                UpdateTopPlayerRpc(topPlayer);
+            }
         }
     }
 

@@ -33,10 +33,6 @@ namespace XRMultiplayer.MiniGames
         private float m_SpawnSphereRadius = 2.5f;
 
         [SerializeField]
-        [Tooltip("Spawn area center offset")]
-        private Vector3 m_SpawnAreaCenter = Vector3.zero;
-
-        [SerializeField]
         [Tooltip("Item spawn position")]
         private Transform m_SpawnTransform;
 
@@ -178,7 +174,7 @@ namespace XRMultiplayer.MiniGames
                 case ColliderType.Box:
                     BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
                     boxCollider.size = m_SpawnAreaSize;
-                    boxCollider.center = m_SpawnAreaCenter;
+                    boxCollider.center = this.transform.localPosition;
                     boxCollider.isTrigger = true;
                     visualizeCollider = boxCollider;
                     break;
@@ -186,7 +182,7 @@ namespace XRMultiplayer.MiniGames
                 case ColliderType.Sphere:
                     SphereCollider sphereCollider = gameObject.AddComponent<SphereCollider>();
                     sphereCollider.radius = m_SpawnSphereRadius;
-                    sphereCollider.center = m_SpawnAreaCenter;
+                    sphereCollider.center = this.transform.localPosition;
                     sphereCollider.isTrigger = true;
                     visualizeCollider = sphereCollider;
                     break;
@@ -206,7 +202,7 @@ namespace XRMultiplayer.MiniGames
             if (m_ColliderType == ColliderType.Box)
             {
                 // Calculate random position inside box
-                localRandomPoint = m_SpawnAreaCenter + new Vector3(
+                localRandomPoint = this.transform.localPosition + new Vector3(
                     Random.Range(-m_SpawnAreaSize.x * 0.5f, m_SpawnAreaSize.x * 0.5f),
                     Random.Range(-m_SpawnAreaSize.y * 0.5f, m_SpawnAreaSize.y * 0.5f),
                     Random.Range(-m_SpawnAreaSize.z * 0.5f, m_SpawnAreaSize.z * 0.5f)
@@ -216,7 +212,7 @@ namespace XRMultiplayer.MiniGames
             {
                 // Calculate random position inside sphere
                 Vector3 randomInsideSphere = Random.insideUnitSphere * m_SpawnSphereRadius;
-                localRandomPoint = m_SpawnAreaCenter + randomInsideSphere;
+                localRandomPoint = this.transform.localPosition + randomInsideSphere;
             }
 
             // Convert from local to world coordinates
@@ -261,7 +257,6 @@ namespace XRMultiplayer.MiniGames
         /// <param name="center">New center offset</param>
         public void SetSpawnAreaCenter(Vector3 center)
         {
-            m_SpawnAreaCenter = center;
 #if UNITY_EDITOR
             // Update collider in Editor
             if (visualizeCollider != null)
@@ -509,7 +504,7 @@ namespace XRMultiplayer.MiniGames
                 if (m_ColliderType == ColliderType.Box)
                 {
                     var size = this.visualizeCollider.bounds.size;
-                    var center = this.visualizeCollider.bounds.center + transform.position;
+                    var center = transform.position;
                     // Draw box (considering rotation)
                     Gizmos.matrix = Matrix4x4.TRS(worldCenter, transform.rotation, Vector3.one);
                     Gizmos.DrawCube(center, size);

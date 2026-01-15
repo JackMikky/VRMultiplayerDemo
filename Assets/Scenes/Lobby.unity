@@ -15086,12 +15086,11 @@ MonoBehaviour:
   - {fileID: 2872804085102359479, guid: 0a72014ba50b48646bb685e3778586aa, type: 3}
   - {fileID: 2044474573068301505, guid: 741d3df0da0c61049821b01d6eb50ab7, type: 3}
   m_ColliderType: 0
-  m_SpawnAreaSize: {x: 23.928652, y: 3.5, z: 23.37}
+  m_SpawnAreaSize: {x: 23.928652, y: 5.2, z: 23.37}
   m_SpawnSphereRadius: 2.5
-  m_SpawnAreaCenter: {x: 0, y: 0, z: 0}
   m_SpawnTransform: {fileID: 1842015052}
   m_SpawnInterval: 2
-  m_MaxSpawnCount: 12
+  m_MaxSpawnCount: 15
   m_RandomSpawnPosition: 1
   UseNavMesh: 1
   m_NavMeshSearchDistance: 10
@@ -15115,7 +15114,7 @@ Transform:
   m_GameObject: {fileID: 1842015048}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.96, z: 1.83}
+  m_LocalPosition: {x: 0, y: 1.28, z: 2.71}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15140,8 +15139,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 23.928652, y: 3.5, z: 23.37}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 23.928652, y: 5.2, z: 23.37}
+  m_Center: {x: 0, y: 1.28, z: 2.71}
 --- !u!1 &1842269165
 GameObject:
   m_ObjectHideFlags: 0
@@ -17211,6 +17210,11 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 3dd65ad0ceb6e2c41a96b15a546cef65, type: 2}
+    - target: {fileID: 5288505034655091391, guid: 4b8d8aa6e49dbae44be25f522cd476c7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5944602407272959347, guid: 4b8d8aa6e49dbae44be25f522cd476c7,
         type: 3}
       propertyPath: m_CastShadows

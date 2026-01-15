@@ -10,7 +10,6 @@ public class SpawnAreaInspector : Editor
     private SerializedProperty m_VisualizeColliderProperty;
     private SerializedProperty m_SpawnAreaSizeProperty;
     private SerializedProperty m_SpawnSphereRadiusProperty;
-    private SerializedProperty m_SpawnAreaCenterProperty;
     private SerializedProperty m_SpawnTransformProperty;
     private SerializedProperty m_SpawnIntervalProperty;
     private SerializedProperty m_MaxSpawnCountProperty;
@@ -28,7 +27,6 @@ public class SpawnAreaInspector : Editor
         m_VisualizeColliderProperty = serializedObject.FindProperty("visualizeCollider");
         m_SpawnAreaSizeProperty = serializedObject.FindProperty("m_SpawnAreaSize");
         m_SpawnSphereRadiusProperty = serializedObject.FindProperty("m_SpawnSphereRadius");
-        m_SpawnAreaCenterProperty = serializedObject.FindProperty("m_SpawnAreaCenter");
         m_SpawnTransformProperty = serializedObject.FindProperty("m_SpawnTransform");
         m_SpawnIntervalProperty = serializedObject.FindProperty("m_SpawnInterval");
         m_MaxSpawnCountProperty = serializedObject.FindProperty("m_MaxSpawnCount");
@@ -87,16 +85,15 @@ public class SpawnAreaInspector : Editor
         }
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(m_SpawnAreaCenterProperty, new GUIContent("Spawn Area Center"));
         if (EditorGUI.EndChangeCheck())
         {
             serializedObject.ApplyModifiedProperties();
             if (spawner.visualizeCollider != null)
             {
                 if (spawner.visualizeCollider is BoxCollider boxCollider)
-                    boxCollider.center = m_SpawnAreaCenterProperty.vector3Value;
+                    boxCollider.center = m_SpawnTransformProperty.vector3Value;
                 else if (spawner.visualizeCollider is SphereCollider sphereCollider)
-                    sphereCollider.center = m_SpawnAreaCenterProperty.vector3Value;
+                    sphereCollider.center = m_SpawnTransformProperty.vector3Value;
             }
         }
 

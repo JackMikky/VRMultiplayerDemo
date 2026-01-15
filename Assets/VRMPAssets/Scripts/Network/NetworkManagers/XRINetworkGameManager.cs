@@ -256,6 +256,8 @@ namespace XRMultiplayer
             {
                 testText.gameObject.SetActive(false);
             }
+#else
+                testText.gameObject.SetActive(false);
 #endif
 
             //if (CurrentSessionType == SessionType.DistributedAuthority)
