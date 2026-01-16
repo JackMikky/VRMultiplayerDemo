@@ -15293,12 +15293,15 @@ MonoBehaviour:
   m_SpawnSphereRadius: 2.5
   m_SpawnTransform: {fileID: 1842015052}
   m_SpawnInterval: 2
-  m_MaxSpawnCount: 15
+  m_MaxSpawnCount: 16
   m_RandomSpawnPosition: 1
   UseNavMesh: 1
   m_NavMeshSearchDistance: 10
   m_HorizontalTolerance: 0.5
   m_MaxRetryAttempts: 5
+  m_UseObjectPool: 1
+  m_InitialPoolSize: 10
+  m_AllowPoolGrowth: 1
   m_GizmoSettings:
     showSpawnArea: 1
     spawnAreaColor: {r: 0, g: 1, b: 1, a: 0.3}

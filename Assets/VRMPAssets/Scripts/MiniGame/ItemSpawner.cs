@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
+using UnityEngine.XR.Content.Interaction;
 
 namespace XRMultiplayer.MiniGames
 {
@@ -12,7 +13,7 @@ namespace XRMultiplayer.MiniGames
     }
 
     /// <summary>
-    /// Network-enabled item spawner
+    /// Network-enabled item spawner with object pooling
     /// </summary>
     public class ItemSpawner : NetworkBehaviour
     {
@@ -64,6 +65,19 @@ namespace XRMultiplayer.MiniGames
         [Tooltip("Maximum retry attempts when NavMesh validation fails")]
         private int m_MaxRetryAttempts = 5;
 
+        [Header("Object Pool Settings")]
+        [SerializeField]
+        [Tooltip("Enable object pooling")]
+        private bool m_UseObjectPool = true;
+
+        [SerializeField]
+        [Tooltip("Initial pool size per prefab")]
+        private int m_InitialPoolSize = 5;
+
+        [SerializeField]
+        [Tooltip("Allow pool to grow beyond initial size")]
+        private bool m_AllowPoolGrowth = true;
+
         [Header("Gizmo Settings")]
         [SerializeField]
         private GizmoSettings m_GizmoSettings = new GizmoSettings
@@ -82,6 +96,12 @@ namespace XRMultiplayer.MiniGames
 
         private float m_SpawnTimer = 0f;
         private int m_CurrentSpawnCount = 0;
+
+        // Object pool management
+        private Dictionary<GameObject, Queue<GameObject>> m_ObjectPools = new Dictionary<GameObject, Queue<GameObject>>();
+
+        private Dictionary<GameObject, GameObject> m_ActiveObjects = new Dictionary<GameObject, GameObject>();
+        private Transform m_PoolContainer;
 
         // List to track spawned instances
         private List<GameObject> m_SpawnedInstances = new List<GameObject>();
@@ -138,10 +158,263 @@ namespace XRMultiplayer.MiniGames
                 }
             }
 
+            // Create pool container
+            if (m_UseObjectPool)
+            {
+                m_PoolContainer = new GameObject("ObjectPool").transform;
+                m_PoolContainer.SetParent(transform);
+                m_PoolContainer.localPosition = Vector3.zero;
+            }
+
 #if UNITY_EDITOR
             // Initialize visualization collider only in Editor
             InitializeSpawnAreaCollider();
 #endif
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            // Initialize object pools on server
+            if (IsServer && m_UseObjectPool)
+            {
+                InitializeObjectPools();
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            // Clean up pools
+            if (IsServer && m_UseObjectPool)
+            {
+                ClearObjectPools();
+            }
+        }
+
+        /// <summary>
+        /// Initialize object pools for all prefabs
+        /// </summary>
+        private void InitializeObjectPools()
+        {
+            foreach (var prefab in m_ItemPrefabs)
+            {
+                if (!m_ObjectPools.ContainsKey(prefab))
+                {
+                    Queue<GameObject> pool = new Queue<GameObject>();
+
+                    for (int i = 0; i < m_InitialPoolSize; i++)
+                    {
+                        GameObject obj = CreatePooledObject(prefab);
+                        pool.Enqueue(obj);
+                    }
+
+                    m_ObjectPools[prefab] = pool;
+                    Debug.Log($"ItemSpawner: Initialized pool for {prefab.name} with {m_InitialPoolSize} objects.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Create a pooled object
+        /// </summary>
+        private GameObject CreatePooledObject(GameObject prefab)
+        {
+            // Don't set parent during instantiation
+            GameObject obj = Instantiate(prefab);
+            obj.transform.position = m_PoolContainer.position;
+            obj.transform.rotation = Quaternion.identity;
+
+            // Spawn NetworkObject immediately FIRST
+            if (obj.TryGetComponent(out NetworkObject networkObject))
+            {
+                networkObject.Spawn();
+            }
+
+            // Configure BreakableTarget AFTER spawning (so IsServer is true)
+            if (obj.TryGetComponent<BreakableTarget>(out var breakableTarget))
+            {
+                breakableTarget.IsPoolObject = true;
+
+                // Register ReturnToPool event to onBreak
+                breakableTarget.onBreak.AddListener(() =>
+                {
+                    ReturnToPool(obj);
+                });
+
+                // Hide via NetworkVariable (will be synced to all clients)
+                breakableTarget.IsVisible = false;
+            }
+
+            return obj;
+        }
+
+        /// <summary>
+        /// Get object from pool or create new one
+        /// </summary>
+        private GameObject GetFromPool(GameObject prefab)
+        {
+            if (!m_ObjectPools.ContainsKey(prefab))
+            {
+                m_ObjectPools[prefab] = new Queue<GameObject>();
+            }
+
+            Queue<GameObject> pool = m_ObjectPools[prefab];
+
+            GameObject obj = null;
+
+            // Try to get from pool
+            while (pool.Count > 0)
+            {
+                obj = pool.Dequeue();
+                if (obj != null)
+                {
+                    break;
+                }
+            }
+
+            // Create new object if pool is empty and growth is allowed
+            if (obj == null)
+            {
+                if (m_AllowPoolGrowth)
+                {
+                    obj = CreatePooledObject(prefab);
+                    Debug.Log($"ItemSpawner: Pool for {prefab.name} expanded.");
+                }
+                else
+                {
+                    Debug.LogWarning($"ItemSpawner: Pool for {prefab.name} is exhausted and growth is disabled.");
+                    return null;
+                }
+            }
+
+            return obj;
+        }
+
+        /// <summary>
+        /// Return object to pool
+        /// </summary>
+        public void ReturnToPool(GameObject obj)
+        {
+            if (!m_UseObjectPool)
+            {
+                // If not using pooling, just destroy
+                if (obj.TryGetComponent(out NetworkObject networkObject))
+                {
+                    if (networkObject.IsSpawned)
+                    {
+                        networkObject.Despawn();
+                    }
+                }
+                Destroy(obj);
+                return;
+            }
+
+            if (!IsServer)
+            {
+                Debug.LogWarning("ItemSpawner: ReturnToPool can only be called on the server.");
+                return;
+            }
+
+            // Remove from active objects tracking
+            if (m_ActiveObjects.ContainsKey(obj))
+            {
+                GameObject prefab = m_ActiveObjects[obj];
+                m_ActiveObjects.Remove(obj);
+
+                // Hide via NetworkVariable
+                if (obj.TryGetComponent<BreakableTarget>(out var breakableTarget))
+                {
+                    breakableTarget.IsVisible = false;
+                }
+
+                // Move to pool position
+                obj.transform.position = m_PoolContainer.position;
+                obj.transform.rotation = Quaternion.identity;
+
+                if (m_ObjectPools.ContainsKey(prefab))
+                {
+                    m_ObjectPools[prefab].Enqueue(obj);
+                }
+
+                // Decrease spawn count
+                m_CurrentSpawnCount--;
+
+                Debug.Log($"ItemSpawner: Returned {obj.name} to pool. Current spawn count: {m_CurrentSpawnCount}");
+            }
+        }
+
+        /// <summary>
+        /// Deactivate object on all clients
+        /// </summary>
+        [Rpc(SendTo.Everyone)]
+        private void DeactivateObjectClientRpc(ulong networkObjectId)
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+            {
+                networkObject.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Activate object on all clients
+        /// </summary>
+        [Rpc(SendTo.Everyone)]
+        private void ActivateObjectClientRpc(ulong networkObjectId, Vector3 position, Quaternion rotation)
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+            {
+                networkObject.transform.position = position;
+                networkObject.transform.rotation = rotation;
+                networkObject.gameObject.SetActive(true);
+
+                // Reset BreakableTarget if present
+                if (networkObject.TryGetComponent<BreakableTarget>(out var breakableTarget))
+                {
+                    breakableTarget.ResetTarget();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clear all object pools
+        /// </summary>
+        private void ClearObjectPools()
+        {
+            // Return all active objects to pool first
+            List<GameObject> activeObjects = new List<GameObject>(m_ActiveObjects.Keys);
+            foreach (var obj in activeObjects)
+            {
+                ReturnToPool(obj);
+                var breakableTarget = obj.GetComponent<BreakableTarget>();
+                breakableTarget?.ResetTarget();
+                breakableTarget?.onBreak.RemoveAllListeners();
+            }
+
+            // Destroy pooled objects
+            foreach (var pool in m_ObjectPools.Values)
+            {
+                while (pool.Count > 0)
+                {
+                    GameObject obj = pool.Dequeue();
+                    if (obj != null)
+                    {
+                        if (obj.TryGetComponent<NetworkObject>(out var networkObject))
+                        {
+                            if (networkObject.IsSpawned)
+                            {
+                                networkObject.Despawn();
+                            }
+                        }
+                        Destroy(obj);
+                    }
+                }
+            }
+
+            m_ObjectPools.Clear();
+            m_ActiveObjects.Clear();
         }
 
 #if UNITY_EDITOR
@@ -269,10 +542,11 @@ namespace XRMultiplayer.MiniGames
 #endif
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (!readyForSpawn)
                 return;
+
             // Check network connection
             if (!NetworkManager.Singleton.IsConnectedClient)
                 return;
@@ -281,15 +555,12 @@ namespace XRMultiplayer.MiniGames
             if (!IsServer)
                 return;
 
-            // Clean up null references from the list
-            m_SpawnedInstances.RemoveAll(item => item == null);
-
             // Check maximum count
-            if (m_SpawnedInstances.Count >= m_MaxSpawnCount)
+            if (m_CurrentSpawnCount >= m_MaxSpawnCount)
                 return;
 
             // Update timer
-            m_SpawnTimer += Time.deltaTime;
+            m_SpawnTimer += Time.fixedDeltaTime;
             if (m_SpawnTimer >= m_SpawnInterval)
             {
                 SpawnRandomItem();
@@ -340,33 +611,96 @@ namespace XRMultiplayer.MiniGames
                     }
                 }
 
-                GameObject spawnedObject = Instantiate(
-                    itemPrefab,
-                    spawnPosition,
-                    spawnTransform.rotation
-                );
+                GameObject spawnedObject;
 
-                // Get NetworkObject and Spawn (share with all clients)
-                if (spawnedObject.TryGetComponent(out NetworkObject networkObject))
+                if (m_UseObjectPool)
                 {
-                    networkObject.Spawn();
-                    m_CurrentSpawnCount++;
+                    // Get from pool
+                    spawnedObject = GetFromPool(itemPrefab);
+                    if (spawnedObject == null)
+                    {
+                        Debug.LogWarning("ItemSpawner: Failed to get object from pool.");
+                        return;
+                    }
 
-                    // Add to spawned instances list
-                    m_SpawnedInstances.Add(spawnedObject);
+                    // Get NetworkObject for RPC
+                    if (!spawnedObject.TryGetComponent(out NetworkObject networkObject))
+                    {
+                        Debug.LogError("ItemSpawner: NetworkObject not found on pooled object.", this);
+                        return;
+                    }
+
+                    // Move to spawn position (server only)
+                    spawnedObject.transform.position = spawnPosition;
+                    spawnedObject.transform.rotation = spawnTransform.rotation;
+
+                    // Sync position and visibility to all clients via RPC
+                    SyncPooledObjectClientRpc(networkObject.NetworkObjectId, spawnPosition, spawnTransform.rotation);
+
+                    // Track which prefab this object came from
+                    m_ActiveObjects[spawnedObject] = itemPrefab;
+
+                    m_CurrentSpawnCount++;
                     spawnSuccessful = true;
+
+                    Debug.Log($"ItemSpawner: Spawned {spawnedObject.name} from pool at {spawnPosition}. Current spawn count: {m_CurrentSpawnCount}");
                 }
                 else
                 {
-                    Debug.LogError("ItemSpawner: NetworkObject not found on spawned object.", this);
-                    Destroy(spawnedObject);
-                    break;
+                    // Traditional instantiation
+                    spawnedObject = Instantiate(
+                        itemPrefab,
+                        spawnPosition,
+                        spawnTransform.rotation
+                    );
+
+                    if (spawnedObject.TryGetComponent<BreakableTarget>(out var breakableTarget))
+                    {
+                        breakableTarget.IsPoolObject = false;
+                    }
+
+                    // Get NetworkObject and Spawn (share with all clients)
+                    if (spawnedObject.TryGetComponent(out NetworkObject networkObject))
+                    {
+                        networkObject.Spawn();
+                        m_CurrentSpawnCount++;
+                        m_SpawnedInstances.Add(spawnedObject);
+                        spawnSuccessful = true;
+                    }
+                    else
+                    {
+                        Debug.LogError("ItemSpawner: NetworkObject not found on spawned object.", this);
+                        Destroy(spawnedObject);
+                        break;
+                    }
                 }
             }
 
             if (!spawnSuccessful && retryCount >= m_MaxRetryAttempts)
             {
                 Debug.LogError($"ItemSpawner: Failed to spawn item after {m_MaxRetryAttempts} attempts. No valid NavMesh positions found.", this);
+            }
+        }
+
+        /// <summary>
+        /// Sync pooled object position, rotation, and visibility to all clients
+        /// </summary>
+        [Rpc(SendTo.Everyone)]
+        private void SyncPooledObjectClientRpc(ulong networkObjectId, Vector3 position, Quaternion rotation)
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+            {
+                // Set position and rotation
+                networkObject.transform.position = position;
+                networkObject.transform.rotation = rotation;
+
+                // Reset and show the target
+                if (networkObject.TryGetComponent<BreakableTarget>(out var breakableTarget))
+                {
+                    breakableTarget.ResetTarget();  // This will set IsVisible = true
+                }
+
+                Debug.Log($"ItemSpawner (Client): Synced {networkObject.name} to position {position}");
             }
         }
 
@@ -401,37 +735,6 @@ namespace XRMultiplayer.MiniGames
         }
 
         /// <summary>
-        /// Manually spawn one item
-        /// </summary>
-        public void SpawnItemManually()
-        {
-            if (!IsOwner)
-                return;
-
-            // Clean up null references
-            m_SpawnedInstances.RemoveAll(item => item == null);
-
-            if (m_SpawnedInstances.Count >= m_MaxSpawnCount)
-            {
-                Debug.LogWarning("ItemSpawner: Maximum spawn count reached.");
-                return;
-            }
-
-            SpawnRandomItem();
-        }
-
-        /// <summary>
-        /// Reset spawn count
-        /// </summary>
-        public void ResetSpawnCount()
-        {
-            if (!IsOwner)
-                return;
-
-            m_CurrentSpawnCount = 0;
-        }
-
-        /// <summary>
         /// Clear all spawned instances (only call on server)
         /// </summary>
         public void ClearAllSpawnedInstances()
@@ -442,45 +745,43 @@ namespace XRMultiplayer.MiniGames
                 return;
             }
 
-            // Clean up null references first
-            m_SpawnedInstances.RemoveAll(item => item == null);
-
-            // Destroy all spawned instances
-            foreach (var instance in m_SpawnedInstances)
+            if (m_UseObjectPool)
             {
-                if (instance != null)
+                // For object pooling, return all active objects to pool
+                List<GameObject> activeObjects = new List<GameObject>(m_ActiveObjects.Keys);
+                foreach (var obj in activeObjects)
                 {
-                    if (instance.TryGetComponent(out NetworkObject networkObject))
-                    {
-                        // Despawn network object
-                        if (networkObject.IsSpawned)
-                        {
-                            networkObject.Despawn();
-                        }
-                    }
-
-                    Destroy(instance);
+                    ReturnToPool(obj);
                 }
             }
+            else
+            {
+                // Clean up null references first
+                m_SpawnedInstances.RemoveAll(item => item == null);
 
-            // Clear the list
-            m_SpawnedInstances.Clear();
+                // Traditional destroy
+                foreach (var instance in m_SpawnedInstances)
+                {
+                    if (instance != null)
+                    {
+                        if (instance.TryGetComponent(out NetworkObject networkObject))
+                        {
+                            if (networkObject.IsSpawned)
+                            {
+                                networkObject.Despawn();
+                            }
+                        }
+                        Destroy(instance);
+                    }
+                }
+
+                m_SpawnedInstances.Clear();
+            }
+
             m_CurrentSpawnCount = 0;
             m_SpawnTimer = 0f;
 
             Debug.Log("ItemSpawner: All spawned instances cleared.");
-        }
-
-        /// <summary>
-        /// Remove a specific instance from the tracking list
-        /// </summary>
-        /// <param name="instance">The instance to remove</param>
-        public void RemoveInstance(GameObject instance)
-        {
-            if (m_SpawnedInstances.Contains(instance))
-            {
-                m_SpawnedInstances.Remove(instance);
-            }
         }
 
         // Gizmos always displayed (even when object is not selected)

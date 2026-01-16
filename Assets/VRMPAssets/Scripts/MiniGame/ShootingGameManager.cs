@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.XR.Content.Interaction;
 using XRMultiplayer;
 using XRMultiplayer.MiniGames;
 
@@ -161,12 +162,13 @@ public class ShootingGameManager : NetworkBehaviour
             SendPlayerDataToServerRpc(localPlayer);
             spawner.ClearAllSpawnedInstances();
             spawner.gameObject.SetActive(false);
-            displayObject.SetActive(true);
             subUI.SetActive(true);
             foreach (var item in otherObjects)
             {
                 item.SetActive(true);
             }
+            if (IsServer)
+                displayObject.GetComponent<BreakableTarget>().IsVisible = (true);
         });
     }
 

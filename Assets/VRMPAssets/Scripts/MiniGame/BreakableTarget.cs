@@ -18,6 +18,10 @@ namespace UnityEngine.XR.Content.Interaction
         [Tooltip("The tag a collider must have to cause this object to break.")]
         private string m_ColliderTag = "Destroyer";
 
+        [SerializeField]
+        [Tooltip("Lifetime of the broken version before it's destroyed")]
+        private float m_BrokenVersionLifetime = 3f;
+
         private bool m_Destroyed = false;
         public CustomEvent onBreak;
 
@@ -25,9 +29,78 @@ namespace UnityEngine.XR.Content.Interaction
 
         [SerializeField] private float dispearAfter = 5f;
 
+        [SerializeField]
+        private NetworkVariable<bool> isPoolObject = new NetworkVariable<bool>(
+            false,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+        [SerializeField]
+        private NetworkVariable<bool> isVisible = new NetworkVariable<bool>(
+            false,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+        public bool IsPoolObject
+        {
+            get => isPoolObject.Value;
+            set
+            {
+                if (IsServer)
+                {
+                    isPoolObject.Value = value;
+                }
+            }
+        }
+
+        public bool IsVisible
+        {
+            get => isVisible.Value;
+            set
+            {
+                if (IsServer)
+                {
+                    isVisible.Value = value;
+                }
+            }
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            // Subscribe to visibility changes
+            isVisible.OnValueChanged += OnVisibilityChanged;
+
+            // Apply initial visibility state
+            if (isDisplayObject)
+            {
+                isVisible.Value = true;
+            }
+            OnVisibilityChanged(false, isVisible.Value);
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            // Unsubscribe from visibility changes
+            isVisible.OnValueChanged -= OnVisibilityChanged;
+        }
+
+        private void OnVisibilityChanged(bool previousValue, bool newValue)
+        {
+            gameObject.SetActive(newValue);
+
+            if (newValue)
+            {
+                m_Destroyed = false;
+            }
+        }
+
         private void Start()
         {
-            if (!isDisplayObject)
+            if (!isDisplayObject && !isPoolObject.Value && IsServer)
                 Invoke(nameof(RequestDestroyServerRpc), dispearAfter + Random.Range(0f, 10f));
         }
 
@@ -38,35 +111,112 @@ namespace UnityEngine.XR.Content.Interaction
 
             if (collision.gameObject.CompareTag(m_ColliderTag))
             {
-                Break(collision);
+                // Call server RPC to break the target
+                BreakServerRpc(collision.relativeVelocity, collision.GetContact(0).point);
+                collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
+                if (projectile != null && projectile.isLocalPlayerProjectile)
+                {
+                    projectile.HitTarget(pointValue, true);
+                }
             }
         }
 
-        public void Break(Collision collision)
+        /// <summary>
+        /// Server RPC to handle breaking the target
+        /// </summary>
+        [Rpc(SendTo.Server)]
+        private void BreakServerRpc(Vector3 impactVelocity, Vector3 impactPoint)
         {
             if (m_Destroyed) return;
+
+            // Execute break on server and propagate to all clients
+            BreakClientRpc(impactVelocity, impactPoint);
+        }
+
+        /// <summary>
+        /// Client RPC to break the target on all clients
+        /// </summary>
+        [Rpc(SendTo.Everyone)]
+        private void BreakClientRpc(Vector3 impactVelocity, Vector3 impactPoint)
+        {
+            if (m_Destroyed) return;
+
+            ExecuteBreak(impactPoint);
+        }
+
+        /// <summary>
+        /// Execute the break logic (called on all clients)
+        /// </summary>
+        private void ExecuteBreak(Vector3 impactPoint)
+        {
             m_Destroyed = true;
 
-            collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
-            if (projectile != null && projectile.isLocalPlayerProjectile)
+            // Create broken version (visual effect only)
+            if (m_BrokenVersion != null)
             {
-                projectile.HitTarget(pointValue, true);
+                var brokenObject = Instantiate(m_BrokenVersion, transform.position, transform.rotation);
+                brokenObject.transform.localScale = transform.localScale;
+
+                // Destroy broken version after a delay
+                Destroy(brokenObject, m_BrokenVersionLifetime);
             }
 
-            var brokenObject = Instantiate(m_BrokenVersion, transform.position, transform.rotation);
-            brokenObject.transform.localScale = transform.localScale;
+            // Invoke onBreak event (this will trigger ReturnToPool on server)
+            if (IsServer)
+            {
+                onBreak?.Invoke();
+            }
 
-            onBreak?.Invoke();
-
+            // Handle object lifecycle
             if (!isDisplayObject)
             {
-                RequestDestroyServerRpc();
+                if (isPoolObject.Value)
+                {
+                    // Pool object: hide via NetworkVariable (synced to all clients)
+                    if (IsServer)
+                    {
+                        isVisible.Value = false;
+                    }
+                    // onBreak event will trigger ReturnToPool on server
+                }
+                else
+                {
+                    // Non-pool object: destroy normally
+                    if (IsServer)
+                    {
+                        RequestDestroyServerRpc();
+                    }
+                }
             }
             else
             {
                 m_Destroyed = false;
-                gameObject.SetActive(false);
+                if (IsServer)
+                {
+                    isVisible.Value = false;
+                }
             }
+        }
+
+        /// <summary>
+        /// Legacy Break method (for backward compatibility)
+        /// </summary>
+        public void Break(Collision collision)
+        {
+            if (m_Destroyed) return;
+
+            // Get projectile for score calculation (server only)
+            if (IsServer)
+            {
+                collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
+                if (projectile != null && projectile.isLocalPlayerProjectile)
+                {
+                    projectile.HitTarget(pointValue, true);
+                }
+            }
+
+            // Call server RPC to synchronize break across network
+            BreakServerRpc(collision.relativeVelocity, collision.GetContact(0).point);
         }
 
         [Rpc(SendTo.Server)]
@@ -74,12 +224,39 @@ namespace UnityEngine.XR.Content.Interaction
         {
             if (TryGetComponent<NetworkObject>(out var networkObject))
             {
-                networkObject.Despawn();
+                if (networkObject.IsSpawned)
+                {
+                    networkObject.Despawn();
+                }
             }
             else
             {
                 Destroy(gameObject);
             }
+        }
+
+        /// <summary>
+        /// Reset target state (called when retrieved from pool)
+        /// </summary>
+        public void ResetTarget()
+        {
+            m_Destroyed = false;
+
+            // Show via NetworkVariable (server only)
+            if (IsServer)
+            {
+                isVisible.Value = true;
+            }
+
+            // Cancel any pending invokes
+            CancelInvoke();
+        }
+
+        private void OnDestroy()
+        {
+            // Clean up any pending invokes
+            CancelInvoke();
+            onBreak?.RemoveAllListeners();
         }
     }
 }

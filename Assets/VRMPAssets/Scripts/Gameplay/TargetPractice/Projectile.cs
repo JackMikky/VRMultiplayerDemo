@@ -47,6 +47,8 @@ namespace XRMultiplayer
 
         private Rigidbody m_Rigidybody;
 
+        [SerializeField] private string m_ColliderTag = "Piggy";
+
         /// <summary>
         /// Sets up the projectile with the specified parameters.
         /// </summary>
@@ -102,9 +104,9 @@ namespace XRMultiplayer
         /// <inheritdoc/>
         private void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Target"))
+            if (other.CompareTag(m_ColliderTag))
             {
-                HitTarget(other.GetComponentInParent<Target>());
+                //HitTarget(other.GetComponentInParent<Target>());
             }
         }
 
