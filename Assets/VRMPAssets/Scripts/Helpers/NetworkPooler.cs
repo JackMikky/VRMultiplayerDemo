@@ -68,9 +68,6 @@ namespace XRMultiplayer
             }
         }
 
-        /// <summary>
-        /// 客户端收集已由服务器生成的对象
-        /// </summary>
         private void CollectExistingPooledObjects()
         {
             m_Pool.Clear();
