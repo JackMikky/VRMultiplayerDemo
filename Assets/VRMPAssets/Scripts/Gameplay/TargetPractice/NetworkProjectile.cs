@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.XR.Content.Interaction;
 
 namespace XRMultiplayer
 {
@@ -25,12 +26,18 @@ namespace XRMultiplayer
         );
 
         private NetworkVariable<bool> m_Visible = new NetworkVariable<bool>(
-            true,
+            false,
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server
         );
 
         public bool Visible { get => m_Visible.Value; set => m_Visible.Value = value; }
+
+        [ServerRpc]
+        public void SetVisibleServerRpc(bool value)
+        {
+            this.Visible = value;
+        }
 
         private Action<NetworkProjectile> m_OnReturnToPool;
         private Action<int, bool> m_HitAction;
@@ -50,7 +57,7 @@ namespace XRMultiplayer
         {
             base.OnNetworkSpawn();
             m_ProjectileColor.OnValueChanged += OnColorChanged;
-            m_Visible.OnValueChanged += OnActiveStateChanged;
+            m_Visible.OnValueChanged += OnVisibleChanged;
 
             // Apply initial color
             ApplyColor(m_ProjectileColor.Value);
@@ -60,7 +67,7 @@ namespace XRMultiplayer
         {
             base.OnNetworkDespawn();
             m_ProjectileColor.OnValueChanged -= OnColorChanged;
-            m_Visible.OnValueChanged -= OnActiveStateChanged;
+            m_Visible.OnValueChanged -= OnVisibleChanged;
         }
 
         private void OnColorChanged(Color previousValue, Color newValue)
@@ -77,13 +84,25 @@ namespace XRMultiplayer
             }
         }
 
-        private void OnActiveStateChanged(bool previousValue, bool newValue)
+        private void OnVisibleChanged(bool previousValue, bool newValue)
         {
             gameObject.SetActive(newValue);
             if (!newValue && m_TrailRenderer != null)
             {
                 m_TrailRenderer.Clear();
             }
+        }
+
+        [Rpc(SendTo.Server)]
+        public void SetupByServerRpc(bool localPlayer, Color playerColor)
+        {
+            this.Setup(localPlayer, playerColor);
+        }
+
+        public void SetupAction(Action<NetworkProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
+        {
+            m_OnReturnToPool = returnToPoolAction;
+            m_HitAction = hitTargetAction;
         }
 
         /// <summary>
@@ -126,74 +145,30 @@ namespace XRMultiplayer
             ResetProjectile();
         }
 
-        private void FixedUpdate()
-        {
-            // Only server handles hit detection
-            if (!IsServer || m_HasHitTarget) return;
-
-            if (Physics.Linecast(m_PrevPos, transform.position, out m_Hit))
-            {
-                if (m_Hit.transform.CompareTag("Target"))
-                {
-                    HitTarget(m_Hit.transform.GetComponentInParent<Target>());
-                }
-
-                CheckForInteractableHit(m_Hit.transform);
-            }
-
-            m_PrevPos = transform.position;
-        }
-
         private void OnCollisionEnter(Collision collision)
         {
-            if (!IsServer) return;
-            CheckForInteractableHit(collision.transform);
-        }
-
-        private void CheckForInteractableHit(Transform t)
-        {
-            NetworkPhysicsInteractable networkPhysicsInteractable = t.GetComponentInParent<NetworkPhysicsInteractable>();
-            if (networkPhysicsInteractable != null)
+            if (collision.gameObject.CompareTag(m_ColliderTag))
             {
-                networkPhysicsInteractable.RequestOwnership();
+                if (IsClient)
+                    HitTarget(collision);
             }
         }
 
-        /// <summary>
-        /// Called when the projectile hits a target.
-        /// </summary>
-        protected virtual void HitTarget(Target target)
+        public void HitTarget(Collision collision)
         {
-            if (target != null)
+            if (collision.gameObject.CompareTag(m_ColliderTag))
             {
-                target.TargetHitLocal();
-            }
-            m_HasHitTarget = true;
-        }
-
-        /// <summary>
-        /// Called when a target is hit with score.
-        /// </summary>
-        public void HitTarget(int score, bool isLocalPlayer)
-        {
-            if (IsServer)
-            {
-                HitTargetClientRpc(score, isLocalPlayer);
+                if (collision.gameObject.TryGetComponent<BreakableTarget>(out var breakableTarget))
+                {
+                    var score = breakableTarget.pointValue;
+                    m_HitAction?.Invoke(score, IsClient);
+                    HitTargetServerRpc();
+                }
             }
         }
 
-        [Rpc(SendTo.Everyone)]
-        private void HitTargetClientRpc(int score, bool isLocalPlayer)
-        {
-            m_HitAction?.Invoke(score, isLocalPlayer);
-            if (IsServer)
-            {
-                ResetProjectile();
-            }
-        }
-
-        [ClientRpc(RequireOwnership = false)]
-        public void ResetProjectileClientRpc()
+        [ServerRpc]
+        private void HitTargetServerRpc()
         {
             ResetProjectile();
         }

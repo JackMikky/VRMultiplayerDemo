@@ -60,7 +60,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (IsOwner)
+        if (IsServer)
         {
             m_ProjectileColor.Value = XRINetworkGameManager.LocalPlayerColor.Value;
         }
@@ -90,11 +90,18 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             projectile.transform.SetPositionAndRotation(m_StartPoint.position, m_StartPoint.rotation);
             if (hitTargetAction != null)
             {
-                //todo:Server and Client functions should be separated
-                projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction);
+                if (IsServer)
+                {
+                    projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction);
+                }
+                else
+                {
+                    projectile.SetupByServerRpc(IsOwner, fireColor);
+                    projectile.SetupAction(OnProjectileDestroy, hitTargetAction);
+                }
             }
 
-            m_AudioSource.PlayOneShot(m_AudioClip);
+            PlayAudioServerRpc();
 
             if (newObject.TryGetComponent(out Rigidbody rigidBody))
             {
@@ -110,6 +117,12 @@ public class NetworkProjectileLauncher : NetworkBehaviour
                 m_ProjectileQueue[0].ResetProjectile();
             }
         }
+    }
+
+    [ServerRpc]
+    public void PlayAudioServerRpc()
+    {
+        m_AudioSource.PlayOneShot(m_AudioClip);
     }
 
     private void OnProjectileDestroy(NetworkProjectile projectile)

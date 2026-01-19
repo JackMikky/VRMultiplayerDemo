@@ -58,12 +58,41 @@ namespace XRMultiplayer
         {
             base.OnNetworkSpawn();
 
-            Debug.Log($"[NetworkPooler] OnNetworkSpawn - IsServer: {IsServer}, IsHost: {IsHost}, IsClient: {IsClient}, IsSpawned: {IsSpawned}");
-
             if (IsServer)
             {
                 InitializePool();
             }
+            else
+            {
+                CollectExistingPooledObjects();
+            }
+        }
+
+        /// <summary>
+        /// 客户端收集已由服务器生成的对象
+        /// </summary>
+        private void CollectExistingPooledObjects()
+        {
+            m_Pool.Clear();
+            m_ActiveObjects.Clear();
+
+            foreach (Transform child in transform)
+            {
+                if (child.TryGetComponent<NetworkProjectile>(out var projectile))
+                {
+                    if (projectile.Visible)
+                    {
+                        m_ActiveObjects.Add(child.gameObject);
+                    }
+                    else
+                    {
+                        m_Pool.Add(child.gameObject);
+                    }
+                }
+            }
+
+            m_IsInitialized = true;
+            Debug.Log($"[NetworkPooler] Client collected {m_Pool.Count} pooled + {m_ActiveObjects.Count} active objects.");
         }
 
         public override void OnNetworkDespawn()
@@ -88,7 +117,11 @@ namespace XRMultiplayer
                 GameObject obj = CreatePooledObject();
                 if (obj != null)
                 {
-                    m_Pool.Add(obj);
+                    if (obj.TryGetComponent<NetworkProjectile>(out var networkProjectile))
+                    {
+                        networkProjectile.Visible = false;
+                        m_Pool.Add(obj);
+                    }
                 }
             }
 
@@ -128,18 +161,17 @@ namespace XRMultiplayer
         {
             Debug.Log($"[NetworkPooler] GetItem called - IsServer: {IsServer}, IsSpawned: {IsSpawned}, IsInitialized: {m_IsInitialized}, PoolCount: {m_Pool.Count}");
 
-            // 僾乕儖偑弶婜壔偝傟偰偄側偄応崌丄僒乕僶乕偱弶婜壔
             if (!m_IsInitialized && IsServer)
             {
                 Debug.LogWarning("[NetworkPooler] Pool not initialized. Initializing now...");
                 InitializePool();
             }
 
-            if (!IsServer)
-            {
-                Debug.LogWarning($"[NetworkPooler] GetItem can only be called on the server. Current state - IsServer: {IsServer}, IsHost: {IsHost}");
-                return null;
-            }
+            //if (!IsServer)
+            //{
+            //    Debug.LogWarning($"[NetworkPooler] GetItem can only be called on the server. Current state - IsServer: {IsServer}, IsHost: {IsHost}");
+            //    return null;
+            //}
 
             GameObject obj = null;
 
@@ -172,7 +204,7 @@ namespace XRMultiplayer
                 if (obj.TryGetComponent<NetworkProjectile>(out var networkProjectile))
                 {
                     m_ActiveObjects.Add(obj);
-                    networkProjectile.Visible = true;
+
                     return obj;
                 }
             }
@@ -221,7 +253,7 @@ namespace XRMultiplayer
         [ClientRpc]
         private void SetObjectActiveClientRpc(ulong networkObjectId, bool isActive)
         {
-            if (IsServer) return; // 僒乕僶乕偼婛偵儘乕僇儖偱張棟嵪傒
+            if (IsServer) return;
 
             if (NetworkManager.Singleton != null &&
                 NetworkManager.Singleton.SpawnManager != null &&

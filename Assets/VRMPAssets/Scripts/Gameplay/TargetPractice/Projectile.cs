@@ -106,7 +106,7 @@ namespace XRMultiplayer
         {
             if (other.CompareTag(m_ColliderTag))
             {
-                //HitTarget(other.GetComponentInParent<Target>());
+                //HitTargetServerRpc(other.GetComponentInParent<Target>());
             }
         }
 
