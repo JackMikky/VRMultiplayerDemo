@@ -21,7 +21,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     [Tooltip("The speed at which the projectile is launched")]
     private int m_MaxProjectilesAllowed = 15;
 
-    private readonly List<Projectile> m_ProjectileQueue = new();
+    private readonly List<NetworkProjectile> m_ProjectileQueue = new();
 
     [Header("Audio")]
     [SerializeField] private AudioSource m_AudioSource;
@@ -42,7 +42,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     /// </remarks>
     private Color m_BackupColor;
 
-    private PoolerProjectiles m_ProjectilePooler;
+    private NetworkPooler m_ProjectilePooler;
 
     private Action<int, bool> hitTargetAction;
 
@@ -53,7 +53,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
 
     private void Awake()
     {
-        m_ProjectilePooler = FindFirstObjectByType<PoolerProjectiles>();
+        m_ProjectilePooler = FindFirstObjectByType<NetworkPooler>();
     }
 
     /// <inheritdoc/>
@@ -81,7 +81,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             }
 
             GameObject newObject = m_ProjectilePooler.GetItem();
-            if (!newObject.TryGetComponent(out Projectile projectile))
+            if (!newObject.TryGetComponent(out NetworkProjectile projectile))
             {
                 Utils.Log("Projectile component not found on projectile object.", 1);
                 return;
@@ -90,6 +90,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             projectile.transform.SetPositionAndRotation(m_StartPoint.position, m_StartPoint.rotation);
             if (hitTargetAction != null)
             {
+                //todo:Server and Client functions should be separated
                 projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction);
             }
 
@@ -111,7 +112,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
         }
     }
 
-    private void OnProjectileDestroy(Projectile projectile)
+    private void OnProjectileDestroy(NetworkProjectile projectile)
     {
         if (m_ProjectileQueue.Contains(projectile))
         {
