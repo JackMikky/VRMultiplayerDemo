@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.XR.Content.Interaction;
 
 namespace XRMultiplayer
@@ -26,7 +27,7 @@ namespace XRMultiplayer
         );
 
         private NetworkVariable<bool> m_Visible = new NetworkVariable<bool>(
-            false,
+            true,
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server
         );
@@ -59,8 +60,8 @@ namespace XRMultiplayer
             m_ProjectileColor.OnValueChanged += OnColorChanged;
             m_Visible.OnValueChanged += OnVisibleChanged;
 
-            // Apply initial color
             ApplyColor(m_ProjectileColor.Value);
+            gameObject.SetActive(m_Visible.Value);
         }
 
         public override void OnNetworkDespawn()
@@ -86,17 +87,32 @@ namespace XRMultiplayer
 
         private void OnVisibleChanged(bool previousValue, bool newValue)
         {
-            gameObject.SetActive(newValue);
-            if (!newValue && m_TrailRenderer != null)
+            if (newValue)
             {
-                m_TrailRenderer.Clear();
+                gameObject.SetActive(true);
+            }
+            else
+            {
+                if (m_TrailRenderer != null)
+                {
+                    m_TrailRenderer.Clear();
+                }
+
+                gameObject.SetActive(false);
             }
         }
 
         [Rpc(SendTo.Server)]
-        public void SetupByServerRpc(bool localPlayer, Color playerColor)
+        public void SetupByServerRpc(Color playerColor)
         {
-            this.Setup(localPlayer, playerColor);
+            this.Setup(playerColor);
+        }
+
+        [Rpc(SendTo.Server)]
+        public void SetTransformByServerRpc(Vector3 position, Quaternion rotation)
+        {
+            transform.position = position;
+            transform.rotation = rotation;
         }
 
         public void SetupAction(Action<NetworkProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
@@ -108,7 +124,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Setup the projectile with parameters. Call on server only.
         /// </summary>
-        public void Setup(bool localPlayer, Color playerColor, Action<NetworkProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
+        public void Setup(Color playerColor, Action<NetworkProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
         {
             if (!IsServer)
             {
@@ -171,6 +187,16 @@ namespace XRMultiplayer
         private void HitTargetServerRpc()
         {
             ResetProjectile();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void FireServerRpc(Vector3 force)
+        {
+            this.m_Rigidbody.isKinematic = false;
+            this.m_Rigidbody.useGravity = true;
+            this.m_Rigidbody.linearVelocity = Vector3.zero;
+            this.m_Rigidbody.angularVelocity = Vector3.zero;
+            this.m_Rigidbody.AddForce(force);
         }
 
         /// <summary>

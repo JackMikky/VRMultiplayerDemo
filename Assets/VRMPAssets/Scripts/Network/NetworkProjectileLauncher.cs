@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using XRMultiplayer;
 
@@ -74,52 +75,59 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     {
         if (activate)
         {
-            Color fireColor = m_BackupColor;
-            if (m_ProjectileColor.Value != default)
+            if (!IsServer)
             {
-                fireColor = m_ProjectileColor.Value;
-            }
-
-            GameObject newObject = m_ProjectilePooler.GetItem();
-            if (!newObject.TryGetComponent(out NetworkProjectile projectile))
-            {
-                Utils.Log("Projectile component not found on projectile object.", 1);
-                return;
-            }
-
-            projectile.transform.SetPositionAndRotation(m_StartPoint.position, m_StartPoint.rotation);
-            if (hitTargetAction != null)
-            {
-                if (IsServer)
-                {
-                    projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction);
-                }
-                else
-                {
-                    projectile.SetupByServerRpc(IsOwner, fireColor);
-                    projectile.SetupAction(OnProjectileDestroy, hitTargetAction);
-                }
-            }
-
-            PlayAudioServerRpc();
-
-            if (newObject.TryGetComponent(out Rigidbody rigidBody))
-            {
-                rigidBody.isKinematic = true;
-                rigidBody.isKinematic = false;
-                Vector3 force = m_StartPoint.forward * m_LaunchSpeed;
-                rigidBody.AddForce(force);
-            }
-
-            m_ProjectileQueue.Add(projectile);
-            if (m_ProjectileQueue.Count > m_MaxProjectilesAllowed)
-            {
-                m_ProjectileQueue[0].ResetProjectile();
+                // クライアントからサーバーに発射リクエストを送信
+                FireProjectileServerRpc(m_StartPoint.position, m_StartPoint.rotation, m_StartPoint.forward);
+                PlayAudioServerRpc();
             }
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
+    private void FireProjectileServerRpc(Vector3 startPosition, Quaternion startRotation, Vector3 forward, ServerRpcParams rpcParams = default)
+    {
+        GameObject newObject = m_ProjectilePooler.GetItem();
+        if (!newObject.TryGetComponent(out NetworkProjectile projectile))
+        {
+            Utils.Log("Projectile component not found on projectile object.", 1);
+            return;
+        }
+
+        Color fireColor = m_BackupColor;
+        if (m_ProjectileColor.Value != default)
+        {
+            fireColor = m_ProjectileColor.Value;
+        }
+
+        // プロジェクタイルの所有権を発射したクライアントに移譲
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        if (newObject.TryGetComponent<NetworkObject>(out var networkObject))
+        {
+            networkObject.ChangeOwnership(clientId);
+        }
+
+        // Setup
+        if (hitTargetAction != null)
+            projectile.Setup(fireColor, OnProjectileDestroy, hitTargetAction);
+
+        // Teleport
+        if (newObject.TryGetComponent<ClientNetworkTransform>(out var clientTransform))
+        {
+            clientTransform.Teleport(startPosition, startRotation, newObject.transform.localScale);
+        }
+
+        // 物理操作
+        projectile.FireServerRpc(forward * m_LaunchSpeed);
+
+        m_ProjectileQueue.Add(projectile);
+        if (m_ProjectileQueue.Count > m_MaxProjectilesAllowed)
+        {
+            m_ProjectileQueue[0].ResetProjectile();
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
     public void PlayAudioServerRpc()
     {
         m_AudioSource.PlayOneShot(m_AudioClip);

@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Services.Matchmaker.Models;
@@ -33,6 +34,12 @@ namespace XRMultiplayer
 
         private bool m_IsInitialized = false;
 
+        private NetworkVariable<bool> m_ServerInitialized = new NetworkVariable<bool>(
+            false,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server
+        );
+
         private void Awake()
         {
             ValidatePrefab();
@@ -61,14 +68,29 @@ namespace XRMultiplayer
             if (IsServer)
             {
                 InitializePool();
+                m_ServerInitialized.Value = true;  // サーバー初期化完了を通知
             }
             else
             {
-                CollectExistingPooledObjects();
+                StartCoroutine(WaitForServerInitialization());
             }
         }
 
-        private void CollectExistingPooledObjects()
+        private IEnumerator WaitForServerInitialization()
+        {
+            // サーバーの初期化完了を待つ
+            while (!m_ServerInitialized.Value)
+            {
+                yield return null;
+            }
+
+            // さらに少し待ってオブジェクトの同期を確保
+            yield return new WaitForSeconds(0.2f);
+
+            yield return CollectExistingPooledObjects();
+        }
+
+        private IEnumerator CollectExistingPooledObjects()
         {
             m_Pool.Clear();
             m_ActiveObjects.Clear();
@@ -90,6 +112,7 @@ namespace XRMultiplayer
 
             m_IsInitialized = true;
             Debug.Log($"[NetworkPooler] Client collected {m_Pool.Count} pooled + {m_ActiveObjects.Count} active objects.");
+            yield return null;
         }
 
         public override void OnNetworkDespawn()
@@ -138,10 +161,12 @@ namespace XRMultiplayer
                 networkObject.Spawn();
 
                 obj.transform.SetParent(this.transform);
-                obj.transform.position = this.transform.position;
+                obj.transform.position = this.spawnPosition.position;
 
-                // Deactivate directly (spawned objects are synced)
-                obj.GetComponent<NetworkProjectile>().Visible = false;
+                if (obj.TryGetComponent<NetworkProjectile>(out var projectile))
+                {
+                    projectile.Visible = false;
+                }
 
                 return obj;
             }
