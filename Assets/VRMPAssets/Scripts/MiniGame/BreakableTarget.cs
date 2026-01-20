@@ -69,22 +69,22 @@ namespace UnityEngine.XR.Content.Interaction
         {
             base.OnNetworkSpawn();
 
-            // Subscribe to visibility changes
             isVisible.OnValueChanged += OnVisibilityChanged;
-
-            // Apply initial visibility state
-            if (isDisplayObject)
+            if (IsServer)
             {
-                isVisible.Value = true;
+                if (isDisplayObject)
+                {
+                    isVisible.Value = true;
+                }
+                OnVisibilityChanged(false, isVisible.Value);
             }
-            OnVisibilityChanged(false, isVisible.Value);
+            gameObject.SetActive(isVisible.Value);
         }
 
         public override void OnNetworkDespawn()
         {
             base.OnNetworkDespawn();
 
-            // Unsubscribe from visibility changes
             isVisible.OnValueChanged -= OnVisibilityChanged;
         }
 
