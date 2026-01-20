@@ -125,29 +125,29 @@ namespace UnityEngine.XR.Content.Interaction
         /// Server RPC to handle breaking the target
         /// </summary>
         [Rpc(SendTo.Server)]
-        private void BreakServerRpc(Vector3 impactVelocity, Vector3 impactPoint)
+        private void BreakServerRpc()
         {
             if (m_Destroyed) return;
 
             // Execute break on server and propagate to all clients
-            BreakClientRpc(impactVelocity, impactPoint);
+            BreakClientRpc();
         }
 
         /// <summary>
         /// Client RPC to break the target on all clients
         /// </summary>
         [Rpc(SendTo.Everyone)]
-        private void BreakClientRpc(Vector3 impactVelocity, Vector3 impactPoint)
+        private void BreakClientRpc()
         {
             if (m_Destroyed) return;
 
-            ExecuteBreak(impactPoint);
+            ExecuteBreak();
         }
 
         /// <summary>
         /// Execute the break logic (called on all clients)
         /// </summary>
-        private void ExecuteBreak(Vector3 impactPoint)
+        private void ExecuteBreak()
         {
             m_Destroyed = true;
 
@@ -216,7 +216,7 @@ namespace UnityEngine.XR.Content.Interaction
             }
 
             // Call server RPC to synchronize break across network
-            BreakServerRpc(collision.relativeVelocity, collision.GetContact(0).point);
+            BreakServerRpc();
         }
 
         [Rpc(SendTo.Server)]
