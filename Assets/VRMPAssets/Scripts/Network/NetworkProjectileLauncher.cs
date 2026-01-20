@@ -77,7 +77,6 @@ public class NetworkProjectileLauncher : NetworkBehaviour
         {
             if (!IsServer)
             {
-                // クライアントからサーバーに発射リクエストを送信
                 FireProjectileServerRpc(m_StartPoint.position, m_StartPoint.rotation, m_StartPoint.forward);
                 PlayAudioServerRpc();
             }
@@ -100,7 +99,6 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             fireColor = m_ProjectileColor.Value;
         }
 
-        // プロジェクタイルの所有権を発射したクライアントに移譲
         ulong clientId = rpcParams.Receive.SenderClientId;
         if (newObject.TryGetComponent<NetworkObject>(out var networkObject))
         {
@@ -117,7 +115,6 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             clientTransform.Teleport(startPosition, startRotation, newObject.transform.localScale);
         }
 
-        // 物理操作
         projectile.FireServerRpc(forward * m_LaunchSpeed);
 
         m_ProjectileQueue.Add(projectile);
