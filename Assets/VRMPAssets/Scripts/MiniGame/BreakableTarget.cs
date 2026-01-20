@@ -112,7 +112,7 @@ namespace UnityEngine.XR.Content.Interaction
             if (collision.gameObject.CompareTag(m_ColliderTag))
             {
                 // Call server RPC to break the target
-                BreakServerRpc(collision.relativeVelocity, collision.GetContact(0).point);
+                BreakServerRpc();
                 collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
                 if (projectile != null && projectile.isLocalPlayerProjectile)
                 {
