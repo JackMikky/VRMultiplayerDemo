@@ -9,7 +9,7 @@ namespace XRMultiplayer
         /// The Prefab to spawn and use for pooling.
         /// </summary>
         [SerializeField, Tooltip("The Prefab to spawn and use for pooling")]
-        GameObject m_SpawnPrefab;
+        protected GameObject m_SpawnPrefab;
 
         /// <summary>
         /// Collection checks are performed when an instance is returned back to the pool.
@@ -17,13 +17,13 @@ namespace XRMultiplayer
         /// Collection checks are only performed in the Editor.
         /// </summary>
         [SerializeField, Tooltip("An exception will be thrown if the instance is already in the pool")]
-        bool m_UseCollectionChecks = true;
+        private bool m_UseCollectionChecks = true;
 
         /// <summary>
         /// The default capacity the pool will be created with.
         /// </summary>
         [SerializeField, Tooltip("he default capacity the pool will be created with")]
-        int m_DefaultCapacity = 30;
+        private int m_DefaultCapacity = 30;
 
         /// <summary>
         /// The maximum size of the pool.
@@ -31,15 +31,15 @@ namespace XRMultiplayer
         /// This can be used to prevent the pool growing to a very large size
         /// </summary>
         [SerializeField, Tooltip("The maximum size of the pool")]
-        int m_MaxCapacity = 1000;
+        private int m_MaxCapacity = 1000;
 
         /// <summary>
         /// If true, the spawned object will be parented under the transform of the Pooler.
         /// </summary>
         [SerializeField, Tooltip("Spawned objects will be parented under this Transform")]
-        bool m_ParentUnderTransform = false;
+        protected bool m_ParentUnderTransform = false;
 
-        IObjectPool<GameObject> m_Pool;
+        protected IObjectPool<GameObject> m_Pool;
 
         protected virtual void Start()
         {
@@ -52,7 +52,7 @@ namespace XRMultiplayer
             OnDestroyPoolObject, m_UseCollectionChecks, m_DefaultCapacity, m_MaxCapacity);
         }
 
-        protected GameObject CreateNewObject()
+        protected virtual GameObject CreateNewObject()
         {
             GameObject spawnedObject = Instantiate(m_SpawnPrefab);
             if (m_ParentUnderTransform)
@@ -68,7 +68,6 @@ namespace XRMultiplayer
         {
             go.SetActive(true);
         }
-
 
         /// <summary>
         /// Called when returning an instance to the pool.

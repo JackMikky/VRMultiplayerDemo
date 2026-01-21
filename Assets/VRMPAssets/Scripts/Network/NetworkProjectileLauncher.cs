@@ -21,7 +21,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     [Tooltip("The speed at which the projectile is launched")]
     private int m_MaxProjectilesAllowed = 15;
 
-    private readonly List<Projectile> m_ProjectileQueue = new();
+    private readonly List<CustomProjectile> m_ProjectileQueue = new();
 
     [Header("Audio")]
     [SerializeField] private AudioSource m_AudioSource;
@@ -31,7 +31,11 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     /// <summary>
     /// Networked Color. This value gets set when ownership is gained.
     /// </summary>
-    private readonly NetworkVariable<Color> m_ProjectileColor = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private readonly NetworkVariable<Color> m_ProjectileColor = new(
+        default,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server  // Owner → Server に変更
+    );
 
     /// <summary>
     /// Backup color to use for the local player if ownership has not been established when firing the launcher.
@@ -60,9 +64,14 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (IsOwner)
+        if (IsServer && IsOwner)
         {
             m_ProjectileColor.Value = XRINetworkGameManager.LocalPlayerColor.Value;
+        }
+        else if (IsOwner)
+        {
+            // クライアントがオーナーの場合、サーバーに色の設定をリクエスト
+            SetProjectileColorServerRpc(XRINetworkGameManager.LocalPlayerColor.Value);
         }
     }
 
@@ -81,7 +90,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             }
 
             GameObject newObject = m_ProjectilePooler.GetItem();
-            if (!newObject.TryGetComponent(out Projectile projectile))
+            if (!newObject.TryGetComponent(out CustomProjectile projectile))
             {
                 Utils.Log("Projectile component not found on projectile object.", 1);
                 return;
@@ -90,7 +99,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             projectile.transform.SetPositionAndRotation(m_StartPoint.position, m_StartPoint.rotation);
             if (hitTargetAction != null)
             {
-                projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction);
+                projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction, OnHitTargetRpc);
             }
 
             m_AudioSource.PlayOneShot(m_AudioClip);
@@ -111,7 +120,23 @@ public class NetworkProjectileLauncher : NetworkBehaviour
         }
     }
 
-    private void OnProjectileDestroy(Projectile projectile)
+    [Rpc(SendTo.NotMe)]
+    public void OnHitTargetRpc(int UID)
+    {
+        for (int i = m_ProjectileQueue.Count - 1; i >= 0; i--)
+        {
+            if (m_ProjectileQueue[i].UID == UID)
+            {
+                CustomProjectile projectile = m_ProjectileQueue[i];
+                m_ProjectileQueue.RemoveAt(i);
+                m_ProjectilePooler.ReturnItem(projectile.gameObject);
+                return;
+            }
+        }
+        m_ProjectilePooler.ReturnItemByUID(UID);
+    }
+
+    private void OnProjectileDestroy(CustomProjectile projectile)
     {
         if (m_ProjectileQueue.Contains(projectile))
         {
@@ -126,7 +151,13 @@ public class NetworkProjectileLauncher : NetworkBehaviour
         base.OnGainedOwnership();
         if (IsOwner)
         {
-            m_ProjectileColor.Value = XRINetworkGameManager.LocalPlayerColor.Value;
+            SetProjectileColorServerRpc(XRINetworkGameManager.LocalPlayerColor.Value);
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SetProjectileColorServerRpc(Color color)
+    {
+        m_ProjectileColor.Value = color;
     }
 }

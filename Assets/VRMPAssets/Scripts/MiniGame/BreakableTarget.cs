@@ -109,14 +109,17 @@ namespace UnityEngine.XR.Content.Interaction
             if (m_Destroyed)
                 return;
 
-            if (collision.gameObject.CompareTag(m_ColliderTag))
+            if (IsClient)
             {
-                // Call server RPC to break the target
-                BreakServerRpc();
-                collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
-                if (projectile != null && projectile.isLocalPlayerProjectile)
+                if (collision.gameObject.CompareTag(m_ColliderTag))
                 {
-                    projectile.HitTarget(pointValue, true);
+                    // Call server RPC to break the target
+                    BreakServerRpc();
+                    collision.gameObject.TryGetComponent<CustomProjectile>(out CustomProjectile projectile);
+                    if (projectile != null && projectile.isLocalPlayerProjectile)
+                    {
+                        projectile.HitTarget(pointValue, true);
+                    }
                 }
             }
         }
@@ -208,7 +211,7 @@ namespace UnityEngine.XR.Content.Interaction
             // Get projectile for score calculation (server only)
             if (IsServer)
             {
-                collision.gameObject.TryGetComponent<Projectile>(out Projectile projectile);
+                collision.gameObject.TryGetComponent<CustomProjectile>(out CustomProjectile projectile);
                 if (projectile != null && projectile.isLocalPlayerProjectile)
                 {
                     projectile.HitTarget(pointValue, true);

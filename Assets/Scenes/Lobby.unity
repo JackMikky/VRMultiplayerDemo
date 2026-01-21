@@ -6906,19 +6906,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   ShowTopMostFoldoutHeaderGroup: 1
-  players:
-  - playerId: 0
-    name: 
-    score: 0
-  - playerId: 0
-    name: 
-    score: 0
-  - playerId: 0
-    name: 
-    score: 0
-  - playerId: 0
-    name: 
-    score: 0
+  players: []
   localPlayer:
     playerId: 0
     name: 
@@ -14501,7 +14489,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51e84aab007306d48bdf6774e8046b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SpawnPrefab: {fileID: 9031775881104408046, guid: 3976a13353f30c74891ad6e9052aaa18,
+  m_SpawnPrefab: {fileID: 9031775881104408046, guid: acbbba7cf91f3d84c882fdc52fb7c8b2,
     type: 3}
   m_UseCollectionChecks: 1
   m_DefaultCapacity: 30
