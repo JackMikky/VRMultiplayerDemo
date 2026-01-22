@@ -113,12 +113,12 @@ namespace UnityEngine.XR.Content.Interaction
             {
                 if (collision.gameObject.CompareTag(m_ColliderTag))
                 {
-                    // Call server RPC to break the target
                     collision.gameObject.TryGetComponent<CustomProjectile>(out CustomProjectile projectile);
 
                     if (projectile != null && projectile.isLocalPlayerProjectile && projectile.LaunchPlayerID == NetworkManager.LocalClientId)
                     {
                         projectile.HitTarget(pointValue, true);
+                        // Call server RPC to break the target
                         BreakServerRpc();
                     }
                 }
