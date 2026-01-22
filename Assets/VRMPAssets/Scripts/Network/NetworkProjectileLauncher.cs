@@ -99,7 +99,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
             projectile.transform.SetPositionAndRotation(m_StartPoint.position, m_StartPoint.rotation);
             if (hitTargetAction != null)
             {
-                projectile.Setup(IsOwner, fireColor, OnProjectileDestroy, hitTargetAction, OnHitTargetRpc);
+                projectile.Setup(IsOwner, this.NetworkObject.OwnerClientId, fireColor, OnProjectileDestroy, hitTargetAction, OnHitTargetRpc);
             }
 
             m_AudioSource.PlayOneShot(m_AudioClip);

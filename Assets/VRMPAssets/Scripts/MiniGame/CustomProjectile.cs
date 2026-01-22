@@ -38,12 +38,20 @@ namespace XRMultiplayer
 
         public int UID { get; set; }
 
+        [SerializeField]
+        private ulong launchPlayerID;
+
+        public ulong LaunchPlayerID
+        {
+            get { return launchPlayerID; }
+        }
+
         /// <summary>
         /// Sets up the projectile with the specified parameters.
         /// </summary>
         /// <param name="localPlayer">Indicates whether the projectile belongs to the local player.</param>
         /// <param name="playerColor">The color of the player.</param>
-        public void Setup(bool localPlayer, Color playerColor, Action<CustomProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null, Action<int> onHitReturnEvent = null)
+        public void Setup(bool localPlayer, ulong launchPlayerID, Color playerColor, Action<CustomProjectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null, Action<int> onHitReturnEvent = null)
         {
             if (m_Rigidybody == null)
             {
@@ -69,6 +77,7 @@ namespace XRMultiplayer
             {
                 hitAction = hitTargetAction;
             }
+            this.launchPlayerID = launchPlayerID;
         }
 
         private IEnumerator ResetProjectileAfterTime()
@@ -96,6 +105,7 @@ namespace XRMultiplayer
         public void ResetProjectile()
         {
             StopAllCoroutines();
+            this.launchPlayerID = 0;
             m_OnReturnToPool?.Invoke(this);
         }
     }
