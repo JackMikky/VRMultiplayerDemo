@@ -21,6 +21,13 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     [Tooltip("The speed at which the projectile is launched")]
     private int m_MaxProjectilesAllowed = 15;
 
+    [SerializeField]
+    [Range(0, 1.5f)]
+    [Tooltip("Cooldown time between shots in seconds")]
+    private float m_FireCooldown = 0.25f;
+
+    private float m_LastFireTime = 0f;
+
     private readonly List<CustomProjectile> m_ProjectileQueue = new();
 
     [Header("Audio")]
@@ -34,7 +41,7 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     private readonly NetworkVariable<Color> m_ProjectileColor = new(
         default,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server  // Owner → Server に変更
+        NetworkVariableWritePermission.Server
     );
 
     /// <summary>
@@ -70,9 +77,16 @@ public class NetworkProjectileLauncher : NetworkBehaviour
         }
         else if (IsOwner)
         {
-            // クライアントがオーナーの場合、サーバーに色の設定をリクエスト
             SetProjectileColorServerRpc(XRINetworkGameManager.LocalPlayerColor.Value);
         }
+    }
+
+    /// <summary>
+    /// Check if the launcher can fire based on cooldown.
+    /// </summary>
+    private bool CanFire()
+    {
+        return Time.time >= m_LastFireTime + m_FireCooldown;
     }
 
     /// <summary>
@@ -83,6 +97,13 @@ public class NetworkProjectileLauncher : NetworkBehaviour
     {
         if (activate)
         {
+            if (!CanFire())
+            {
+                return;
+            }
+
+            m_LastFireTime = Time.time;
+
             Color fireColor = m_BackupColor;
             if (m_ProjectileColor.Value != default)
             {
