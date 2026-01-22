@@ -16195,6 +16195,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1678316935803634492, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1678316935803634492, guid: bc88b72691cf239499211adf424f560e,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2023967654609563568, guid: bc88b72691cf239499211adf424f560e,
         type: 3}
       propertyPath: GlobalObjectIdHash
