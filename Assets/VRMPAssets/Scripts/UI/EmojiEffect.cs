@@ -6,7 +6,6 @@ public class EmojiEffect : MonoBehaviour
     [SerializeField] private Image emojiImage;
     [SerializeField] private GameObject emojiEffectPrefab;
 
-    public Vector3 effectOffset;
     private float effectHeightOffset = 1f;
     private Button button;
     private Texture2D m_CachedTexture;
@@ -37,13 +36,38 @@ public class EmojiEffect : MonoBehaviour
                 SetParticleTexture(childRenderer);
             }
         }
+
+        // Destroy effect after particle system finishes
+        DestroyEffectWhenComplete(effectInstance);
+    }
+
+    private void DestroyEffectWhenComplete(GameObject effectInstance)
+    {
+        if (effectInstance.TryGetComponent<ParticleSystem>(out var ps))
+        {
+            float lifetime = ps.main.duration + ps.main.startLifetime.constantMax;
+            Destroy(effectInstance, lifetime);
+        }
+        else
+        {
+            var childPs = effectInstance.GetComponentInChildren<ParticleSystem>();
+            if (childPs != null)
+            {
+                float lifetime = childPs.main.duration + childPs.main.startLifetime.constantMax;
+                Destroy(effectInstance, lifetime);
+            }
+            else
+            {
+                // Fallback: destroy after 5 seconds
+                Destroy(effectInstance, 5f);
+            }
+        }
     }
 
     private void SetParticleTexture(ParticleSystemRenderer renderer)
     {
         if (emojiImage == null || emojiImage.sprite == null) return;
 
-        // 使用缓存的 Texture，避免重复提取
         if (m_CachedTexture == null)
         {
             m_CachedTexture = ExtractTextureFromSprite(emojiImage.sprite);
@@ -57,20 +81,16 @@ public class EmojiEffect : MonoBehaviour
     }
 
     /// <summary>
-    /// 从图集的 Sprite 中提取单独的 Texture2D
+    /// Extracts a standalone Texture2D from an atlas Sprite.
     /// </summary>
     private Texture2D ExtractTextureFromSprite(Sprite sprite)
     {
         if (sprite == null) return null;
 
-        // 获取 Sprite 在图集中的区域
         Rect rect = sprite.textureRect;
 
-        // 创建新的 Texture2D
         Texture2D newTexture = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGBA32, false);
 
-        // 从原始图集中读取像素
-        // 注意：需要在图集的 Import Settings 中启用 Read/Write Enabled
         try
         {
             Color[] pixels = sprite.texture.GetPixels(
@@ -84,7 +104,7 @@ public class EmojiEffect : MonoBehaviour
         }
         catch (UnityException e)
         {
-            Debug.LogError($"无法读取 Sprite 像素，请在图集的 Import Settings 中启用 Read/Write Enabled: {e.Message}");
+            Debug.LogError($"Failed to read Sprite pixels. Please enable Read/Write Enabled in the atlas Import Settings: {e.Message}");
             return null;
         }
 
