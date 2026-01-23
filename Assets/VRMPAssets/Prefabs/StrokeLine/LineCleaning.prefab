@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 683419718478158776}
   - component: {fileID: 674839885771017239}
   - component: {fileID: 2412807216771379821}
+  - component: {fileID: 2282537699292717133}
   m_Layer: 0
   m_Name: LineCleaning
   m_TagString: Untagged
@@ -308,7 +309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1852794324
+  GlobalObjectIdHash: 3763787112
   InScenePlacedSourceGlobalObjectIdHash: 1334984786
   DeferredDespawnTick: 0
   Ownership: 2
@@ -431,6 +432,23 @@ MonoBehaviour:
   m_AllowCollisionOwnershipExchange: 1
   m_MinExchangeVelocityMagitude: 0.025
   spawnLocked: 1
+--- !u!114 &2282537699292717133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980946374271473322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
 --- !u!1 &3317639619231902533
 GameObject:
   m_ObjectHideFlags: 0

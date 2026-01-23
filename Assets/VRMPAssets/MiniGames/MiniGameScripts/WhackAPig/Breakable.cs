@@ -15,19 +15,19 @@ namespace UnityEngine.XR.Content.Interaction
 #pragma warning restore CS0108 // Member hides inherited member; missing new keyword
 
         [SerializeField]
-        Collider m_Collider;
+        private Collider m_Collider;
 
         [SerializeField]
         [Tooltip("The 'broken' version of this object.")]
-        GameObject m_BrokenVersion;
+        private GameObject m_BrokenVersion;
 
         [SerializeField]
         [Tooltip("The tag a collider must have to cause this object to break.")]
-        string m_ColliderTag = "Destroyer";
+        private string m_ColliderTag = "Destroyer";
 
-        bool m_Destroyed = false;
+        private bool m_Destroyed = false;
 
-        void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter(Collision collision)
         {
             if (m_Destroyed)
                 return;
@@ -42,7 +42,8 @@ namespace UnityEngine.XR.Content.Interaction
         {
             if (m_Destroyed) return;
             m_Destroyed = true;
-            Instantiate(m_BrokenVersion, transform.position, transform.rotation);
+            var brokenObject = Instantiate(m_BrokenVersion, transform.position, transform.rotation);
+            brokenObject.transform.localScale = transform.localScale;
             onBreak?.Invoke(collider);
             Destroy(gameObject);
         }

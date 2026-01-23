@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+
 namespace XRMultiplayer
 {
     /// <summary>
@@ -18,34 +19,42 @@ namespace XRMultiplayer
         /// <summary>
         /// The previous position of the projectile.
         /// </summary>
-        Vector3 m_PrevPos = Vector3.zero;
+        private Vector3 m_PrevPos = Vector3.zero;
 
         /// <summary>
         /// The raycast hit for the projectile.
         /// </summary>
-        RaycastHit m_Hit;
+        private RaycastHit m_Hit;
 
         /// <summary>
         /// Indicates whether the projectile has hit a target.
         /// </summary>
-        bool m_HasHitTarget = false;
+        private bool m_HasHitTarget = false;
 
         /// <summary>
         /// Indicates whether the projectile belongs to the local player.
         /// </summary>
-        bool m_LocalPlayerProjectile;
+        private bool m_LocalPlayerProjectile;
 
-        Action<Projectile> m_OnReturnToPool;
+        public bool isLocalPlayerProjectile
+        {
+            get { return m_LocalPlayerProjectile; }
+        }
 
-        Rigidbody m_Rigidybody;
+        private Action<Projectile> m_OnReturnToPool;
 
+        private Action<int, bool> hitAction;
+
+        private Rigidbody m_Rigidybody;
+
+        [SerializeField] private string m_ColliderTag = "Piggy";
 
         /// <summary>
         /// Sets up the projectile with the specified parameters.
         /// </summary>
         /// <param name="localPlayer">Indicates whether the projectile belongs to the local player.</param>
         /// <param name="playerColor">The color of the player.</param>
-        public void Setup(bool localPlayer, Color playerColor, Action<Projectile> returnToPoolAction = null)
+        public void Setup(bool localPlayer, Color playerColor, Action<Projectile> returnToPoolAction = null, Action<int, bool> hitTargetAction = null)
         {
             if (m_Rigidybody == null)
             {
@@ -62,9 +71,14 @@ namespace XRMultiplayer
                 m_OnReturnToPool = returnToPoolAction;
                 StartCoroutine(ResetProjectileAfterTime());
             }
+
+            if (hitTargetAction != null)
+            {
+                hitAction = hitTargetAction;
+            }
         }
 
-        IEnumerator ResetProjectileAfterTime()
+        private IEnumerator ResetProjectileAfterTime()
         {
             yield return new WaitForSeconds(m_Lifetime);
             ResetProjectile();
@@ -88,21 +102,21 @@ namespace XRMultiplayer
         }
 
         /// <inheritdoc/>
-        void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Target"))
+            if (other.CompareTag(m_ColliderTag))
             {
-                HitTarget(other.GetComponentInParent<Target>());
+                //HitTarget(other.GetComponentInParent<Target>());
             }
         }
 
-        void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter(Collision collision)
         {
             if (!m_LocalPlayerProjectile) return;
             CheckForInteractableHit(collision.transform);
         }
 
-        void CheckForInteractableHit(Transform t)
+        private void CheckForInteractableHit(Transform t)
         {
             NetworkPhysicsInteractable networkPhysicsInteractable = t.GetComponentInParent<NetworkPhysicsInteractable>();
             if (networkPhysicsInteractable != null)
@@ -119,6 +133,12 @@ namespace XRMultiplayer
         {
             target.TargetHitLocal();
             m_HasHitTarget = true;
+        }
+
+        public void HitTarget(int score, bool isLocalPlayer)
+        {
+            hitAction?.Invoke(score, isLocalPlayer);
+            ResetProjectile();
         }
 
         public void ResetProjectile()

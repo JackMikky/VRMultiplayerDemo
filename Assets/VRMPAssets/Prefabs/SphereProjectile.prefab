@@ -299,4 +299,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_TrailRenderer: {fileID: 4355027779353820095}
-  m_Lifetime: 10
+  m_Lifetime: 7
