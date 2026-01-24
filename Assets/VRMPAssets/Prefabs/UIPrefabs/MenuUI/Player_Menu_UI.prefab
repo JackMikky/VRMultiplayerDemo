@@ -6229,7 +6229,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 486609713505675701}
   toggleTransition: 1
   graphic: {fileID: 7178987483518585129}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 58522570627511495}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -15710,7 +15710,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AllowSwitchOff: 0
+  m_AllowSwitchOff: 1
 --- !u!114 &1839616414249517146
 MonoBehaviour:
   m_ObjectHideFlags: 0
