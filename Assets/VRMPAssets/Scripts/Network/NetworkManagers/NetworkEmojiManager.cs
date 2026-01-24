@@ -25,10 +25,9 @@ namespace XRMultiplayer
         /// <param name="emojiID">Emoji ID</param>
         public void SpawnEmojiEffect(Vector3 position, int emojiID)
         {
-            CreateLocalEmojiEffect(position, emojiID);
-
             if (IsServer)
             {
+                CreateLocalEmojiEffect(position, emojiID);
                 SpawnEmojiEffectClientRpc(position, emojiID);
             }
             else
