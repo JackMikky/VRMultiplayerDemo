@@ -19,7 +19,7 @@ namespace XRMultiplayer
 
         private void Initialize()
         {
-            for (int i = 0; i < sprites.Count; i++)
+            for (int i = 0; i < this.GetEmojiCount(); i++)
             {
                 GameObject emoji = Instantiate(emojiIconPrefab, emojiUIContainer.transform);
                 Image image = emoji.GetComponent<Image>();
@@ -38,11 +38,11 @@ namespace XRMultiplayer
         /// </summary>
         public Sprite GetSpriteByID(int emojiID)
         {
-            if (emojiID >= 0 && emojiID < sprites.Count)
+            if (emojiID >= 0 && emojiID < this.GetEmojiCount())
             {
                 return sprites[emojiID];
             }
-            Debug.LogWarning($"Invalid emoji ID: {emojiID}. Valid range is 0-{sprites.Count - 1}");
+            Debug.LogWarning($"Invalid emoji ID: {emojiID}. Valid range is 0-{this.GetEmojiCount() - 1}");
             return null;
         }
 
