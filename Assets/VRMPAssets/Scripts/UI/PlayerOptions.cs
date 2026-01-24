@@ -24,7 +24,7 @@ namespace XRMultiplayer
         [SerializeField] private GameObject[] m_OfflineWarningPanels;
         [SerializeField] private GameObject[] m_OnlinePanels;
         [SerializeField] private GameObject[] m_Panels;
-        [SerializeField] private GameObject EmojiPanel;
+        [SerializeField] private GameObject emojiPanel;
         [SerializeField] private Toggle[] m_PanelToggles;
         [SerializeField] private Toggle emojiToggle;
 
@@ -97,6 +97,7 @@ namespace XRMultiplayer
             permCallbacks.PermissionGranted += PermissionCallbacks_PermissionGranted;
 
             emojiToggle.onValueChanged.AddListener(ToggleEmojiPanel);
+            emojiToggle.isOn = false;
         }
 
         private void UpdateHostVisuals(ulong newHostId)
@@ -192,18 +193,9 @@ namespace XRMultiplayer
             }
         }
 
-        public void ToggleEmojiPanel(bool value)
+        private void ToggleEmojiPanel(bool value)
         {
-            if (value)
-            {
-                EmojiPanel.SetActive(false);
-                emojiToggle.SetIsOnWithoutNotify(false);
-            }
-            else
-            {
-                EmojiPanel.SetActive(true);
-                emojiToggle.SetIsOnWithoutNotify(true);
-            }
+            emojiPanel.SetActive(value);
         }
 
         /// <summary>
