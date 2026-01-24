@@ -136,10 +136,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3240afff50ee9b44a1568a8a10a5415, type: 3}
   m_Name: 
   m_EditorClassIdentifier: VRMP::EmojiEffect
-  emojiImage: {fileID: 7366764590538664001}
   emojiEffectPrefab: {fileID: 7187300229028042013, guid: ed31f0749265c0f459bbbd9087baa08f,
     type: 3}
-  effectOffset: {x: 0, y: 0, z: 0}
+  cooldownTime: 3
+  emojiID: 0
 --- !u!114 &8074778598493498816
 MonoBehaviour:
   m_ObjectHideFlags: 0
