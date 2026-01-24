@@ -28,7 +28,7 @@ namespace XRMultiplayer
                 {
                     emojiEffect.emojiID = i;
                     emojiEffect.EmojiEffectController = this;
-                    image.sprite = sprites[i];
+                    image.sprite = this.GetSpriteByID(i);
                 }
             }
         }
