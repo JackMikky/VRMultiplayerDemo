@@ -194,15 +194,13 @@ namespace XRMultiplayer
 
         private SessionManager m_SessionManager;
 
+        [Header("Network Managers")]
         [SerializeField] public NetworkSceneManager networkSceneManager;
 
         [SerializeField] public NetworkChatManager networkChatManager;
 
-        /// <summary>
-        /// List that handles all current players by ID.
-        /// Useful for getting specific players.
-        /// See <see cref="TryGetPlayerByID"/>
-        /// </summary>
+        [SerializeField] public NetworkEmojiManager networkEmojiManager;
+
         private readonly List<ulong> m_CurrentPlayerIDs = new();
 
         /// <summary>
@@ -212,6 +210,7 @@ namespace XRMultiplayer
 
         private const string k_DebugPrepend = "<color=#FAC00C>[Network Game Manager]</color> ";
 
+        [Space(10)]
         [SerializeField] private TMP_Text hostIP;
 
         [SerializeField] private TMP_Text testText;
