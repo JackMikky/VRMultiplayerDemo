@@ -786,6 +786,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 219.62973
       objectReference: {fileID: 0}
+    - target: {fileID: 2171824975730114802, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 2542410477482858708, guid: 95bd29654e15ad844be6210374a75967,
         type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
@@ -871,6 +876,11 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4565285722145487475, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 4796381454154536339, guid: 95bd29654e15ad844be6210374a75967,
         type: 3}
       propertyPath: m_IsActive
@@ -920,6 +930,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5622498893621386240, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 5776314539175808220, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 5802331049561055244, guid: 95bd29654e15ad844be6210374a75967,
         type: 3}
