@@ -6308,6 +6308,21 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 3990628612
       objectReference: {fileID: 0}
+    - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: m_MusicClips.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: 'm_MusicClips.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: d44c292842dcc2047a5843f79cc3b21d, type: 3}
+    - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: 'm_MusicClips.Array.data[3]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 2f22d17769f936e4a981a47e4cdfbb6a, type: 3}
     - target: {fileID: 7458142162643275300, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
       propertyPath: GlobalObjectIdHash
