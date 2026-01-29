@@ -103,6 +103,13 @@ namespace XRMultiplayer
         /// </summary>
         private int currentSongId = 0;
 
+        private void Awake()
+        {
+            // Set the initial volume and clip for the audio source
+            m_AudioSource.volume = m_VolumeSlider.value;
+            m_AudioSource.clip = m_MusicClips[0];
+        }
+
         /// <inheritdoc/>
         private void Start()
         {
@@ -130,9 +137,6 @@ namespace XRMultiplayer
                 PickRandomSong();
             }
 
-            // Set the initial volume and clip for the audio source
-            m_AudioSource.volume = m_VolumeSlider.value;
-            m_AudioSource.clip = m_MusicClips[Random.Range(0, m_MusicClips.Length)];
 
             SetupUIListeners();
 
