@@ -6518,7 +6518,7 @@ PrefabInstance:
     - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
       propertyPath: m_MusicClips.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
@@ -6534,7 +6534,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'm_MusicClips.Array.data[2]'
       value: 
-      objectReference: {fileID: 8300000, guid: ed17fb86925ac3d4eae0ae88ccc5a16c, type: 3}
+      objectReference: {fileID: 8300000, guid: 44e557278866e0641b0bd62e8328c07a, type: 3}
     - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
       propertyPath: 'm_MusicClips.Array.data[3]'
@@ -6549,7 +6549,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'm_MusicClips.Array.data[5]'
       value: 
-      objectReference: {fileID: 8300000, guid: 34754043257c5a1408eee75e53438d02, type: 3}
+      objectReference: {fileID: 8300000, guid: d44c292842dcc2047a5843f79cc3b21d, type: 3}
     - target: {fileID: 7071489329916892960, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
       propertyPath: 'm_MusicClips.Array.data[6]'
