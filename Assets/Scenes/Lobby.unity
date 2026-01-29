@@ -161,7 +161,7 @@ AudioReverbZone:
   m_GameObject: {fileID: 38135073}
   m_Enabled: 1
   m_MinDistance: 5
-  m_MaxDistance: 20
+  m_MaxDistance: 60
   m_ReverbPreset: 1
   m_Room: -1000
   m_RoomHF: -100
@@ -6333,6 +6333,21 @@ PrefabInstance:
       propertyPath: 'm_MusicClips.Array.data[5]'
       value: 
       objectReference: {fileID: 8300000, guid: 44e557278866e0641b0bd62e8328c07a, type: 3}
+    - target: {fileID: 7408118917573419045, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7408118917573419045, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: MaxDistance
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 7408118917573419045, guid: 674209cce4a2ab543af7573fe07dcb94,
+        type: 3}
+      propertyPath: MinDistance
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7458142162643275300, guid: 674209cce4a2ab543af7573fe07dcb94,
         type: 3}
       propertyPath: GlobalObjectIdHash
