@@ -23,7 +23,8 @@ public class FourthEvent : MonoBehaviour
     public Vector3 localOffset = Vector3.zero;
     public Vector3 localEuler = Vector3.zero;
 
-    bool _stuck;
+    bool _stuck_picker = false;
+    bool _stuck = false;
 
     void OnTriggerEnter(Collider other)
     {
@@ -31,7 +32,7 @@ public class FourthEvent : MonoBehaviour
         if (!allowedPartner) return;
        
 
-        if (other.gameObject == allowedPartner)
+        if (other.gameObject == allowedPartner && _stuck_picker != true)
         {
             Play();
 
@@ -51,7 +52,7 @@ public class FourthEvent : MonoBehaviour
                 rb.angularVelocity = Vector3.zero;
                 //rb.constraints = RigidbodyConstraints.FreezeAll; // 全軸固定
             }
-
+            _stuck_picker = true;
         }
 
         if (other.gameObject == Box)
