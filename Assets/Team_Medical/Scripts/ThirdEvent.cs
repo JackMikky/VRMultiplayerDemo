@@ -23,11 +23,12 @@ public class ThirdEvent : MonoBehaviour
         if (allowedPartner == null) return;
         if (other.gameObject == allowedPartner)
         {
+           // Play();
             // 許可ペアのみ処理
             DoAction(other.gameObject);
         }
     }
-
+    /*
     // 衝突判定（Rigidbody + Collider の組み合わせ用）
     void OnCollisionEnter(Collision collision)
     {
@@ -36,19 +37,24 @@ public class ThirdEvent : MonoBehaviour
         {
             DoAction(collision.gameObject);
         }
-    }
+    }*/
 
     void DoAction(GameObject partner)
     {
         // ここに効果音・エフェクト・スコアなどの処理
         Play();
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
         //organs.SetActive(true);
+        Vector3 gameObjectpositiony = gameObject.transform.position;
+        gameObjectpositiony.y -= 2;
+        gameObject.transform.position = gameObjectpositiony;
+
         Vector3 positiony = organs.transform.position;
         positiony.y += 2;
         organs.transform.position = positiony;
 
     }
+
 
 
     void Play()
