@@ -8,6 +8,11 @@ public class LocalManager : MonoBehaviour
 
     [SerializeField] private GameObject localAvatar;
 
+    [SerializeField] private SceneAnnouncerController sceneAnnouncerController;
+
+    public SceneAnnouncerController _SceneAnnouncerController
+    { get { return sceneAnnouncerController; } }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

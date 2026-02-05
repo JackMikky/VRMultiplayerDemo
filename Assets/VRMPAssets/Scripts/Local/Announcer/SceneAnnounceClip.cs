@@ -11,7 +11,7 @@ namespace XRMultiplayer
         [SerializeField] private List<AudioClip> loadStartClips;
 
         [SerializeField] private List<AudioClip> loadedClips;
-        [SerializeField] private AudioClip loadFailedClip;
+        [SerializeField] private List<AudioClip> loadFailedClips;
 
         private const string ANNOUNCER_CLIP_FOLDER = "Announcers";
         private const string START_SUFFIX = "Start";
@@ -23,6 +23,7 @@ namespace XRMultiplayer
             this.folderHead = folderHead;
             loadStartClips = new List<AudioClip>();
             loadedClips = new List<AudioClip>();
+            loadFailedClips = new List<AudioClip>();
         }
 
         public void LoadClips()
@@ -33,15 +34,14 @@ namespace XRMultiplayer
             var loadedClipsPath = $"{folderHead}/{LOADED_SUFFIX}";
             loadedClips.AddRange(this.LoadAllClipFormResources(loadedClipsPath));
 
-            var loadFailedClipPath = $"{LOAD_FAILED_SUFFIX}";
-            var faildClips = this.LoadAllClipFormResources(loadFailedClipPath);
-            if (faildClips != null)
-            {
-                this.loadFailedClip = faildClips.FirstOrDefault();
-            }
+            var loadFailedClipPath = $"{folderHead}/{LOAD_FAILED_SUFFIX}";
+            loadFailedClips.AddRange(this.LoadAllClipFormResources(loadFailedClipPath));
         }
 
-        public AudioClip LoadFailedClip => loadFailedClip;
+        public AudioClip LoadFailedClipRandom()
+        {
+            return this.loadFailedClips[Random.Range(0, this.loadFailedClips.Count)];
+        }
 
         public AudioClip GetLoadStartClipRandom()
         {

@@ -986,6 +986,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4869762330597572276, guid: 95bd29654e15ad844be6210374a75967,
+        type: 3}
+      propertyPath: m_text
+      value: Return
+      objectReference: {fileID: 0}
     - target: {fileID: 4901550941262174682, guid: 95bd29654e15ad844be6210374a75967,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -1941,6 +1946,11 @@ PrefabInstance:
       propertyPath: entranceObject
       value: 
       objectReference: {fileID: 227281061}
+    - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
+        type: 3}
+      propertyPath: sceneAnnouncerController
+      value: 
+      objectReference: {fileID: 1059215951}
     - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
         type: 3}
       propertyPath: onApplicationStarted.m_PersistentCalls.m_Calls.Array.size
@@ -4133,32 +4143,32 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 35bf246f3b7d5d64da223f049bb22f1f, type: 3}
     loadedClips:
     - {fileID: 8300000, guid: 30ba53fe51c80a54b89bb9554c1d832c, type: 3}
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   lobbyAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   constructionAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   manufacturingAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   prevention_BasicAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   medicalAnnounceClip:
     folderHead: 
     loadStartClips: []
     loadedClips: []
-    loadFailedClip: {fileID: 0}
+    loadFailedClips: []
   loadFailedAnnounceClips: []
 --- !u!4 &1059215952
 Transform:

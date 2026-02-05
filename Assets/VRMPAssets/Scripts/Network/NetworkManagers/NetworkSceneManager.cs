@@ -8,6 +8,7 @@ namespace XRMultiplayer
 {
     public enum SceneListEnum
     {
+        None = -1,
         Entrance = 0,
         Lobby = 1,
         Construction = 2,

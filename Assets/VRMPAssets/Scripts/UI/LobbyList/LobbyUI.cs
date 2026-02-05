@@ -92,6 +92,13 @@ namespace XRMultiplayer
             XRINetworkGameManager.Instance.OnConnectionFailedAction += FailedToConnect;
             XRINetworkGameManager.Instance.OnConnectionUpdated += ConnectedUpdated;
 
+            this.OnConnectionFailed.AddListener(() =>
+            {
+                var andouncer = LocalManager.Instance._SceneAnnouncerController;
+                andouncer.ForceStop();
+                andouncer.HandleSceneLoadFailed("Lobby");
+            });
+
             foreach (Transform t in m_LobbyListParent)
             {
                 Destroy(t.gameObject);
@@ -112,6 +119,9 @@ namespace XRMultiplayer
         {
             XRINetworkGameManager.Instance.OnConnectionFailedAction -= FailedToConnect;
             XRINetworkGameManager.Instance.OnConnectionUpdated -= ConnectedUpdated;
+
+            this.OnConnectionSuccessful.RemoveAllListeners();
+            this.OnConnectionFailed.RemoveAllListeners();
 
             SessionManager.status.Unsubscribe(ConnectedUpdated);
         }

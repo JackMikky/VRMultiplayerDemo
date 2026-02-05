@@ -91,6 +91,15 @@ namespace XRMultiplayer
             {
                 this.HandleSceneLoadStart(sceneName);
             });
+            XRINetworkGameManager.Instance.networkSceneManager.onSceneLoadFailed.AddListener((sceneName) =>
+                        {
+                            this.HandleSceneLoadFailed(sceneName);
+                        });
+
+            XRINetworkGameManager.Instance.OnConnectionFailedAction += (message) =>
+            {
+                this.HandleSceneLoadFailed("Lobby");
+            };
         }
 
         private void OnDestroy()
@@ -103,6 +112,10 @@ namespace XRMultiplayer
                 _networkSceneManager = null;
                 warpController = null;
             }
+            XRINetworkGameManager.Instance.OnConnectionFailedAction -= (message) =>
+            {
+                this.HandleSceneLoadFailed("Lobby");
+            };
         }
 
         private void EnqueueClip(AudioClip clip, UnityAction onStart = null)
@@ -134,11 +147,7 @@ namespace XRMultiplayer
 
         public void HandleOnSceneLoaded(string sceneName)
         {
-            if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
-            {
-                Debug.LogWarning($"[SceneAnnouncerController] Unknown scene name: {sceneName}");
-                return;
-            }
+            var sceneEnum = this.GetSceneFromListByName(sceneName);
 
             if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
             {
@@ -149,17 +158,42 @@ namespace XRMultiplayer
 
         public void HandleSceneLoadStart(string sceneName)
         {
-            if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
-            {
-                Debug.LogWarning($"[SceneAnnouncerController] Unknown scene name: {sceneName}");
-                return;
-            }
+            var sceneEnum = this.GetSceneFromListByName(sceneName);
 
             if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
             {
                 var clip = announceClip.GetLoadStartClipRandom();
                 EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
             }
+        }
+
+        public void HandleSceneLoadFailed(string sceneName)
+        {
+            var sceneEnum = this.GetSceneFromListByName(sceneName);
+
+            if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
+            {
+                var clip = announceClip.LoadFailedClipRandom();
+                EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
+            }
+        }
+
+        public void ForceStop()
+        {
+            if (announcerAudioSource != null && announcerAudioSource.isPlaying)
+            {
+                this.announcerAudioSource.Stop();
+            }
+        }
+
+        private SceneListEnum GetSceneFromListByName(string sceneName)
+        {
+            if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
+            {
+                Debug.LogWarning($"[SceneAnnouncerController] Unknown scene name: {sceneName}");
+                return SceneListEnum.None;
+            }
+            return sceneEnum;
         }
 
         protected override AudioClip[] LoadAllClipFormResources(string relativePath)
