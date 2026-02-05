@@ -147,7 +147,7 @@ namespace XRMultiplayer
 
         public void HandleOnSceneLoaded(string sceneName)
         {
-            var sceneEnum = this.GetSceneFromListByName(sceneName);
+            var sceneEnum = this.GetSceneEnumFromListByName(sceneName);
 
             if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
             {
@@ -158,7 +158,7 @@ namespace XRMultiplayer
 
         public void HandleSceneLoadStart(string sceneName)
         {
-            var sceneEnum = this.GetSceneFromListByName(sceneName);
+            var sceneEnum = this.GetSceneEnumFromListByName(sceneName);
 
             if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
             {
@@ -169,7 +169,7 @@ namespace XRMultiplayer
 
         public void HandleSceneLoadFailed(string sceneName)
         {
-            var sceneEnum = this.GetSceneFromListByName(sceneName);
+            var sceneEnum = this.GetSceneEnumFromListByName(sceneName);
 
             if (_sceneClips.TryGetValue(sceneEnum, out var announceClip))
             {
@@ -186,7 +186,7 @@ namespace XRMultiplayer
             }
         }
 
-        private SceneListEnum GetSceneFromListByName(string sceneName)
+        private SceneListEnum GetSceneEnumFromListByName(string sceneName)
         {
             if (!System.Enum.TryParse<SceneListEnum>(sceneName, out var sceneEnum))
             {
