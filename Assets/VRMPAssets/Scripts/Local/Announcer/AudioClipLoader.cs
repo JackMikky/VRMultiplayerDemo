@@ -10,7 +10,7 @@ namespace XRMultiplayer
 
         protected const string LOADED_SUFFIX = "Loaded";
 
-        protected const string LOAD_FAILED_SUFFIX = "LoadFailed";
+        protected const string CONNECTION_FAILED = "ConnectionFailed";
 
         protected abstract AudioClip[] LoadAllClipFormResources(string relativePath);
     }
