@@ -96,7 +96,7 @@ namespace XRMultiplayer
             {
                 var andouncer = LocalManager.Instance._SceneAnnouncerController;
                 andouncer.ForceStop();
-                andouncer.HandleSceneLoadFailed("Lobby");
+                andouncer.HandleConnectFailed();
             });
 
             foreach (Transform t in m_LobbyListParent)

@@ -41,8 +41,8 @@ namespace XRMultiplayer
         [Header("Medical Clips")]
         [SerializeField] private SceneAnnounceClip medicalAnnounceClip;
 
-        [Header("LoadFailed Clips")]
-        [SerializeField] private AudioClip[] loadFailedAnnounceClips = null;
+        [Header("ConnectFailed Clips")]
+        [SerializeField] private AudioClip[] connectFailedAnnounceClips = null;
 
         private Dictionary<SceneListEnum, SceneAnnounceClip> _sceneClips;
 
@@ -77,10 +77,7 @@ namespace XRMultiplayer
                 { SceneListEnum.Medical, medicalAnnounceClip }
             };
 
-            if (loadFailedAnnounceClips == null)
-            {
-                loadFailedAnnounceClips = this.LoadAllClipFormResources(LOAD_FAILED_SUFFIX);
-            }
+            connectFailedAnnounceClips = this.LoadAllClipFormResources(CONNECTION_FAILED);
 
             warpController.onWarpFadeInStart.AddListener((sceneName) =>
             {
@@ -176,6 +173,14 @@ namespace XRMultiplayer
                 var clip = announceClip.LoadFailedClipRandom();
                 EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
             }
+        }
+
+        public void HandleConnectFailed()
+        {
+            if (connectFailedAnnounceClips.Length == 0) return;
+            var randomIndex = Random.Range(0, connectFailedAnnounceClips.Length);
+            var clip = connectFailedAnnounceClips[randomIndex];
+            EnqueueClip(clip, () => this.OnSceneLoadStart?.Invoke());
         }
 
         public void ForceStop()
