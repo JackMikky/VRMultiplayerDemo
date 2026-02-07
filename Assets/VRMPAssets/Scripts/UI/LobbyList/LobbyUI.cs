@@ -61,6 +61,11 @@ namespace XRMultiplayer
 
         [SerializeField] private GameObject[] m_ConnectionSubPanels;
 
+        [Header("Connection Event")]
+        [SerializeField] private CustomEvent OnConnectionSuccessful;
+
+        [SerializeField] private CustomEvent OnConnectionFailed;
+
         private VoiceChatManager m_VoiceChatManager;
 
         private Coroutine m_UpdateLobbiesRoutine;
@@ -87,6 +92,13 @@ namespace XRMultiplayer
             XRINetworkGameManager.Instance.OnConnectionFailedAction += FailedToConnect;
             XRINetworkGameManager.Instance.OnConnectionUpdated += ConnectedUpdated;
 
+            this.OnConnectionFailed.AddListener(() =>
+            {
+                var andouncer = LocalManager.Instance._SceneAnnouncerController;
+                andouncer.ForceStop();
+                andouncer.HandleConnectFailed();
+            });
+
             foreach (Transform t in m_LobbyListParent)
             {
                 Destroy(t.gameObject);
@@ -107,6 +119,9 @@ namespace XRMultiplayer
         {
             XRINetworkGameManager.Instance.OnConnectionFailedAction -= FailedToConnect;
             XRINetworkGameManager.Instance.OnConnectionUpdated -= ConnectedUpdated;
+
+            this.OnConnectionSuccessful.RemoveAllListeners();
+            this.OnConnectionFailed.RemoveAllListeners();
 
             SessionManager.status.Unsubscribe(ConnectedUpdated);
         }
@@ -330,9 +345,11 @@ namespace XRMultiplayer
             {
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionSuccessPanel);
                 onNetworkConnected.Invoke();
+                OnConnectionSuccessful.Invoke();
             }
             else
             {
+                OnConnectionFailed.Invoke();
                 Utils.LogError($"Failed to host local room:");
                 m_ConnectionFailedText.text = $"<b>Error:</b> Room already exists or could not be created";
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionFailurePanel);
@@ -345,6 +362,7 @@ namespace XRMultiplayer
             {
                 StartCoroutine(CheckForFailedConnection());
                 ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionPanel);
+                OnConnectionSuccessful.Invoke();
             }
             else
             {
@@ -354,6 +372,7 @@ namespace XRMultiplayer
 
         private void FailedToJoinLocal()
         {
+            OnConnectionFailed.Invoke();
             Utils.LogError($"Failed to join local room:");
             m_ConnectionFailedText.text = $"<b>Error:</b> Room does not exist or could not be joined";
             ToggleConnectionSubPanel(ConnectionSubPanel.ConnectionFailurePanel);
