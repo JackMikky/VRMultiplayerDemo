@@ -1,25 +1,13 @@
 #ifndef MYHLSLINCLUDE_INCLUDE
 #define MYHLSLINCLUDE_INCLUDE
 
-	void Hexagon_float(        
-        float2 UV,
-        float Scale,
-        out float Hexagon, // 六角形
-        out float2 HexPos, // 六角形の位置
-        out float2 HexUV, // 六角形内のUVを出力
-        out float2 HexIndex // 六角形の番号
-        )
-	{
-
-	}
-
     void Hexagon_noise_float(        
         float2 UV,
         float Scale,
-        out float Hexagon, // 六角形
-        out float2 HexPos, // 六角形の位置
-        out float2 HexUV, // 六角形内のUVを出力
-        out float2 HexIndex // 六角形の番号
+        out float Hexagon,
+        out float2 HexPos,
+        out float2 HexUV,
+        out float2 HexIndex
         ){
        float2 p = UV * Scale;
         p.x *= 1.15470053838; // x座標を2/√3倍 (六角形の横方向の大きさが√3/2倍になる)
@@ -42,11 +30,8 @@
             float2(s.x, +step(0.0, s.y)), // 奇数列目 (isTwo=0.0の場合はこちらを採用)
             float2(s.x, -step(s.y, 0.0)), // 偶数列目 (isTwo=1.0の場合はこちらを採用)
             isTwo) * isOutHex; // 六角形の外側だけ取り出す
-        // 六角形の番号として出力
         HexIndex = grid + grid2; 
-        // 六角形の座標として出力
         HexPos = HexIndex / Scale;
-        // 六角形の内側ならrectUV、外側なら4つの六角形のUVを使う
         HexUV = lerp(rectUV, rectUV - s * float2(1.0, 0.5), isOutHex); 
     }
 
