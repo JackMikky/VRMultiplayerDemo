@@ -27,7 +27,6 @@
 		float2 uv : TEXCOORD0;
 	};
 
-	// ✅ URP RenderGraph 纹理声明
 	TEXTURE2D(_BlitTexture);
 	SAMPLER(sampler_LinearClamp);
 
@@ -38,12 +37,10 @@
 	float _UseLineColor;
 	float _T;
 
-	// ✅ 全屏三角形顶点着色器
 	v2f vert(appdata v)
 	{
 		v2f o;
 		
-		// 生成全屏三角形
 		float2 uv = float2((v.vertexID << 1) & 2, v.vertexID & 2);
 		o.positionCS = float4(uv * 2.0 - 1.0, 0.0, 1.0);
 		
@@ -63,10 +60,8 @@
 		float HexPos;
 		float2 HexIndex;
 		
-		// ✅ 采样相机颜色缓冲
 		float4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, i.uv);
 		
-		// 计算六边形效果
 		float2 uv = i.uv;
 		uv.x *= _ScreenParams.x / _ScreenParams.y;
 		
@@ -85,7 +80,6 @@
 		col *= HexPos;
 		col += lineColor;
 		
-		// ✅ 应用淡入淡出效果 (_T: 0=显示, 1=黑屏)
 		col = lerp(col, float4(0, 0, 0, 1), _T);
 		
 		return col;
