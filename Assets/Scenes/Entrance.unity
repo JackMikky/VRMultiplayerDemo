@@ -4169,7 +4169,7 @@ MonoBehaviour:
     loadStartClips: []
     loadedClips: []
     loadFailedClips: []
-  loadFailedAnnounceClips: []
+  connectFailedAnnounceClips: []
 --- !u!4 &1059215952
 Transform:
   m_ObjectHideFlags: 0
