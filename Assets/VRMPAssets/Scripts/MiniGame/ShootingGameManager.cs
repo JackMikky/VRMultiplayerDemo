@@ -60,8 +60,8 @@ public class ShootingGameManager : NetworkBehaviour
 
     [SerializeField] private BGMController bgmController;
 
-    [SerializeField] private AudioClip gameOverAudioClip;
-    [SerializeField] private AudioClip gameStartAudioClip;
+    [SerializeField] private List<AudioClip> gameStartAudioClips;
+    [SerializeField] private List<AudioClip> gameOverAudioClips;
 
     [Header("Game State")]
     public bool isStarted = false;
@@ -132,7 +132,9 @@ public class ShootingGameManager : NetworkBehaviour
             item.SetActive(false);
         }
 
-        this.eventAudio.PlayOneShot(gameStartAudioClip, () =>
+        var clipindex = Random.Range(0, gameStartAudioClips.Count);
+
+        this.eventAudio.PlayOneShot(gameStartAudioClips[clipindex], () =>
         {
             isStarted = true;
             spawner.gameObject.SetActive(true);
@@ -155,7 +157,9 @@ public class ShootingGameManager : NetworkBehaviour
             bgmController.StopWithFadeOut();
         }
 
-        this.eventAudio.PlayOneShot(gameOverAudioClip, () =>
+        var clipindex = Random.Range(0, gameOverAudioClips.Count);
+
+        this.eventAudio.PlayOneShot(gameOverAudioClips[clipindex], () =>
         {
             gameUIGroup.alpha = 0;
             boardUIGroup.alpha = 1;

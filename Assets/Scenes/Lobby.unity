@@ -2691,7 +2691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!215 &499119692
 ReflectionProbe:
   m_ObjectHideFlags: 0
@@ -3465,7 +3465,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!215 &624091544
 ReflectionProbe:
   m_ObjectHideFlags: 0
@@ -4973,8 +4973,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1.25
-  MaxDistance: 10
+  MinDistance: 4
+  MaxDistance: 20
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -6791,8 +6791,18 @@ MonoBehaviour:
   timeUI: {fileID: 1231604799}
   eventAudio: {fileID: 1094014841}
   bgmController: {fileID: 1094014842}
-  gameOverAudioClip: {fileID: 8300000, guid: ce9ab71ae50e88945b8501047aa1e79f, type: 3}
-  gameStartAudioClip: {fileID: 8300000, guid: b519a8150832bd24aad88ff6529828e3, type: 3}
+  gameStartAudioClips:
+  - {fileID: 8300000, guid: 299bcdf921560464786561d32a7753f0, type: 3}
+  - {fileID: 8300000, guid: 17bd9e3b27052f844bc683182e4d9939, type: 3}
+  - {fileID: 8300000, guid: 480023dca06536341893973175c4e89f, type: 3}
+  - {fileID: 8300000, guid: 783409172ad07e94fbd63952cfafe120, type: 3}
+  - {fileID: 8300000, guid: 4ad956e11f51624408dc0738efe87161, type: 3}
+  gameOverAudioClips:
+  - {fileID: 8300000, guid: 8f03cd6057fbcb44293689dc2485cea3, type: 3}
+  - {fileID: 8300000, guid: 0a4289adf0ce0df408f45e191bc8ab37, type: 3}
+  - {fileID: 8300000, guid: 7d06be3dbd6146e4da671029a654ec14, type: 3}
+  - {fileID: 8300000, guid: c077ffbb87b08e846a829ab562b32403, type: 3}
+  - {fileID: 8300000, guid: 337f192652743ab419c6f2a25f82fc83, type: 3}
   isStarted: 0
   displayObject: {fileID: 153028594240468603}
   otherObjects:
@@ -7642,7 +7652,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1.8
+  MinDistance: 2
   MaxDistance: 20
   Pan2D: 0
   rolloffMode: 0
