@@ -38,10 +38,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blend: 1
+    - _Blend: 0
     - _Offset: 0.08
     - _Segment: 128
     - _Thickness: 0.4
-    m_Colors: []
+    m_Colors:
+    - _UVOffset: {r: 0.002, g: 0.0025, b: 0, a: 0}
+    - _Vector2: {r: 0.002, g: 0.0025, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

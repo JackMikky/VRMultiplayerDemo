@@ -161,7 +161,7 @@ AudioReverbZone:
   m_GameObject: {fileID: 38135073}
   m_Enabled: 1
   m_MinDistance: 5
-  m_MaxDistance: 60
+  m_MaxDistance: 50
   m_ReverbPreset: 1
   m_Room: -1000
   m_RoomHF: -100
@@ -17955,7 +17955,8 @@ MonoBehaviour:
     filterMaterial: {fileID: 2100000, guid: ac08ba6a58e32a84db1e9fec88f7e569, type: 2}
   - leverObject: {fileID: 1116655165}
     filterMaterial: {fileID: 2100000, guid: 0e906d8e63841a04a89493df0dff0488, type: 2}
-  autoDisableTime: 20
+  autoDisableTime: 28
+  blendParameterName: _Blend
 --- !u!1 &2108752328
 GameObject:
   m_ObjectHideFlags: 0

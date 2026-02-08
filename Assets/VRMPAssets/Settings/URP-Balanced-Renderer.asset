@@ -178,11 +178,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
   m_Name: FullScreenFilter
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
-  m_Active: 1
+  m_Active: 0
   injectionPoint: 600
   fetchColorBuffer: 1
   requirements: 0
-  passMaterial: {fileID: 2100000, guid: ac08ba6a58e32a84db1e9fec88f7e569, type: 2}
+  passMaterial: {fileID: 2100000, guid: 0e906d8e63841a04a89493df0dff0488, type: 2}
   passIndex: 0
   bindDepthStencilAttachment: 0
   m_Version: 1

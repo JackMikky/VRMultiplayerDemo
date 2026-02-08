@@ -17,6 +17,7 @@ public class ScreenFilterController : MonoBehaviour
     [SerializeField] private List<ScreenFilterLever> screenFilterObjects = new List<ScreenFilterLever>();
 
     [SerializeField] private float autoDisableTime = 10f;
+    [SerializeField] private string blendParameterName = "_Blend";
 
     private readonly string rendererFeatureName = "FullScreenFilter";
 
@@ -120,6 +121,9 @@ public class ScreenFilterController : MonoBehaviour
             return;
         }
 
+        // Set blend to 1 (fully visible) when activating
+        filterMaterial.SetFloat(blendParameterName, 1f);
+
         cachedRendererFeature.passMaterial = filterMaterial;
 
         if (!cachedRendererFeature.isActive)
@@ -184,7 +188,19 @@ public class ScreenFilterController : MonoBehaviour
     /// </summary>
     private IEnumerator AutoDisableFilterAfterDelay()
     {
-        yield return new WaitForSeconds(autoDisableTime);
+        float elapsedTime = 0f;
+        var currentMaterial = screenFilterObjects[currentActiveIndex].filterMaterial;
+
+        while (elapsedTime < autoDisableTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float blendValue = 1f - (elapsedTime / autoDisableTime);
+            currentMaterial.SetFloat(blendParameterName, Mathf.Clamp01(blendValue));
+            yield return null;
+        }
+
+        // Ensure blend is set to 0 at the end
+        currentMaterial.SetFloat(blendParameterName, 0f);
         DisableFilter();
     }
 
