@@ -38,8 +38,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _MosaicIntensity: 32
+    - _MosaicIntensity: 16
     m_Colors:
-    - _Offset: {r: -0.01, g: -0.02, b: 0, a: 0}
+    - _Offset: {r: -0.005, g: -0.006, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
