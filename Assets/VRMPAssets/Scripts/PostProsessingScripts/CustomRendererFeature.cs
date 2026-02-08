@@ -10,7 +10,6 @@ public class CustomRendererFeature : ScriptableRendererFeature
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
         public Material material;
 
-        [Tooltip("是否在编辑器相机(Scene视图)中也渲染效果")]
         public bool renderInSceneView = false;
     }
 

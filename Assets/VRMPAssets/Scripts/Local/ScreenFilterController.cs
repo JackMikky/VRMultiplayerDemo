@@ -18,9 +18,11 @@ public class ScreenFilterController : MonoBehaviour
 
     [SerializeField] private float autoDisableTime = 10f;
 
+    private readonly string rendererFeatureName = "FullScreenFilter";
+
     private int currentActiveIndex = -1;
     private Coroutine autoDisableCoroutine;
-    private CustomRendererFeature cachedRendererFeature;
+    private FullScreenPassRendererFeature cachedRendererFeature;
 
     private void Awake()
     {
@@ -46,9 +48,9 @@ public class ScreenFilterController : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the CustomRendererFeature from the currently active URP Renderer Data
+    /// Get the FullScreenPassRendererFeature from the currently active URP Renderer Data
     /// </summary>
-    private CustomRendererFeature GetCustomRendererFeature()
+    private FullScreenPassRendererFeature GetCustomRendererFeature()
     {
         var urpAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urpAsset == null)
@@ -83,14 +85,14 @@ public class ScreenFilterController : MonoBehaviour
 
         foreach (var feature in rendererFeatures)
         {
-            if (feature is CustomRendererFeature customFeature)
+            if (feature is FullScreenPassRendererFeature fullScreenFeature && fullScreenFeature.name.Equals(rendererFeatureName))
             {
-                Debug.Log($"[ScreenFilterController] Found CustomRendererFeature: {feature.name}");
-                return customFeature;
+                Debug.Log($"[ScreenFilterController] Found FullScreenPassRendererFeature: {feature.name}");
+                return fullScreenFeature;
             }
         }
 
-        Debug.LogWarning("[ScreenFilterController] CustomRendererFeature not found!");
+        Debug.LogWarning("[ScreenFilterController] FullScreenPassRendererFeature not found!");
         return null;
     }
 
@@ -118,7 +120,7 @@ public class ScreenFilterController : MonoBehaviour
             return;
         }
 
-        cachedRendererFeature.settings.material = filterMaterial;
+        cachedRendererFeature.passMaterial = filterMaterial;
 
         if (!cachedRendererFeature.isActive)
         {
