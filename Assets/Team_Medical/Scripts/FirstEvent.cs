@@ -27,16 +27,7 @@ public class FirstEvent : MonoBehaviour
             DoAction(other.gameObject);
         }
     }
-
-    // 衝突判定（Rigidbody + Collider の組み合わせ用）
-    void OnCollisionEnter(Collision collision)
-    {
-        if (allowedPartner == null) return;
-        if (collision.gameObject == allowedPartner)
-        {
-            DoAction(collision.gameObject);
-        }
-    }
+   
 
     void DoAction(GameObject partner)
     {
