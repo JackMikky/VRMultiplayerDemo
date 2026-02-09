@@ -136,13 +136,11 @@ namespace Manufacturing
             if (nearObjects.Count <= 0)
             {
                 rigidbody.isKinematic = false;
-                rigidbody.useGravity = true;
 
                 releaseParts.IsKinematicNetwork.Value = false;
-                releaseParts.UseGravityNetwork.Value = true;
 
                 // サーバー以外に通知
-                OnReleaseRpc(releasePartsIndex, -1, false, true);
+                OnReleaseRpc(releasePartsIndex, -1, false);
 
                 return;
             }
@@ -151,7 +149,14 @@ namespace Manufacturing
             NearObjectInfo objectInfo = nearObjects.OrderBy(obj => obj.Distance).First();
 
             // 一番近いガイド用オブジェクトにはめる
-            ConnectObject(releaseParts, releaseObject, objectInfo.NearObject.gameObject);
+            releaseObject.transform.position = objectInfo.NearObject.transform.position;
+            releaseObject.transform.rotation = objectInfo.NearObject.transform.rotation;
+            rigidbody.isKinematic = true;
+            rigidbody.linearVelocity = Vector3.zero;
+            rigidbody.angularVelocity = Vector3.zero;
+
+            // ネットワーク変数も更新
+            releaseParts.IsKinematicNetwork.Value = true;
 
             // 接続されているフラグをtrueに
             objectInfo.NearObject.IsConnected = true;
@@ -163,17 +168,15 @@ namespace Manufacturing
             releaseParts.ConnectGuidePartsIndex = nearPartsIndex;
             releaseParts.ConnectGuidePartsIndexNetwork.Value = nearPartsIndex;
 
-            Debug.Log($"サーバー側…isKinematic：{releaseObject.GetComponent<Rigidbody>().isKinematic}, useGravity：{releaseObject.GetComponent<Rigidbody>().useGravity}");
-
             // サーバー以外に通知
-            OnReleaseRpc(releasePartsIndex, nearPartsIndex, true, false);
+            OnReleaseRpc(releasePartsIndex, nearPartsIndex, true);
         }
 
         /// <summary>
         /// オブジェクトを離した時にサーバー以外で呼び出されます
         /// </summary>
         [Rpc(SendTo.Everyone)]
-        void OnReleaseRpc(int releasePartsIndex, int nearPartsIndex, bool isKinematic, bool useGravity)
+        void OnReleaseRpc(int releasePartsIndex, int nearPartsIndex, bool isKinematic)
         {
             // 組み立て部品・ガイドの情報を取得
             var releaseParts = AssemblyPartsList[releasePartsIndex];
@@ -182,14 +185,11 @@ namespace Manufacturing
             releaseParts.ConnectGuidePartsIndex = nearPartsIndex;
             Rigidbody rigidbody = releaseParts.GetComponent<Rigidbody>();
             rigidbody.isKinematic = isKinematic;
-            rigidbody.useGravity = useGravity;
 
             if (nearParts != null)
             {
                 nearParts.IsConnected = true;
             }
-
-            Debug.Log($"クライアント側…isKinematic：{rigidbody.isKinematic}, useGravity：{rigidbody.useGravity}");
         }
 
         /// <summary>
@@ -199,25 +199,6 @@ namespace Manufacturing
         private void OnGrab(AssemblyParts assemblyParts)
 		{
             Debug.Log($"掴んだ組み立て部品種別：{assemblyParts.Type}");
-        }
-
-        /// <summary>
-        /// 一定以下の距離のオブジェクトに指定のオブジェクトを接続
-        /// </summary>
-        private void ConnectObject(AssemblyParts releaseParts, GameObject releaseObject, GameObject guideObject)
-		{
-            releaseObject.transform.position = guideObject.transform.position;
-            releaseObject.transform.rotation = guideObject.transform.rotation;
-
-            Rigidbody rigidbody = releaseObject.GetComponent<Rigidbody>();
-			rigidbody.useGravity = false;
-			rigidbody.linearVelocity = Vector3.zero;
-			rigidbody.angularVelocity = Vector3.zero;
-			rigidbody.isKinematic = true;
-
-            // ネットワーク変数も更新
-            releaseParts.IsKinematicNetwork.Value = true;
-            releaseParts.UseGravityNetwork.Value = false;
         }
     }
 

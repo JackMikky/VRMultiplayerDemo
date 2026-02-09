@@ -40,6 +40,11 @@ namespace Manufacturing
         private XRGrabInteractable grabInteractable;
 
         /// <summary>
+        /// Colliderのインスタンス
+        /// </summary>
+        private Collider collider;
+
+        /// <summary>
         /// 接続先のガイド用オブジェクトのGuidePartsインデックス
         /// </summary>
         public int ConnectGuidePartsIndex = -1;
@@ -53,11 +58,6 @@ namespace Manufacturing
         /// isKinematicの状態（ネットワーク上）
         /// </summary>
         public NetworkVariable<bool> IsKinematicNetwork = new NetworkVariable<bool>(false, writePerm: NetworkVariableWritePermission.Server);
-
-        /// <summary>
-        /// useGravityの状態（ネットワーク上）
-        /// </summary>
-        public NetworkVariable<bool> UseGravityNetwork = new NetworkVariable<bool>(true, writePerm: NetworkVariableWritePermission.Server);
 
         /// <summary>
         /// 初期座標
@@ -76,9 +76,10 @@ namespace Manufacturing
         {
 			// インスタンスを取得
 			grabInteractable = GetComponent<XRGrabInteractable>();
+            collider = GetComponent<Collider>();
 
-			// イベントに登録
-			grabInteractable.selectExited.AddListener(OnRelease);
+            // イベントに登録
+            grabInteractable.selectExited.AddListener(OnRelease);
 			grabInteractable.selectEntered.AddListener(OnGrab);
 
             // 初期座標・回転を保存
@@ -123,6 +124,8 @@ namespace Manufacturing
 				return;
 			}
 
+            collider.isTrigger = false;
+
             OnReleaseServerRpc();
         }
 
@@ -142,6 +145,8 @@ namespace Manufacturing
         /// <param name="args"></param>
         void OnGrab(SelectEnterEventArgs args)
         {
+            collider.isTrigger = true;
+
             // イベント発火
             OnGrabEvent.Invoke(this);
         }
