@@ -37,12 +37,12 @@ namespace Manufacturing
         /// <summary>
         /// XRGrabInteractableのインスタンス
         /// </summary>
-        private XRGrabInteractable grabInteractable;
+        public XRGrabInteractable XRGrabInteractable;
 
         /// <summary>
         /// Colliderのインスタンス
         /// </summary>
-        private Collider collider;
+        public Collider Collider;
 
         /// <summary>
         /// 接続先のガイド用オブジェクトのGuidePartsインデックス
@@ -75,12 +75,12 @@ namespace Manufacturing
         public override void OnNetworkSpawn()
         {
 			// インスタンスを取得
-			grabInteractable = GetComponent<XRGrabInteractable>();
-            collider = GetComponent<Collider>();
+            XRGrabInteractable = GetComponent<XRGrabInteractable>();
+            Collider = GetComponent<Collider>();
 
             // イベントに登録
-            grabInteractable.selectExited.AddListener(OnRelease);
-			grabInteractable.selectEntered.AddListener(OnGrab);
+            XRGrabInteractable.selectExited.AddListener(OnRelease);
+			XRGrabInteractable.selectEntered.AddListener(OnGrab);
 
             // 初期座標・回転を保存
             if (IsOwner)
@@ -96,10 +96,10 @@ namespace Manufacturing
         public override void OnNetworkDespawn()
 		{
 			// イベントの登録解除
-			if (grabInteractable != null)
+			if (XRGrabInteractable != null)
 			{
-                grabInteractable.selectExited.RemoveListener(OnRelease);
-				grabInteractable.selectEntered.RemoveListener(OnGrab);
+                XRGrabInteractable.selectExited.RemoveListener(OnRelease);
+				XRGrabInteractable.selectEntered.RemoveListener(OnGrab);
             }
 		}
 
@@ -119,12 +119,12 @@ namespace Manufacturing
         void OnRelease(SelectExitEventArgs args)
 		{
 			// 掴んでいるinteractorの数が0より多いならreturn
-			if (grabInteractable.interactorsSelecting.Count > 0)
+			if (XRGrabInteractable.interactorsSelecting.Count > 0)
 			{
 				return;
 			}
 
-            collider.isTrigger = false;
+            Collider.isTrigger = false;
 
             OnReleaseServerRpc();
         }
@@ -145,7 +145,7 @@ namespace Manufacturing
         /// <param name="args"></param>
         void OnGrab(SelectEnterEventArgs args)
         {
-            collider.isTrigger = true;
+            Collider.isTrigger = true;
 
             // イベント発火
             OnGrabEvent.Invoke(this);

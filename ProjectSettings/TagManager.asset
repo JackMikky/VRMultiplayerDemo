@@ -14,6 +14,11 @@ TagManager:
   - ColorPallet
   - PenTrail
   - Piggy
+  - AssemblyTarget_0
+  - AssemblyTarget_1
+  - AssemblyTarget_2
+  - AssemblyTarget_3
+  - AssemblyTarget_4
   layers:
   - Default
   - TransparentFX

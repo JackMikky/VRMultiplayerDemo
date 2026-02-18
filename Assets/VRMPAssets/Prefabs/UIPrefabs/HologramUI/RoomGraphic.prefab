@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2265347109
+  GlobalObjectIdHash: 368627388
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 2
@@ -317,7 +317,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: a70ad8c72e74c4443b4c28f1cfc8e2a7, type: 3}
+  m_Texture: {fileID: 2800000, guid: 21d03864644d37842bb239382f305449, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

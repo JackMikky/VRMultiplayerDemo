@@ -27,6 +27,15 @@ namespace PXR.Construction.Runtime
         [SerializeField]
         private ScaleField scaleField;
 
+        [SerializeField]
+        private AudioSource leverAudioSource;
+
+        [SerializeField]
+        private AudioClip leverOnAudioClip;
+
+        [SerializeField]
+        private AudioClip leverOffAudioClip;
+
         void Awake()
         {
             // Get associated components
@@ -96,6 +105,8 @@ namespace PXR.Construction.Runtime
         {
             background_On.SetActive(m_XRLever.value);
             background_Off.SetActive(!m_XRLever.value);
+            leverAudioSource.resource = m_XRLever.value ? leverOnAudioClip : leverOffAudioClip;
+            leverAudioSource.Play();
         }
     }
 }
