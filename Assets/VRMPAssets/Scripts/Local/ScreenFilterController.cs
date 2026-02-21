@@ -11,7 +11,8 @@ public class ScreenFilterController : MonoBehaviour
     public class ScreenFilterLever
     {
         public GameObject leverObject;
-        public Material filterMaterial;
+        public Material fullScreenFilterMaterial;
+        public Material renderObjectsFilterMaterial;
     }
 
     [SerializeField] private List<ScreenFilterLever> screenFilterObjects = new List<ScreenFilterLever>();
@@ -19,11 +20,13 @@ public class ScreenFilterController : MonoBehaviour
     [SerializeField] private float autoDisableTime = 10f;
     [SerializeField] private string blendParameterName = "_Blend";
 
-    private readonly string rendererFeatureName = "FullScreenFilter";
+    private const string rendererFeatureName = "FullScreenFilter";
+    private const string renderObjectsFeatureName = "FullScreenRenderObject";
 
     private int currentActiveIndex = -1;
     private Coroutine autoDisableCoroutine;
     private FullScreenPassRendererFeature cachedRendererFeature;
+    private RenderObjects cachedRenderObjectsFeature;
 
     private void Awake()
     {
@@ -37,21 +40,19 @@ public class ScreenFilterController : MonoBehaviour
             });
         }
 
-        cachedRendererFeature = GetCustomRendererFeature();
+        cachedRendererFeature = FindRendererFeature<FullScreenPassRendererFeature>(rendererFeatureName);
+        cachedRenderObjectsFeature = FindRendererFeature<RenderObjects>(renderObjectsFeatureName);
     }
 
     private void Start()
     {
-        if (cachedRendererFeature != null)
-        {
-            cachedRendererFeature.SetActive(false);
-        }
+        DisableAllFeatures();
     }
 
     /// <summary>
-    /// Get the FullScreenPassRendererFeature from the currently active URP Renderer Data
+    /// Get a ScriptableRendererFeature of the specified type and name from the active URP Renderer
     /// </summary>
-    private FullScreenPassRendererFeature GetCustomRendererFeature()
+    private T FindRendererFeature<T>(string featureName) where T : ScriptableRendererFeature
     {
         var urpAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urpAsset == null)
@@ -67,8 +68,7 @@ public class ScreenFilterController : MonoBehaviour
             return null;
         }
 
-        var rendererDataType = scriptableRenderer.GetType();
-        var rendererFeaturesProperty = rendererDataType.GetProperty("rendererFeatures",
+        var rendererFeaturesProperty = scriptableRenderer.GetType().GetProperty("rendererFeatures",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         if (rendererFeaturesProperty == null)
@@ -86,49 +86,81 @@ public class ScreenFilterController : MonoBehaviour
 
         foreach (var feature in rendererFeatures)
         {
-            if (feature is FullScreenPassRendererFeature fullScreenFeature && fullScreenFeature.name.Equals(rendererFeatureName))
+            if (feature is T typedFeature && typedFeature.name.Equals(featureName))
             {
-                Debug.Log($"[ScreenFilterController] Found FullScreenPassRendererFeature: {feature.name}");
-                return fullScreenFeature;
+                Debug.Log($"[ScreenFilterController] Found {typeof(T).Name}: {feature.name}");
+                return typedFeature;
             }
         }
 
-        Debug.LogWarning("[ScreenFilterController] FullScreenPassRendererFeature not found!");
+        Debug.LogWarning($"[ScreenFilterController] {typeof(T).Name} '{featureName}' not found!");
         return null;
     }
 
     /// <summary>
-    /// Activate the filter material at the specified index
+    /// Disable all renderer features regardless of type
+    /// </summary>
+    private void DisableAllFeatures()
+    {
+        if (cachedRendererFeature != null && cachedRendererFeature.isActive)
+        {
+            cachedRendererFeature.SetActive(false);
+        }
+        if (cachedRenderObjectsFeature != null && cachedRenderObjectsFeature.isActive)
+        {
+            cachedRenderObjectsFeature.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Activate the filter at the specified index.
+    /// Enables FullScreenPass if fullScreenFilterMaterial is set,
+    /// and enables RenderObjects if renderObjectsFilterMaterial is set.
     /// </summary>
     public void ActivateFilter(int index)
     {
-        if (cachedRendererFeature == null)
-        {
-            Debug.LogError("[ScreenFilterController] CustomRendererFeature not found!");
-            return;
-        }
-
         if (index < 0 || index >= screenFilterObjects.Count)
         {
             Debug.LogWarning($"[ScreenFilterController] Index {index} is out of range!");
             return;
         }
 
-        var filterMaterial = screenFilterObjects[index].filterMaterial;
-        if (filterMaterial == null)
+        var screenFilter = screenFilterObjects[index];
+
+        if (screenFilter.fullScreenFilterMaterial == null && screenFilter.renderObjectsFilterMaterial == null)
         {
-            Debug.LogWarning($"[ScreenFilterController] Material at index {index} is not set!");
+            Debug.LogWarning($"[ScreenFilterController] No materials set at index {index}!");
             return;
         }
 
-        // Set blend to 1 (fully visible) when activating
-        filterMaterial.SetFloat(blendParameterName, 1f);
+        DisableAllFeatures();
 
-        cachedRendererFeature.passMaterial = filterMaterial;
-
-        if (!cachedRendererFeature.isActive)
+        // FullScreenPass
+        if (screenFilter.fullScreenFilterMaterial != null)
         {
-            cachedRendererFeature.SetActive(true);
+            if (cachedRendererFeature == null)
+            {
+                Debug.LogError("[ScreenFilterController] FullScreenPassRendererFeature not found!");
+            }
+            else
+            {
+                screenFilter.fullScreenFilterMaterial.SetFloat(blendParameterName, 1f);
+                cachedRendererFeature.passMaterial = screenFilter.fullScreenFilterMaterial;
+                cachedRendererFeature.SetActive(true);
+            }
+        }
+
+        // RenderObjects
+        if (screenFilter.renderObjectsFilterMaterial != null)
+        {
+            if (cachedRenderObjectsFeature == null)
+            {
+                Debug.LogError("[ScreenFilterController] RenderObjects Feature not found!");
+            }
+            else
+            {
+                cachedRenderObjectsFeature.SetActive(true);
+            }
         }
 
         currentActiveIndex = index;
@@ -146,10 +178,7 @@ public class ScreenFilterController : MonoBehaviour
     /// </summary>
     public void DisableFilter()
     {
-        if (cachedRendererFeature != null && cachedRendererFeature.isActive)
-        {
-            cachedRendererFeature.SetActive(false);
-        }
+        DisableAllFeatures();
 
         currentActiveIndex = -1;
 
@@ -165,6 +194,12 @@ public class ScreenFilterController : MonoBehaviour
     /// </summary>
     public void ToggleFilter(int index)
     {
+        if (index < 0 || index >= screenFilterObjects.Count)
+        {
+            Debug.LogWarning($"[ScreenFilterController] Index {index} is out of range!");
+            return;
+        }
+
         if (currentActiveIndex == index)
         {
             DisableFilter();
@@ -189,24 +224,34 @@ public class ScreenFilterController : MonoBehaviour
     private IEnumerator AutoDisableFilterAfterDelay()
     {
         float elapsedTime = 0f;
-        var currentMaterial = screenFilterObjects[currentActiveIndex].filterMaterial;
+
+        var screenFilter = screenFilterObjects[currentActiveIndex];
+        var fullScreenMat = screenFilter.fullScreenFilterMaterial;
+        var hasBlendParameter = fullScreenMat != null && fullScreenMat.HasFloat(blendParameterName);
 
         while (elapsedTime < autoDisableTime)
         {
             elapsedTime += Time.deltaTime;
-            float blendValue = 1f - (elapsedTime / autoDisableTime);
-            currentMaterial.SetFloat(blendParameterName, Mathf.Clamp01(blendValue));
+
+            if (hasBlendParameter)
+            {
+                float blendValue = Mathf.Clamp01(1f - (elapsedTime / autoDisableTime));
+                fullScreenMat.SetFloat(blendParameterName, blendValue);
+            }
+
             yield return null;
         }
 
-        // Ensure blend is set to 0 at the end
-        currentMaterial.SetFloat(blendParameterName, 0f);
+        if (hasBlendParameter)
+        {
+            fullScreenMat.SetFloat(blendParameterName, 0f);
+        }
+
         DisableFilter();
     }
 
     private void OnDestroy()
     {
-        // Clean up all listeners
         foreach (var item in screenFilterObjects)
         {
             if (item.leverObject != null)
@@ -219,16 +264,11 @@ public class ScreenFilterController : MonoBehaviour
             }
         }
 
-        // Stop coroutine
         if (autoDisableCoroutine != null)
         {
             StopCoroutine(autoDisableCoroutine);
         }
 
-        // Disable renderer feature
-        if (cachedRendererFeature != null)
-        {
-            cachedRendererFeature.SetActive(false);
-        }
+        DisableAllFeatures();
     }
 }

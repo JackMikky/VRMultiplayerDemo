@@ -100,9 +100,10 @@ MonoBehaviour:
   - {fileID: -3682703612826154577}
   - {fileID: 1499945515314798281}
   - {fileID: 9131221722497484465}
-  m_RendererFeatureMap: adc0de57c6d2eee5be8fb8c1b629ab63af0973709368e4ccc95ec7c67fe0d014b106cbfec69db87e
+  - {fileID: 6414391266177785627}
+  m_RendererFeatureMap: adc0de57c6d2eee5be8fb8c1b629ab63af0973709368e4ccc95ec7c67fe0d014b106cbfec69db87e1b1fe526df7e0459
   m_UseNativeRenderPass: 0
-  xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
+  xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   m_AssetVersion: 3
   m_PrepassLayerMask:
@@ -146,6 +147,48 @@ MonoBehaviour:
     renderPassEvent: 600
     material: {fileID: 2100000, guid: 88c9ae703ea0ca140bc6732155b79c9f, type: 2}
     renderInSceneView: 0
+--- !u!114 &6414391266177785627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: FullScreenRenderObject
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
+  m_Active: 0
+  settings:
+    passTag: FullScreenRenderObject
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 321
+      PassNames: []
+    overrideMaterial: {fileID: 2100000, guid: 55fab6fbf53a94a44b52eedb8fd19b68, type: 2}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 0}
+    overrideShaderPassIndex: 0
+    overrideMode: 1
+    overrideDepthState: 1
+    depthCompareFunction: 4
+    enableWrite: 0
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &7181879895683272638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,7 +225,7 @@ MonoBehaviour:
   injectionPoint: 600
   fetchColorBuffer: 1
   requirements: 0
-  passMaterial: {fileID: 2100000, guid: 0e906d8e63841a04a89493df0dff0488, type: 2}
+  passMaterial: {fileID: 2100000, guid: a4074e118ea20004fad498fea306e8d3, type: 2}
   passIndex: 0
   bindDepthStencilAttachment: 0
   m_Version: 1
