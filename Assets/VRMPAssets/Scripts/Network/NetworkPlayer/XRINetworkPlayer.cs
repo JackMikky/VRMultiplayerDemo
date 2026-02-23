@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Unity.XR.CoreUtils;
 using Unity.Collections;
 using System;
+
 //using Unity.Services.Vivox;
 using Unity.XR.CoreUtils.Bindings.Variables;
 using UnityEngine.XR.Templates.VRMultiplayer;
@@ -17,7 +18,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Speed at which voice amplitude changes.
         /// </summary>
-        const float k_VoiceAmplitudeSpeed = 15.0f;
+        private const float k_VoiceAmplitudeSpeed = 15.0f;
 
         /// <summary>
         /// Singleton Reference for the Local Player.
@@ -25,9 +26,6 @@ namespace XRMultiplayer
         public static XRINetworkPlayer LocalPlayer;
 
         [Header("Avatar Transform References"), Tooltip("Assign to local avatar transform.")]
-        /// <summary>
-        /// Non-Local player transforms.
-        /// </summary>
         public Transform head;
 
         /// <summary>
@@ -78,7 +76,13 @@ namespace XRMultiplayer
             get => m_VoiceAmplitudeCurrent;
         }
 
-        float m_VoiceAmplitudeCurrent;
+        private float m_VoiceAmplitudeCurrent;
+
+        /// <summary>
+        /// Networked voice amplitude synced from the owner to all clients.
+        /// </summary>
+        private readonly NetworkVariable<float> m_NetworkVoiceAmp = new(0f, NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Owner);
 
         /// <summary>
         /// Player Voice Id string that reads from the internal NetworkVariable for the Player Voice Id.
@@ -99,7 +103,7 @@ namespace XRMultiplayer
             get => m_PlayerName.Value.ToString();
         }
 
-        readonly NetworkVariable<FixedString128Bytes> m_PlayerName = new("", NetworkVariableReadPermission.Everyone,
+        private readonly NetworkVariable<FixedString128Bytes> m_PlayerName = new("", NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Owner);
 
         /// <summary>
@@ -110,24 +114,23 @@ namespace XRMultiplayer
             get => m_PlayerColor.Value;
         }
 
-        readonly NetworkVariable<Color> m_PlayerColor = new(Color.white, NetworkVariableReadPermission.Everyone,
+        private readonly NetworkVariable<Color> m_PlayerColor = new(Color.white, NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Owner);
 
         public NetworkVariable<int> platformType => m_PlatformType;
 
-        readonly NetworkVariable<int> m_PlatformType = new NetworkVariable<int>(0,
+        private readonly NetworkVariable<int> m_PlatformType = new NetworkVariable<int>(0,
             NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-        [HideInInspector] public readonly NetworkVariable<bool> selfMuted = new(false,
+        [HideInInspector]
+        public readonly NetworkVariable<bool> selfMuted = new(false,
             NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
 
         /// <summary>
         /// Player Name Tag.
         /// </summary>
         [Header("Player Name Tag"), SerializeField, Tooltip("Player Name Tag.")]
         protected bool m_UpdateObjectName = true;
-
 
         // /// <summary>
         // /// Head Renderers to change rendering mode for local players.
@@ -214,22 +217,12 @@ namespace XRMultiplayer
         ///<inheritdoc/>
         protected virtual void Update()
         {
-            //if (IsOwner)
-            //{
-            //    if (Time.time > m_VoicePositionCheckTimer)
-            //    {
-            //        m_VoicePositionCheckTimer += m_VoicePositionUpdateTime;
+            if (IsOwner)
+            {
+                m_NetworkVoiceAmp.Value = OfflinePlayerAvatar.voiceAmp.Value;
+            }
 
-            //        if (Vector3.Distance(m_PrevHeadPos, m_HeadOrigin.position) > m_VoiceUpdatePosotionDelta)
-            //        {
-            //            m_PrevHeadPos = m_HeadOrigin.position;
-            //            if (XRINetworkGameManager.Instance.positionalVoiceChat)
-            //            {
-            //                m_VoiceChat.Set3DAudio(m_HeadOrigin);
-            //            }
-            //        }
-            //    }
-            //}
+            m_VoiceAmplitudeDestination = m_NetworkVoiceAmp.Value;
 
             m_VoiceAmplitudeCurrent = Mathf.Lerp(m_VoiceAmplitudeCurrent, m_VoiceAmplitudeDestination,
                 Time.deltaTime * k_VoiceAmplitudeSpeed);
@@ -351,7 +344,7 @@ namespace XRMultiplayer
         /// Called from the local player only
         /// </summary>
         /// <param name="muted"></param>
-        void SelfMutedChanged(bool muted)
+        private void SelfMutedChanged(bool muted)
         {
             selfMuted.Value = muted;
         }
@@ -379,7 +372,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Called when the player object is finished being setup.
         /// </summary>
-        void CompleteSetup()
+        private void CompleteSetup()
         {
             // Add player to XRINetworkManager.
             XRINetworkGameManager.Instance.PlayerJoined(NetworkObject.OwnerClientId);
@@ -409,7 +402,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Callback anytime the local player sets <see cref="m_PlayerName"/>.
         /// </summary><remarks>Invokes the callback <see cref="onNameUpdated"/>.</remarks>
-        void UpdatePlayerName(FixedString128Bytes oldName, FixedString128Bytes currentName)
+        private void UpdatePlayerName(FixedString128Bytes oldName, FixedString128Bytes currentName)
         {
             onNameUpdated?.Invoke(currentName.ToString());
 
@@ -427,12 +420,12 @@ namespace XRMultiplayer
         /// <summary>
         /// Callback when the local player sets <see cref="m_PlayerColor"/>.
         /// </summary><remarks>Invokes the callback <see cref="onColorUpdated"/>.</remarks>
-        void UpdatePlayerColor(Color oldColor, Color newColor)
+        private void UpdatePlayerColor(Color oldColor, Color newColor)
         {
             onColorUpdated?.Invoke(newColor);
         }
 
-        void UpdatePlayerVoiceEnergy(float current)
+        private void UpdatePlayerVoiceEnergy(float current)
         {
             m_VoiceAmplitudeDestination = Mathf.Clamp01(current);
         }

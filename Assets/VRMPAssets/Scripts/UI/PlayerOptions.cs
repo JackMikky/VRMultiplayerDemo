@@ -56,8 +56,9 @@ namespace XRMultiplayer
         [SerializeField] private Vector2 m_MinMaxTurnAmount = new Vector2(15.0f, 180.0f);
         [SerializeField] private float m_SnapTurnUpdateAmount = 15.0f;
 
-        private VoiceChatManager m_VoiceChatManager;
+        //private VoiceChatManager m_VoiceChatManager;
         private DynamicMoveProvider m_MoveProvider;
+
         private SnapTurnProvider m_TurnProvider;
         private UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort.TunnelingVignetteController m_TunnelingVignetteController;
 
@@ -65,7 +66,7 @@ namespace XRMultiplayer
 
         private void Awake()
         {
-            m_VoiceChatManager = FindFirstObjectByType<VoiceChatManager>();
+            // m_VoiceChatManager = FindFirstObjectByType<VoiceChatManager>();
             m_MoveProvider = FindFirstObjectByType<DynamicMoveProvider>();
             m_TurnProvider = FindFirstObjectByType<SnapTurnProvider>();
             m_TunnelingVignetteController =
@@ -76,11 +77,11 @@ namespace XRMultiplayer
             XRINetworkGameManager.ConnectedRoomName.Subscribe(UpdateRoomName);
             XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
 
-            if (m_VoiceChatManager)
-            {
-                m_VoiceChatManager.selfMuted.Subscribe(MutedChanged);
-                m_VoiceChatManager.connectionStatus.Subscribe(UpdateVoiceChatStatus);
-            }
+            //if (m_VoiceChatManager)
+            //{
+            //    m_VoiceChatManager.selfMuted.Subscribe(MutedChanged);
+            //    m_VoiceChatManager.connectionStatus.Subscribe(UpdateVoiceChatStatus);
+            //}
 
             m_InputVolumeSlider.onValueChanged.AddListener(SetInputVolume);
             m_OutputVolumeSlider.onValueChanged.AddListener(SetOutputVolume);
@@ -137,9 +138,9 @@ namespace XRMultiplayer
             XRINetworkGameManager.ConnectedRoomName.Unsubscribe(UpdateRoomName);
             XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
 
-            m_VoiceChatManager?.selfMuted.Unsubscribe(MutedChanged);
+            //m_VoiceChatManager?.selfMuted.Unsubscribe(MutedChanged);
 
-            m_VoiceChatManager?.connectionStatus.Unsubscribe(UpdateVoiceChatStatus);
+            //m_VoiceChatManager?.connectionStatus.Unsubscribe(UpdateVoiceChatStatus);
             m_InputVolumeSlider.onValueChanged.RemoveListener(SetInputVolume);
             m_OutputVolumeSlider.onValueChanged.RemoveListener(SetOutputVolume);
         }
@@ -147,14 +148,14 @@ namespace XRMultiplayer
         private void Update()
         {
             m_TimeText.text = $"{DateTime.Now:h:mm}<size=4><voffset=1em>{DateTime.Now:tt}</size></voffset>";
-            //if (XRINetworkGameManager.Connected.Value)
-            //{
-            //    m_LocalPlayerAudioVolume.fillAmount = XRINetworkPlayer.LocalPlayer.playerVoiceAmp;
-            //}
-            //else
-            //{
-            //    m_LocalPlayerAudioVolume.fillAmount = OfflinePlayerAvatar.voiceAmp.Value;
-            //}
+            if (XRINetworkGameManager.Connected.Value)
+            {
+                m_LocalPlayerAudioVolume.fillAmount = XRINetworkPlayer.LocalPlayer.playerVoiceAmp;
+            }
+            else
+            {
+                m_LocalPlayerAudioVolume.fillAmount = OfflinePlayerAvatar.voiceAmp.Value;
+            }
         }
 
         private void ConnectOnline(bool connected)
@@ -254,18 +255,18 @@ namespace XRMultiplayer
         public void SetInputVolume(float volume)
         {
             float perc = Mathf.Lerp(-10, 10, volume);
-            m_VoiceChatManager.SetInputVolume(perc);
+            //m_VoiceChatManager.SetInputVolume(perc);
         }
 
         public void SetOutputVolume(float volume)
         {
             float perc = Mathf.Lerp(-10, 10, volume);
-            m_VoiceChatManager.SetOutputVolume(perc);
+            //m_VoiceChatManager.SetOutputVolume(perc);
         }
 
         public void ToggleMute()
         {
-            m_VoiceChatManager.ToggleSelfMute();
+            //m_VoiceChatManager.ToggleSelfMute();
         }
 
         private void MutedChanged(bool muted)

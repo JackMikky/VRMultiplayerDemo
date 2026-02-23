@@ -49,6 +49,11 @@ namespace XRMultiplayer
 
         bool m_IsFocusedOn = false;
 
+        /// <summary>
+        /// Whether this name tag is managed by a WorldCanvas (which calls UpdateVoice externally).
+        /// </summary>
+        bool m_ManagedByWorldCanvas = false;
+
         private void Awake()
         {
             m_Camera = Camera.main;
@@ -58,6 +63,12 @@ namespace XRMultiplayer
         {
             UpdateRotation();
             UpdateMinimizedState();
+
+            // If not managed by WorldCanvas, drive the voice UI from here.
+            if (!m_ManagedByWorldCanvas && m_Player != null)
+            {
+                UpdateVoice(m_Player.playerVoiceAmp);
+            }
         }
 
         private void OnDestroy()
@@ -83,6 +94,15 @@ namespace XRMultiplayer
             m_Player.squelched.Subscribe(UpdateSquelchedState);
             m_MuteButton.onClick.AddListener(SquelchPressed);
             m_SquelchedIcon.enabled = false;
+        }
+
+        /// <summary>
+        /// Marks this name tag as externally managed by a WorldCanvas.
+        /// When managed, UpdateVoice will not be called from LateUpdate to avoid duplicate updates.
+        /// </summary>
+        public void SetManagedByWorldCanvas(bool managed)
+        {
+            m_ManagedByWorldCanvas = managed;
         }
 
         void UpdateRotation()

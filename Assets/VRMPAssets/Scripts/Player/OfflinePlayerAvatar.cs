@@ -28,86 +28,88 @@ namespace XRMultiplayer
         /// <summary>
         /// A value indicating whether the player is muted.
         /// </summary>
-        static bool s_Muted;
+        private static bool s_Muted;
+
+        [SerializeField]
+        private GameObject offlineAvatar;
 
         /// <summary>
         /// The head transform.
         /// </summary>
-        [SerializeField] Transform m_HeadTransform;
+        [SerializeField] private Transform m_HeadTransform;
 
         /// <summary>
         /// The head renderer.
         /// </summary>
-        [SerializeField] SkinnedMeshRenderer m_HeadRend;
+        [SerializeField] private SkinnedMeshRenderer m_HeadRend;
 
         /// <summary>
         /// The voice amplitude curve.
         /// </summary>
-        [SerializeField] AnimationCurve m_VoiceCurve;
+        [SerializeField] private AnimationCurve m_VoiceCurve;
 
         /// <summary>
         /// The head origin.
         /// </summary>
-        Transform m_HeadOrigin;
+        private Transform m_HeadOrigin;
 
         /// <summary>
         /// The mouth blend smoothing.
         /// </summary>
-        [SerializeField] float m_MouthBlendSmoothing = 5.0f;
+        [SerializeField] private float m_MouthBlendSmoothing = 5.0f;
 
         /// <summary>
         /// The microphone loudness.
         /// </summary>
-        float m_MicLoudness;
+        private float m_MicLoudness;
 
         /// <summary>
         /// The microphone device name.
         /// </summary>
-        string m_Device;
+        private string m_Device;
 
         /// <summary>
         /// The sample window.
         /// </summary>
-        int m_SampleWindow = 128;
+        private int m_SampleWindow = 128;
 
         /// <summary>
         /// The clip record.
         /// </summary>
-        AudioClip m_ClipRecord;
+        private AudioClip m_ClipRecord;
 
         /// <summary>
         /// The voice destination volume.
         /// </summary>
-        float m_VoiceDestinationVolume;
+        private float m_VoiceDestinationVolume;
 
-        bool m_MicInitialized = false;
+        private bool m_MicInitialized = false;
 
         /// <inheritdoc/>
-        void Start()
+        private void Start()
         {
             XROrigin rig = FindFirstObjectByType<XROrigin>();
             m_HeadOrigin = rig.Camera.transform;
-
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             XRINetworkGameManager.LocalPlayerColor.Subscribe(UpdatePlayerColor);
-            VoiceChatManager.s_HasMicrophonePermission.Subscribe(MicrophonePermissionGranted);
+            MicrophonePermissionGranted(true);
             XRINetworkGameManager.Connected.Subscribe(connected =>
             {
-                gameObject.SetActive(!connected);
+                offlineAvatar.SetActive(!connected);
             });
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             XRINetworkGameManager.LocalPlayerColor.Unsubscribe(UpdatePlayerColor);
-            VoiceChatManager.s_HasMicrophonePermission.Subscribe(MicrophonePermissionGranted);
+            MicrophonePermissionGranted(false);
             StopMicrophone();
             XRINetworkGameManager.Connected.Unsubscribe(connected =>
             {
-                gameObject.SetActive(!connected);
+                offlineAvatar.SetActive(!connected);
             });
         }
 
@@ -118,7 +120,7 @@ namespace XRMultiplayer
         }
 
         /// <inheritdoc/>
-        void Update()
+        private void Update()
         {
             if (!s_Muted)
             {
@@ -136,7 +138,7 @@ namespace XRMultiplayer
             }
         }
 
-        void MicrophonePermissionGranted(bool granted)
+        private void MicrophonePermissionGranted(bool granted)
         {
             if (granted)
             {
@@ -144,7 +146,7 @@ namespace XRMultiplayer
             }
         }
 
-        void UpdatePlayerColor(Color color)
+        private void UpdatePlayerColor(Color color)
         {
             m_HeadRend.materials[2].color = color;
         }
@@ -152,7 +154,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Initializes the microphone, called from <see cref="VoiceChatManager.s_HasMicrophonePermission" callback/>.
         /// </summary>
-        void InitMic()
+        private void InitMic()
         {
             m_MicInitialized = true;
             m_Device ??= Microphone.devices[0];
@@ -162,7 +164,7 @@ namespace XRMultiplayer
         /// <summary>
         /// Stops the microphone.
         /// </summary>
-        void StopMicrophone()
+        private void StopMicrophone()
         {
             m_MicInitialized = false;
             if (Permission.HasUserAuthorizedPermission(Permission.Microphone))
@@ -179,7 +181,7 @@ namespace XRMultiplayer
         /// Gets the maximum level of the microphone input.
         /// </summary>
         /// <returns>The maximum level of the microphone input.</returns>
-        float LevelMax()
+        private float LevelMax()
         {
             if (!m_MicInitialized) return 0;
             float levelMax = 0;
