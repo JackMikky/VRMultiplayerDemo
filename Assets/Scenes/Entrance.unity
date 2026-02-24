@@ -2018,6 +2018,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: LocalManager
       objectReference: {fileID: 0}
+    - target: {fileID: 2119353626023400229, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 6584394722584133363, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -6509,6 +6514,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PXRNetwork Manager VR Multiplayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 5087823492143518475, guid: 8605187a018b7614292eb14329a78d70,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
