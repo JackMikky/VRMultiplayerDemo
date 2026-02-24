@@ -30,6 +30,16 @@ namespace XRMultiplayer
         /// </summary>
         private static bool s_Muted;
 
+        public bool micMuted
+        {
+            get => s_Muted;
+            set
+            {
+                if (Permission.HasUserAuthorizedPermission(Permission.Microphone))
+                    s_Muted = value;
+            }
+        }
+
         [SerializeField]
         private GameObject offlineAvatar;
 
@@ -98,6 +108,7 @@ namespace XRMultiplayer
             MicrophonePermissionGranted(true);
             XRINetworkGameManager.Connected.Subscribe(connected =>
             {
+                this.gameObject.GetComponent<XRAvatarIK>().enabled = !connected;
                 offlineAvatar.SetActive(!connected);
             });
         }
@@ -109,6 +120,7 @@ namespace XRMultiplayer
             StopMicrophone();
             XRINetworkGameManager.Connected.Unsubscribe(connected =>
             {
+                this.gameObject.GetComponent<XRAvatarIK>().enabled = !connected;
                 offlineAvatar.SetActive(!connected);
             });
         }
@@ -156,6 +168,7 @@ namespace XRMultiplayer
         /// </summary>
         private void InitMic()
         {
+            if (Microphone.devices.Length == 0) return;
             m_MicInitialized = true;
             m_Device ??= Microphone.devices[0];
             m_ClipRecord = Microphone.Start(m_Device, true, 999, 44100);

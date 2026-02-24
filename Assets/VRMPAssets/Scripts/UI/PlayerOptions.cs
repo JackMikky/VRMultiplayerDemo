@@ -267,6 +267,8 @@ namespace XRMultiplayer
         public void ToggleMute()
         {
             //m_VoiceChatManager.ToggleSelfMute();
+            OfflinePlayerAvatar.muted = !OfflinePlayerAvatar.muted;
+            MutedChanged(OfflinePlayerAvatar.muted);
         }
 
         private void MutedChanged(bool muted)
