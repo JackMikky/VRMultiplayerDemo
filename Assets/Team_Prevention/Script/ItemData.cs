@@ -34,6 +34,26 @@ namespace Assets.Team_Prevention.Script
         [Tooltip("正解時に加算されるポイント（誤答時は減算）")]
         [SerializeField] private int _point;
 
+        [Header("エフェクト設定")]
+        /// <summary>
+        /// このアイテム使用時に発動するエフェクトの種類
+        /// </summary>
+        [Tooltip("このアイテムを正しいスポットで使用したときに発動するエフェクト")]
+        [SerializeField] private ItemEffectType _effectType = ItemEffectType.None;
+
+        /// <summary>
+        /// エフェクトのターゲット名（複数のオブジェクトから特定する場合に使用）
+        /// </summary>
+        [Tooltip("エフェクト対象のGameObject名（例: 'Flame01', 'Sail'）")]
+        [SerializeField] private string _effectTargetName = "";
+
+        /// <summary>
+        /// エフェクトの強度（0.0 ～ 1.0）
+        /// </summary>
+        [Tooltip("エフェクトの強度（例: 縮小率、煙の量など）")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _effectIntensity = 1.0f;
+
         // プロパティでアクセス
         public string Name
         {
@@ -53,6 +73,21 @@ namespace Assets.Team_Prevention.Script
         public int Point
         {
             get { return _point; }
+        }
+
+        public ItemEffectType EffectType
+        {
+            get { return _effectType; }
+        }
+
+        public string EffectTargetName
+        {
+            get { return _effectTargetName; }
+        }
+
+        public float EffectIntensity
+        {
+            get { return _effectIntensity; }
         }
     }
 }

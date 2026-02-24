@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe13f48e06189149b3be67d91865398, type: 3}
   m_Name: "\u98DB\u8ECA"
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Team_Prevention.Script.ItemData
-  _name: "\u98DB\u8ECA"
+  _name: hisya
   _icon: {fileID: 0}
   _correctUseSpotId: 0
-  _point: 20
+  _point: 50
+  _effectType: 0
+  _effectTargetName: 
+  _effectIntensity: 1

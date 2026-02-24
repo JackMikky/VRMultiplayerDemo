@@ -14,6 +14,12 @@ public class ItemResetButtonManager : MonoBehaviour
     // 追加: ItemBoxComponent の参照
     [SerializeField] private Assets.Team_Prevention.Script.UI.ItemBoxComponent itemBoxComponent;
 
+    // ★ ここから追加 ★
+    [Header("インベントリ連携")]
+    [SerializeField, Tooltip("アイテム選択フェーズのマネージャー（インベントリUIを管理しているクラス）")]
+    private ItemSelectionPhaseManager itemSelectionPhaseManager;
+
+
     // アイテムの情報を記録するクラス
     [System.Serializable]
     public class ItemData
@@ -91,10 +97,53 @@ public class ItemResetButtonManager : MonoBehaviour
                     Debug.Log("ItemBoxComponent の所持品表示を全クリアしました。");
                 }
             }
+
+            // ★ ここから追加：ItemSelectionPhaseManager 側のインベントリも全クリア ★
+            if (itemSelectionPhaseManager != null)
+            {
+                itemSelectionPhaseManager.ClearAllItems();
+                Debug.Log("ItemSelectionPhaseManager 側のインベントリも全クリアしました。");
+            }
+            else
+            {
+                Debug.LogWarning("ItemSelectionPhaseManager が設定されていないため、インベントリUIをクリアできません。");
+            }
+            // ★ ここまで追加 ★
         }
         else
         {
             Debug.LogWarning("Item群のGameObjectが設定されていません。処理を行いません。");
         }
     }
+
+
+    // ★ ここから追加 ★
+    /// <summary>
+    /// 特定のアイテムだけを元の位置・回転に戻す
+    /// </summary>
+    public void ResetOneItem(Transform targetTransform)
+    {
+        if (targetTransform == null)
+        {
+            Debug.LogWarning("[ItemResetButtonManager] ResetOneItem: targetTransform が null です。");
+            return;
+        }
+
+        foreach (ItemData data in itemDataList)
+        {
+            if (data.itemTransform == targetTransform)
+            {
+                data.itemTransform.gameObject.SetActive(true);
+                data.itemTransform.position = data.position;
+                data.itemTransform.rotation = data.rotation;
+
+                Debug.Log($"[ItemResetButtonManager] 単体アイテムをリセットしました: {data.itemTransform.name}");
+                return;
+            }
+        }
+
+        Debug.LogWarning($"[ItemResetButtonManager] ResetOneItem: 対象が itemDataList に見つかりませんでした: {targetTransform.name}");
+    }
+    // ★ ここまで追加 ★
+
 }

@@ -4041,6 +4041,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5027557367369404957}
     m_Modifications:
+    - target: {fileID: 100573703188671352, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100573703188671352, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100573703188671352, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 471521400547067002, guid: 91ce1a88475755c4cac0c1a7acd505e6,
         type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
@@ -4390,6 +4405,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Value
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183981093782110007, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183981093782110007, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183981093782110007, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183981093782110007, guid: 91ce1a88475755c4cac0c1a7acd505e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7645162950061128685, guid: 91ce1a88475755c4cac0c1a7acd505e6,
         type: 3}
@@ -6002,6 +6037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GazeTransform: {fileID: 7648409842563483903}
   m_FacingThreshold: 0.85
+  updateEveryFrame: 1
   m_FacingEntered:
     m_PersistentCalls:
       m_Calls:
@@ -6158,6 +6194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GazeTransform: {fileID: 7648409842563483903}
   m_FacingThreshold: 0.85
+  updateEveryFrame: 1
   m_FacingEntered:
     m_PersistentCalls:
       m_Calls:

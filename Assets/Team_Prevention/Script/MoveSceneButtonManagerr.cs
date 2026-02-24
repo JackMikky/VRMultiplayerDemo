@@ -6,7 +6,7 @@ using UnityEngine.UI; // UIコンポーネントを使用するために必要
 public class MoveSceneButtonManager : MonoBehaviour
 {
     [SerializeField]
-    private GameObject targetObject; // 移動させたいGameObjectをインスペクターで設定
+    public GameObject targetObject; // 移動させたいGameObjectをインスペクターで設定
 
     [SerializeField]
     private GameObject destinationObject; // 移動先の位置を持つGameObjectをインスペクターで設定
@@ -19,15 +19,29 @@ public class MoveSceneButtonManager : MonoBehaviour
 
     private Button button; // ボタンコンポーネント
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // 自動で探す対象の名前
+    private const string TargetObjectName = "XR Origin Hands (XR Rig) MP Template Variant Customized";
+
     void Start()
     {
+        // 名前から対象を自動検索（未設定時のみ）
+        if (targetObject == null)
+        {
+            var found = GameObject.Find(TargetObjectName);
+            if (found != null)
+            {
+                targetObject = found;
+            }
+            else
+            {
+                UnityEngine.Debug.LogWarning($"Target GameObject \"{TargetObjectName}\" が見つかりませんでした。インスペクターで手動設定してください。");
+            }
+        }
+
         // ボタンコンポーネントを取得
         button = GetComponent<Button>();
-
         if (button != null)
         {
-            // ボタンのクリックイベントにリスナーを登録
             button.onClick.AddListener(OnButtonClicked);
         }
         else

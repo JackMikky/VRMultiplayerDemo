@@ -193,6 +193,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 973595132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &15273066 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5367480300349841817, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1213759067}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &22038706
 GameObject:
   m_ObjectHideFlags: 0
@@ -1829,6 +1835,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 318591186}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &337045934 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 832944620120956811, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1213759067}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &347382425
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1933,6 +1945,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
         type: 3}
+      propertyPath: itemBox
+      value: 
+      objectReference: {fileID: 15273066}
+    - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
+        type: 3}
       propertyPath: lobbyObject
       value: 
       objectReference: {fileID: 0}
@@ -1946,6 +1963,16 @@ PrefabInstance:
       propertyPath: entranceObject
       value: 
       objectReference: {fileID: 227281061}
+    - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
+        type: 3}
+      propertyPath: itemActionButton
+      value: 
+      objectReference: {fileID: 1511763041}
+    - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
+        type: 3}
+      propertyPath: itemSelectButton
+      value: 
+      objectReference: {fileID: 337045934}
     - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
         type: 3}
       propertyPath: sceneAnnouncerController
@@ -5161,6 +5188,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2323240240939307293, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2400375398256290977, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -6642,6 +6674,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1511763041 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8173287936812968906, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1213759067}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1587353398
 GameObject:
   m_ObjectHideFlags: 19

@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe13f48e06189149b3be67d91865398, type: 3}
   m_Name: "\u3070\u3093\u305D\u3046\u3053\u3046"
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Team_Prevention.Script.ItemData
-  _name: "\u3070\u3093\u305D\u3046\u3053\u3046"
+  _name: bandaid
   _icon: {fileID: 0}
-  _correctUseSpotId: 1
+  _correctUseSpotId: 3
   _point: 30
+  _effectType: 0
+  _effectTargetName: 
+  _effectIntensity: 1

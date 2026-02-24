@@ -38,7 +38,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blend: 0
+    - _Blend: 1
     - _Offset: 0.08
     - _Segment: 128
     - _Thickness: 0.4
