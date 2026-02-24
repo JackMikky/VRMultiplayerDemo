@@ -62,6 +62,7 @@ namespace XRMultiplayer
         public void SetupPlayerNameTag(XRINetworkPlayer player, PlayerNameTag nameTag)
         {
             nameTag.SetupNameTag(player);
+            nameTag.SetManagedByWorldCanvas(true);
             nameTag.transform.SetParent(m_PlayerNameTagsParent);
 
             if (!playerDictionary.ContainsKey(nameTag))

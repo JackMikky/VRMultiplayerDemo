@@ -1957,7 +1957,7 @@ PrefabInstance:
         type: 3}
       propertyPath: localAvatar
       value: 
-      objectReference: {fileID: 1213759068}
+      objectReference: {fileID: 2147282564}
     - target: {fileID: 184065741711430430, guid: 1b2a793f73ea80b4cbab71b0eaed78b6,
         type: 3}
       propertyPath: entranceObject
@@ -5318,9 +5318,19 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3447472021292929849, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3538149477872846523, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_RequestedTrackingOriginMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3601242389355275422, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3738400040004670695, guid: 77c77bfaf87e3b14a801327ee9c547eb,
@@ -5473,6 +5483,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4710523025883885027, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4962363702716767136, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -5573,6 +5588,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5942057472789044919, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: offlineAvatar
+      value: 
+      objectReference: {fileID: 2147282564}
     - target: {fileID: 6097300952546425161, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -5889,12 +5909,6 @@ PrefabInstance:
       addedObject: {fileID: 1180365485}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 77c77bfaf87e3b14a801327ee9c547eb, type: 3}
---- !u!1 &1213759068 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1263417739565041837, guid: 77c77bfaf87e3b14a801327ee9c547eb,
-    type: 3}
-  m_PrefabInstance: {fileID: 1213759067}
-  m_PrefabAsset: {fileID: 0}
 --- !u!20 &1213759069 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 2396443454739078752, guid: 77c77bfaf87e3b14a801327ee9c547eb,
@@ -8063,6 +8077,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4380922377841737904, guid: 2fbdc41b0d3b3494ea6acefbcee475d7,
     type: 3}
   m_PrefabInstance: {fileID: 2134238671}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2147282564 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3601242389355275422, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 1213759067}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &104797356010745575
 PrefabInstance:
