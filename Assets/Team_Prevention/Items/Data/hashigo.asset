@@ -14,5 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Team_Prevention.Script.ItemData
   _name: hashigo
   _icon: {fileID: 0}
-  _correctUseSpotId: 0
-  _point: 20
+  _correctUseSpotId: 1
+  _point: 30
+  _effectType: 0
+  _effectTargetName: 
+  _effectIntensity: 1

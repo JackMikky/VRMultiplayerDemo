@@ -19204,11 +19204,11 @@ MonoBehaviour:
       type: 2}
     renderObjectsFilterMaterial: {fileID: 0}
   - leverObject: {fileID: 715461088}
-    fullScreenFilterMaterial: {fileID: 2100000, guid: 88c9ae703ea0ca140bc6732155b79c9f,
+    fullScreenFilterMaterial: {fileID: 2100000, guid: ac08ba6a58e32a84db1e9fec88f7e569,
       type: 2}
     renderObjectsFilterMaterial: {fileID: 0}
   - leverObject: {fileID: 1116655165}
-    fullScreenFilterMaterial: {fileID: 2100000, guid: ba0a510c33ce2f34ca4e609d90fcfce0,
+    fullScreenFilterMaterial: {fileID: 2100000, guid: 0e906d8e63841a04a89493df0dff0488,
       type: 2}
     renderObjectsFilterMaterial: {fileID: 0}
   - leverObject: {fileID: 997836586}

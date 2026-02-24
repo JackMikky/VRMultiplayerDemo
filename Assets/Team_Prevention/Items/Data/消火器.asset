@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe13f48e06189149b3be67d91865398, type: 3}
   m_Name: "\u6D88\u706B\u5668"
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Team_Prevention.Script.ItemData
-  _name: "\u6D88\u706B\u5668"
+  _name: syoukaki
   _icon: {fileID: 0}
   _correctUseSpotId: 2
-  _point: 40
+  _point: 50
+  _effectType: 0
+  _effectTargetName: 
+  _effectIntensity: 1

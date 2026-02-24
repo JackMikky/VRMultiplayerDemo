@@ -55,60 +55,71 @@ public class Tex3DSectionController:MonoBehaviour
     [SerializeField]
     private List<Renderer> targets = new(6);
 
-    [Header("Z Segments (mm) - targets ‚Æ“¯‚¶‡”Ô‚Å•À‚×‚é")]
-    [Tooltip("ŠeƒIƒuƒWƒFƒNƒg‚Ì Z ’· (mm)B—á: [234, 450, ...]")]
+    [Header("Z Segments (mm) - targets ï¿½Æ“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚Å•ï¿½ï¿½×‚ï¿½")]
+    [Tooltip("ï¿½eï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½ï¿½ Z ï¿½ï¿½ (mm)ï¿½Bï¿½ï¿½: [234, 450, ...]")]
     public List<float> zLengthsMm = new List<float>()
     {
         234f, 450f, 150f, 400f, 350f, 150f
     };
 
+ // å‰å›å€¤ã‚­ãƒ£ãƒƒã‚·ãƒ¥
+    private float prevMinX, prevMaxX, prevMinY, prevMaxY;
 
-    // ŠeRenderer—p‚ÌMPBi‹¤—Lƒ}ƒeƒŠƒAƒ‹‚Å‚àŒÂ•Ê’l‚ğ‚Ä‚éj
+    // ï¿½eRendererï¿½pï¿½ï¿½MPBï¿½iï¿½ï¿½ï¿½Lï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Å‚ï¿½ï¿½Â•Ê’lï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½j
     private MaterialPropertyBlock[] mpbs;
 
 
     void OnEnable()
     {
         EnsureTargetsAndBlocks();
-        Apply();
+        ForceApplyXY();
+        prevMinX = _minX; prevMaxX = _maxX; prevMinY = _minY; prevMaxY = _maxY;
     }
 
     void OnValidate()
     {
         EnsureTargetsAndBlocks();
-        Apply();
+        ForceApplyXY();
+        prevMinX = _minX; prevMaxX = _maxX; prevMinY = _minY; prevMaxY = _maxY;
     }
 
     private void Update()
     {
+        bool changed = false;
         if (maxXSlider != null)
         {
-            _maxX = maxXSlider.value.Value;
+            var v = maxXSlider.value.Value;
+            if (!Mathf.Approximately(v, _maxX)) { _maxX = v; changed = true; }
         }
 
         if (minXSlider != null)
         {
-            _minX = minXSlider.value.Value;
+            var v  = minXSlider.value.Value;
+            if (!Mathf.Approximately(v, _minX)) { _minX = v; changed = true; }
         }
 
         if (maxYSlider != null)
         {
-            _maxY = maxYSlider.value.Value;
+            var v  = maxYSlider.value.Value;
+            if (!Mathf.Approximately(v, _maxY)) { _maxY = v; changed = true; }
         }
 
-        Apply();
+        if (changed)
+        {
+            ApplyXYIfChanged();
+        }
     }
 
 
     /// <summary>
-    /// ƒCƒ“ƒXƒyƒNƒ^–¢İ’è‚È‚ç’¼‰º‚Ìq‚©‚çRenderer‚ğ©“®ûWB
-    /// MPB”z—ñ‚ğƒ^[ƒQƒbƒg”‚É‡‚í‚¹‚ÄŠm•ÛB
+    /// ï¿½Cï¿½ï¿½ï¿½Xï¿½yï¿½Nï¿½^ï¿½ï¿½ï¿½İ’ï¿½È‚ç’¼ï¿½ï¿½ï¿½Ìqï¿½ï¿½ï¿½ï¿½Rendererï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½B
+    /// MPBï¿½zï¿½ï¿½ï¿½ï¿½^ï¿½[ï¿½Qï¿½bï¿½gï¿½ï¿½ï¿½Éï¿½ï¿½í‚¹ï¿½ÄŠmï¿½ÛB
     /// </summary>
     void EnsureTargetsAndBlocks()
     {
         if (targets == null) targets = new List<Renderer>();
 
-        // –¢İ’è‚È‚çe’¼‰º‚Ìq‚©‚çE‚¤i•K—v‚È‚çè“®İ’è‚ÉØ‚è‘Ö‚¦‰Âj
+        // ï¿½ï¿½ï¿½İ’ï¿½È‚ï¿½eï¿½ï¿½ï¿½ï¿½ï¿½Ìqï¿½ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½iï¿½Kï¿½vï¿½È‚ï¿½è“®ï¿½İ’ï¿½ÉØ‚ï¿½Ö‚ï¿½ï¿½Âj
         if (targets.Count == 0)
         {
             targets.Clear();
@@ -119,7 +130,7 @@ public class Tex3DSectionController:MonoBehaviour
             }
         }
 
-        // MPB‚ğƒ^[ƒQƒbƒg”‚É‡‚í‚¹‚ÄŠm•Û
+        // MPBï¿½ï¿½ï¿½^ï¿½[ï¿½Qï¿½bï¿½gï¿½ï¿½ï¿½Éï¿½ï¿½í‚¹ï¿½ÄŠmï¿½ï¿½
         if (mpbs == null || mpbs.Length != targets.Count)
         {
             mpbs = new MaterialPropertyBlock[targets.Count];
@@ -130,24 +141,66 @@ public class Tex3DSectionController:MonoBehaviour
     
 
     /// <summary>
-    /// ‚·‚×‚Ä‚Ìtarget‚ÌƒVƒF[ƒ_[‚ÌRange‚ğ”½‰f
+    /// ï¿½ï¿½ï¿½×‚Ä‚ï¿½targetï¿½ÌƒVï¿½Fï¿½[ï¿½_ï¿½[ï¿½ï¿½Rangeï¿½ğ”½‰f
     /// </summary>
-    private void Apply()
-    {
-        ApplyXY();
-        ApplyZ();
-    }
+    // private void Apply()
+    // {
+    //     ApplyXY();
+    //    // ApplyZ();
+    // }
 
-    // ŠO•”‚©‚çˆÀ‘S‚ÉƒZƒbƒg‚µ‚½‚¢ê‡‚Ìƒwƒ‹ƒp[
-    // ‚à‚µg‚¢‚»‚¤‚È‚ç‘¼‚Ìminmax‚à—pˆÓ‚·‚é
+    // ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Sï¿½ÉƒZï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Ìƒwï¿½ï¿½ï¿½pï¿½[
+    // ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ç‘¼ï¿½ï¿½minmaxï¿½ï¿½ï¿½pï¿½Ó‚ï¿½ï¿½ï¿½
     public void SetMinX(float minX)
     {
         _minX = Mathf.Clamp01(minX);
-        Apply();
+        ApplyXYIfChanged();
     }
 
+
+
+    private void ApplyXYIfChanged()
+    {
+        if (Mathf.Approximately(prevMinX, _minX) &&
+            Mathf.Approximately(prevMaxX, _maxX) &&
+            Mathf.Approximately(prevMinY, _minY) &&
+            Mathf.Approximately(prevMaxY, _maxY))
+        {
+            return;
+        }
+
+        ForceApplyXY();
+        prevMinX = _minX; prevMaxX = _maxX; prevMinY = _minY; prevMaxY = _maxY;
+    }
+
+    private void ForceApplyXY()
+    {
+        if (targets == null || targets.Count == 0) return;
+
+        float minX = Mathf.Clamp01(_minX);
+        float maxX = Mathf.Clamp01(_maxX);
+        float minY = Mathf.Clamp01(_minY);
+        float maxY = Mathf.Clamp01(_maxY);
+
+        for (int i = 0; i < targets.Count; i++)
+        {
+            var r = targets[i];
+            if (r == null) continue;
+
+            var block = mpbs[i];
+            // r.GetPropertyBlock(block); // æ¯å›å–å¾—ã¯ä¸è¦ã€‚ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ç›´æ¥è¨­å®šã€‚
+            block.SetFloat(shaderPropertyName_MinX, minX);
+            block.SetFloat(shaderPropertyName_MaxX, maxX);
+            block.SetFloat(shaderPropertyName_MinY, minY);
+            block.SetFloat(shaderPropertyName_MaxY, maxY);
+
+            r.SetPropertyBlock(block);
+        }
+    }
+
+/*
     /// <summary>
-    /// XY•ûŒü‚ÌƒXƒ‰ƒCƒ_[‚Ì’l‚ğƒVƒF[ƒ_[‚É“K—p‚·‚é
+    /// XYï¿½ï¿½ï¿½ï¿½ï¿½ÌƒXï¿½ï¿½ï¿½Cï¿½_ï¿½[ï¿½Ì’lï¿½ï¿½ï¿½Vï¿½Fï¿½[ï¿½_ï¿½[ï¿½É“Kï¿½pï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void ApplyXY()
     {
@@ -163,7 +216,7 @@ public class Tex3DSectionController:MonoBehaviour
             var r = targets[i];
             if (r == null) continue;
 
-            // Šù‘¶‚ÌƒuƒƒbƒN‚ğæ“¾ ¨ ’l‚ğİ’è ¨ ”½‰f
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ìƒuï¿½ï¿½ï¿½bï¿½Nï¿½ï¿½ï¿½æ“¾ ï¿½ï¿½ ï¿½lï¿½ï¿½İ’ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½f
             var block = mpbs[i];
             r.GetPropertyBlock(block);
             block.SetFloat(shaderPropertyName_MinX, minX);
@@ -171,14 +224,14 @@ public class Tex3DSectionController:MonoBehaviour
             block.SetFloat(shaderPropertyName_MinY, minY);
             block.SetFloat(shaderPropertyName_MaxY, maxY);
 
-            // 1ƒŒƒ“ƒ_ƒ‰[‚É•¡”ƒ}ƒeƒŠƒAƒ‹‚ª‚ ‚éê‡‚Å‚à
-            // MaterialPropertyBlock‚ÍƒŒƒ“ƒ_ƒ‰[’PˆÊ‚Å“K—p‰Â”\
+            // 1ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½[ï¿½É•ï¿½ï¿½ï¿½ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Å‚ï¿½
+            // MaterialPropertyBlockï¿½Íƒï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½[ï¿½Pï¿½Ê‚Å“Kï¿½pï¿½Â”\
             r.SetPropertyBlock(block);
         }
     }
 
     /// <summary>
-    /// ‚y•ûŒü‚ÌƒXƒ‰ƒCƒ_[‚Ì’l‚ğƒVƒF[ƒ_[‚É“K—p‚·‚é
+    /// ï¿½yï¿½ï¿½ï¿½ï¿½ï¿½ÌƒXï¿½ï¿½ï¿½Cï¿½_ï¿½[ï¿½Ì’lï¿½ï¿½ï¿½Vï¿½Fï¿½[ï¿½_ï¿½[ï¿½É“Kï¿½pï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void ApplyZ()
     {
@@ -192,7 +245,7 @@ public class Tex3DSectionController:MonoBehaviour
 
         //var minZMm = _minZ * totalLength;
 
-        //// ‹«ŠE‚ğ’Tõ
+        //// ï¿½ï¿½ï¿½Eï¿½ï¿½Tï¿½ï¿½
         //var acc = 0f;
         //var targetIndex = 0;
         //var remaindVal = 0f;
@@ -209,9 +262,9 @@ public class Tex3DSectionController:MonoBehaviour
         //}
 
 
-        // 0-1‚Ì’l‚ğ‡Œv’l‚ÌŠY“–‚·‚é‹æŠÔ‚ğ‹‚ß‚éB
-        // ‹æŠÔ‚É‰‚¶‚ÄŠetarget‚ÌZ‚ğƒZƒbƒg‚·‚éiminZAmaxZ‚ğ6‚Â‚¸‚Â’è‹`‚·‚ê‚Î‚æ‚¢‚Í‚¸B
-        // ‘Sgo‚·‚Ì‚ªƒXƒyƒbƒN“I‚É‹ê‚µ‚­‚È‚é‚È‚ç1‚Â1‚Â‚Å‚¢‚¢‚©‚à‚ÈB
+        // 0-1ï¿½Ì’lï¿½ï¿½ï¿½ï¿½ï¿½vï¿½lï¿½ÌŠYï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ï¿½ï¿½ï¿½ï¿½ß‚ï¿½B
+        // ï¿½ï¿½Ô‚É‰ï¿½ï¿½ï¿½ï¿½ÄŠetargetï¿½ï¿½Zï¿½ï¿½ï¿½Zï¿½bï¿½gï¿½ï¿½ï¿½ï¿½iminZï¿½AmaxZï¿½ï¿½6ï¿½Â‚ï¿½ï¿½Â’ï¿½`ï¿½ï¿½ï¿½ï¿½Î‚æ‚¢ï¿½Í‚ï¿½ï¿½B
+        // ï¿½Sï¿½gï¿½oï¿½ï¿½ï¿½Ì‚ï¿½ï¿½Xï¿½yï¿½bï¿½Nï¿½Iï¿½É‹ê‚µï¿½ï¿½ï¿½È‚ï¿½È‚ï¿½1ï¿½ï¿½1ï¿½Â‚Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÈB
     }
 
 
@@ -226,5 +279,5 @@ public class Tex3DSectionController:MonoBehaviour
 
         return sum;
     }
-
+*/
 }

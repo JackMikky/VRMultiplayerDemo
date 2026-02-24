@@ -43,7 +43,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaBlending: 1
-    - _Blend: 0
+    - _Blend: 0.089767136
     - _GrayB: 1
     - _GrayG: 1
     - _GrayR: 1

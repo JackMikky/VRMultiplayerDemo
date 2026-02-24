@@ -47,10 +47,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlphaStop: 0.97
     - _BlendDst: 10
     - _BlendSrc: 5
-    - _Intensity: 0.661
-    - _Iteration: 32
+    - _Intensity: 1
+    - _Iteration: 16
+    - _IterationMax: 16
     - _MaxX: 1
     - _MaxY: 1
     - _MaxZ: 1

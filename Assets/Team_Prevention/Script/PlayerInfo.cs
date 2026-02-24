@@ -1,8 +1,10 @@
 ﻿using Assets.Team_Prevention.Script.UI;
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace Assets.Team_Prevention.Script
 {
@@ -16,17 +18,13 @@ namespace Assets.Team_Prevention.Script
         [Tooltip("体力表示Text")]
         public TMP_Text healthText;
 
-        // PlayerInfo クラス内のフィールドに追加
         [SerializeField] private ItemBoxComponent itemBoxComponent;
 
-        // フェーズ判定用の参照
         [Header("スポット判定用")]
         public GameObject Phase1Object;
-
         public GameObject Phase2Object;
         public GameObject Phase3Object;
 
-        // PlayerInfo クラス内のフィールドに追加（インスペクタでアタッチ）
         [Header("判定対象（頭など）")]
         [SerializeField] private GameObject HeadObject;
 
@@ -57,7 +55,6 @@ namespace Assets.Team_Prevention.Script
 
         public event System.Action<float> OnItemUsed;
 
-        // --- 追加イベント（インベントリ変更通知） ---
         /// <summary>
         /// アイテム取得時に発火（新しく追加されたItemInfoを引数で渡す）
         /// </summary>
@@ -75,39 +72,34 @@ namespace Assets.Team_Prevention.Script
 
         // -----------------------------------------------
 
-        // 追加: 全スポット到達時に有効化するオブジェクト
         [SerializeField] private GameObject allSpotsCompletedObject;
 
-        // 追加: スポット到達状態のトラッキング
         private bool visitedSpot1 = false;
-
         private bool visitedSpot2 = false;
         private bool visitedSpot3 = false;
 
-        // -----------------------------------------------
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioSource loopAudioSource;
+        [SerializeField] private AudioClip correctClip;
+        [SerializeField] private AudioClip wrongClip;
+        [SerializeField] private AudioClip fireClip;
 
-        // -----------------------------------------------
+        [Header("アイテム生成設定")]
+        [SerializeField] private ItemUseSpawner _itemUseSpawner;
 
-        // 追加: 再生するサウンド
-        [SerializeField] private AudioSource audioSource;           // 再生に使う AudioSource（任意のGameObjectにアタッチ）
+        [Tooltip("このプレイヤーの手（Interactor）を明示指定したい場合に設定してください。未設定なら本オブジェクト配下から自動検出します。")]
+        [SerializeField] private XRBaseInteractor _preferredInteractor;
 
-        [SerializeField] private AudioSource loopAudioSource;       // ループ用の別のAudioSource
-        [SerializeField] private AudioClip correctClip;             // 正解時のクリップ
-        [SerializeField] private AudioClip wrongClip;               // 誤り時のクリップ
-        [SerializeField] private AudioClip fireClip;                // 燃えている音
-
-        // -----------------------------------------------
-
-        // 毎フレーム、このコンポーネントがアタッチされているGameObject の位置が各フェーズオブジェクトのエリア内かを判定してcurrentSpotIdを更新
         private void Update()
         {
-            if (itemBoxComponent == null) return;
+            if (itemBoxComponent == null)
+            {
+                return;
+            }
 
-            // 判定対象のワールド座標（HeadObject が設定されていればそれを使う）
             var selfPos = (HeadObject != null) ? HeadObject.transform.position : transform.position;
             int spot = 0;
 
-            // 3D: Collider を使用した領域判定
             if (Phase1Object != null)
             {
                 var col1 = Phase1Object.GetComponentInChildren<Collider>();
@@ -117,6 +109,7 @@ namespace Assets.Team_Prevention.Script
                     visitedSpot1 = true;
                 }
             }
+
             bool inPhase2 = false;
             if (Phase2Object != null)
             {
@@ -128,6 +121,7 @@ namespace Assets.Team_Prevention.Script
                     inPhase2 = true;
                 }
             }
+
             if (Phase3Object != null)
             {
                 var col3 = Phase3Object.GetComponentInChildren<Collider>();
@@ -137,13 +131,12 @@ namespace Assets.Team_Prevention.Script
                     visitedSpot3 = true;
                 }
             }
+
             if (itemBoxComponent.currentSpotId != spot)
             {
                 itemBoxComponent.currentSpotId = spot;
-                // Debug.Log($"[PlayerInfo] Spot changed -> {itemBoxComponent.currentSpotId}");
             }
 
-            // 追加: フェーズ2滞在判定に応じてループ再生制御
             if (loopAudioSource != null)
             {
                 if (inPhase2)
@@ -169,7 +162,6 @@ namespace Assets.Team_Prevention.Script
                 allSpotsCompletedObject.SetActive(false);
             }
         }
-
         // -----------------------------------------------
 
         /// <summary>
@@ -179,7 +171,6 @@ namespace Assets.Team_Prevention.Script
         {
             CurrentHP = MaxHP;
             OnHPChanged?.Invoke(CurrentHP, MaxHP);
-
             healthText.text = CurrentHP.ToString();
         }
 
@@ -191,7 +182,6 @@ namespace Assets.Team_Prevention.Script
         {
             CurrentHP = Mathf.Clamp(CurrentHP - amount, 0, MaxHP);
             OnHPChanged?.Invoke(CurrentHP, MaxHP);
-
             healthText.text = CurrentHP.ToString();
         }
 
@@ -203,8 +193,198 @@ namespace Assets.Team_Prevention.Script
         {
             CurrentHP = Mathf.Clamp(CurrentHP + amount, 0, MaxHP);
             OnHPChanged?.Invoke(CurrentHP, MaxHP);
-
             healthText.text = CurrentHP.ToString();
+        }
+
+        public bool UsedItem(ItemData data, int currentSpotId)
+        {
+            if (data == null)
+            {
+                return false;
+            }
+
+            var entry = ItemsList.Find(i => i.Name == data.Name && !i.IsUsed);
+            if (entry == null)
+            {
+                Debug.LogWarning($"Item not in inventory or already used: {data.Name}");
+                return false;
+            }
+
+            entry.IsUsed = true;
+
+            int rawPoint = data.Point;
+            float applied = 0f;
+            bool isCorrect = (data.CorrectUseSpotId == currentSpotId);
+
+            if (isCorrect)
+            {
+                applied = rawPoint;
+                Heal(applied);
+
+                // 正解音はここでは鳴らさない（エフェクト完了後にする）
+            }
+            else
+            {
+                applied = -Mathf.Abs(rawPoint);
+                Damage(Mathf.Abs(applied));
+
+                if (audioSource != null && wrongClip != null)
+                {
+                    audioSource.PlayOneShot(wrongClip);
+                }
+            }
+
+            OnInventoryChanged?.Invoke(ItemsList);
+
+            OnItemUsed?.Invoke(applied);
+            Debug.Log($"Used item: {data.Name}, spot={currentSpotId}, point change={applied}");
+
+            // 正解時のみ「複製→エフェクト完了→音」へ
+            if (isCorrect)
+            {
+                TrySpawnItemToInteractorAndPlayCorrectSoundAfterEffect(data);
+            }
+            else
+            {
+                TrySpawnItemToInteractor(data);
+            }
+
+            return true;
+        }
+
+        private void TrySpawnItemToInteractorAndPlayCorrectSoundAfterEffect(ItemData data)
+        {
+            XRGrabInteractable created = TrySpawnItemToInteractor(data);
+            if (created == null)
+            {
+                // 生成できない場合はフォールバックとして即再生（無音のままよりはマシ、不要なら消してOK）
+                if (audioSource != null && correctClip != null)
+                {
+                    audioSource.PlayOneShot(correctClip);
+                }
+
+                return;
+            }
+
+            var effectTrigger = created.GetComponent<ItemEffectTrigger>();
+            if (effectTrigger == null)
+            {
+                // エフェクトスクリプトが無いなら即再生
+                if (audioSource != null && correctClip != null)
+                {
+                    audioSource.PlayOneShot(correctClip);
+                }
+
+                return;
+            }
+
+            // 二重購読防止のため、ハンドラはローカルで作って一回で解除
+            void Handler(ItemEffectTrigger _)
+            {
+                effectTrigger.OnEffectCompleted -= Handler;
+
+                if (audioSource != null && correctClip != null)
+                {
+                    audioSource.PlayOneShot(correctClip);
+                }
+            }
+
+            effectTrigger.OnEffectCompleted += Handler;
+        }
+
+        /// <summary>
+        /// 生成に成功したら XRGrabInteractable を返す。失敗時は null。
+        /// </summary>
+        private XRGrabInteractable TrySpawnItemToInteractor(ItemData data)
+        {
+            if (data == null)
+            {
+                return null;
+            }
+
+            ItemUseSpawner spawner = _itemUseSpawner;
+            if (spawner == null)
+            {
+                spawner = FindFirstObjectByType<ItemUseSpawner>();
+                if (spawner == null)
+                {
+                    Debug.LogWarning("[PlayerInfo] ItemUseSpawner が見つかりません。アイテムを手元に生成できません。");
+                    return null;
+                }
+            }
+
+            XRBaseInteractor targetInteractor = ResolveInteractorForThisPlayer();
+            if (targetInteractor == null)
+            {
+                Debug.LogWarning("[PlayerInfo] このプレイヤー配下に XRBaseInteractor が見つかりません。_preferredInteractor を設定してください。");
+                return null;
+            }
+
+            XRGrabInteractable created = spawner.SpawnAndAttachToInteractor(targetInteractor, data.Name);
+            if (created == null)
+            {
+                created = spawner.SpawnAndAttachToInteractor(targetInteractor);
+            }
+
+            if (created == null)
+            {
+                Debug.LogWarning("[PlayerInfo] アイテムの生成または手動掴みに失敗しました。");
+                return null;
+            }
+
+            Debug.Log($"[PlayerInfo] アイテムを手元に生成して掴ませました: {data.Name}");
+            return created;
+        }
+
+        private XRBaseInteractor ResolveInteractorForThisPlayer()
+        {
+            // 明示指定があるなら最優先
+            if (_preferredInteractor != null)
+            {
+                return _preferredInteractor;
+            }
+
+            // マルチ対策：シーンから適当に拾わず「自分の子」から探す
+            var interactors = GetComponentsInChildren<XRBaseInteractor>(true);
+            if (interactors == null || interactors.Length == 0)
+            {
+                return null;
+            }
+
+            // 優先度：Direct → Ray → それ以外
+            for (int i = 0; i < interactors.Length; i++)
+            {
+                if (interactors[i] is XRDirectInteractor)
+                {
+                    return interactors[i];
+                }
+            }
+
+            for (int i = 0; i < interactors.Length; i++)
+            {
+                if (interactors[i] is XRRayInteractor)
+                {
+                    return interactors[i];
+                }
+            }
+
+            return interactors[0];
+        }
+
+        /// <summary>
+        /// デバッグ/確認用：アイテムを「使用」せずに手元へ生成して掴ませる（インベントリ消費なし）
+        /// </summary>
+        /// <remarks>
+        /// アイテム選択フェーズなど、Spot未確定(spot=0)でもモーション/エフェクト確認をするためのAPI。
+        /// </remarks>
+        public XRGrabInteractable PreviewSpawnItemToHand(ItemData data)
+        {
+            if (data == null)
+            {
+                return null;
+            }
+
+            return TrySpawnItemToInteractor(data);
         }
 
         /// <summary>
@@ -267,15 +447,6 @@ namespace Assets.Team_Prevention.Script
         }
 
         /// <summary>
-        /// 全アイテム削除 API（外部から削除する場合は直接 ItemsList を操作せずこちらを使う）
-        /// </summary>
-        public void AllClear()
-        {
-            ItemsList.Clear();
-            OnInventoryChanged?.Invoke(ItemsList);
-        }
-
-        /// <summary>
         /// アイテム削除 API（外部から削除する場合は直接 ItemsList を操作せずこちらを使う）
         /// </summary>
         public bool RemoveItem(ItemInfo item)
@@ -296,54 +467,17 @@ namespace Assets.Team_Prevention.Script
         }
 
         /// <summary>
-        /// アイテム使用（正しいスポットなら加点、違えば減点）
+        /// 全アイテム削除 API（外部から削除する場合は直接 ItemsList を操作せずこちらを使う）
         /// </summary>
-        public bool UsedItem(ItemData data, int currentSpotId)
+        public void AllClear()
         {
-            if (data == null) return false;
-
-            var entry = ItemsList.Find(i => i.Name == data.Name && !i.IsUsed);
-            if (entry == null)
+            if (ItemsList == null)
             {
-                Debug.LogWarning($"Item not in inventory or already used: {data.Name}");
-                return false;
+                ItemsList = new List<ItemInfo>(5);
             }
 
-            // 使用フラグ
-            entry.IsUsed = true;
-
-            // スポット判定：正解なら加点、誤りなら減点
-            int rawPoint = data.Point;
-            float applied = 0f;
-            if (data.CorrectUseSpotId == currentSpotId)
-            {
-                applied = rawPoint; // 加点
-                Heal(applied);
-
-                // 正解サウンド
-                if (audioSource != null && correctClip != null)
-                {
-                    audioSource.PlayOneShot(correctClip);
-                }
-            }
-            else
-            {
-                applied = -Mathf.Abs(rawPoint); // 減点
-                Damage(Mathf.Abs(applied));
-
-                // 誤りサウンド
-                if (audioSource != null && wrongClip != null)
-                {
-                    audioSource.PlayOneShot(wrongClip);
-                }
-            }
-
-            // 所持品更新通知（使用済みによる状態変化）
+            ItemsList.Clear();
             OnInventoryChanged?.Invoke(ItemsList);
-
-            OnItemUsed?.Invoke(applied);
-            Debug.Log($"Used item: {data.Name}, spot={currentSpotId}, point change={applied}");
-            return true;
         }
     }
 }

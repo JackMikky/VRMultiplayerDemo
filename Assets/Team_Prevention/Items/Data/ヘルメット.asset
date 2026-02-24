@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fe13f48e06189149b3be67d91865398, type: 3}
   m_Name: "\u30D8\u30EB\u30E1\u30C3\u30C8"
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Team_Prevention.Script.ItemData
-  _name: "\u30D8\u30EB\u30E1\u30C3\u30C8"
+  _name: harumet
   _icon: {fileID: 0}
   _correctUseSpotId: 1
   _point: 40
+  _effectType: 0
+  _effectTargetName: 
+  _effectIntensity: 1

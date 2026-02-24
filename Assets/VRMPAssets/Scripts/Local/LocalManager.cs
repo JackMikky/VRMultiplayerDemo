@@ -8,6 +8,12 @@ public class LocalManager : MonoBehaviour
 
     [SerializeField] private GameObject localAvatar;
 
+    [SerializeField] private GameObject itemBox;
+    [SerializeField] private GameObject itemSelectButton;
+    [SerializeField] private GameObject itemActionButton;
+
+    public GameObject ItemBoxObject => itemBox;
+
     [SerializeField] private SceneAnnouncerController sceneAnnouncerController;
 
     public SceneAnnouncerController _SceneAnnouncerController
@@ -47,11 +53,29 @@ public class LocalManager : MonoBehaviour
 
     private void HideLocalAvatar(bool connected)
     {
-        this.localAvatar.SetActive(!connected);
+        localAvatar.SetActive(!connected);
+
+        // ���݂̃V�[�������擾
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        bool isPreventionBasic = currentSceneName != "Prevention_Basic";
+
+
+        itemBox.SetActive(!isPreventionBasic);
+
+        itemSelectButton.SetActive(!isPreventionBasic);
+
+        itemActionButton.SetActive(!isPreventionBasic);
     }
 
     public void SetLocalAvatarInvisibility(bool value)
     {
         this.localAvatar.SetActive(value);
+    }
+
+    public void SetLocalPreventionInvisibility(bool value)
+    {
+        this.itemBox.SetActive(value);
+        this.itemSelectButton.SetActive(value);
+        this.itemActionButton.SetActive(value);
     }
 }

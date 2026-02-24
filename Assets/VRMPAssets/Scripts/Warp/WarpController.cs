@@ -9,11 +9,11 @@ namespace XRMultiplayer
     {
         [SerializeField] private Material fullScreenMat;
 
-        [Range(0, 10)] [SerializeField] private float fadeTime = 1;
+        [Range(0, 10)][SerializeField] private float fadeTime = 1;
 
-        [Range(0, 5)] [SerializeField] private float fadeInWaitTime = 1;
+        [Range(0, 5)][SerializeField] private float fadeInWaitTime = 1;
 
-        [Range(0, 5)] [SerializeField] private float fadeOutWaitTime = 1;
+        [Range(0, 5)][SerializeField] private float fadeOutWaitTime = 1;
 
         [Space(10)]
         [Header("Events")]
