@@ -76,6 +76,7 @@ namespace XRMultiplayer
             XRINetworkGameManager.Connected.Subscribe(ConnectOnline);
             XRINetworkGameManager.ConnectedRoomName.Subscribe(UpdateRoomName);
             XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
+            XRINetworkGameManager.Instance.OnPlayerCountChanged += UpdatePlayerCountText;
 
             //if (m_VoiceChatManager)
             //{
@@ -87,6 +88,7 @@ namespace XRMultiplayer
             m_OutputVolumeSlider.onValueChanged.AddListener(SetOutputVolume);
 
             ConnectOnline(false);
+            UpdatePlayerCountText(0, XRINetworkGameManager.maxPlayers);
 
             if (m_ToggleMenuAction != null)
                 m_ToggleMenuAction.action.performed += ctx => ToggleMenu();
@@ -136,7 +138,8 @@ namespace XRMultiplayer
         {
             XRINetworkGameManager.Connected.Unsubscribe(ConnectOnline);
             XRINetworkGameManager.ConnectedRoomName.Unsubscribe(UpdateRoomName);
-            XRINetworkGameManager.Instance.OnSessionOwnerPromoted += UpdateHostVisuals;
+            XRINetworkGameManager.Instance.OnSessionOwnerPromoted -= UpdateHostVisuals;
+            XRINetworkGameManager.Instance.OnPlayerCountChanged -= UpdatePlayerCountText;
 
             //m_VoiceChatManager?.selfMuted.Unsubscribe(MutedChanged);
 
@@ -182,6 +185,20 @@ namespace XRMultiplayer
             else
             {
                 ToggleMenu(false);
+            }
+        }
+
+        /// <summary>
+        /// Updates the player count text in the format "current/max".
+        /// </summary>
+        /// <param name="currentCount">Current number of connected players.</param>
+        /// <param name="maxCount">Maximum number of allowed players.</param>
+        private void UpdatePlayerCountText(int currentCount, int maxCount)
+        {
+            string countText = $"{currentCount:D2}/{maxCount:D2}";
+            foreach (var text in m_PlayerCountText)
+            {
+                text.text = countText;
             }
         }
 
