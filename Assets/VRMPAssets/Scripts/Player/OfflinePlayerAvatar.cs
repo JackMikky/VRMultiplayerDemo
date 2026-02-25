@@ -40,6 +40,16 @@ namespace XRMultiplayer
             }
         }
 
+        /// <summary>
+        /// The input volume gain multiplier, range [0, 1]. Controlled by the input volume slider.
+        /// </summary>
+        private static float s_InputVolumeGain = 25f;
+
+        /// <summary>
+        /// The minimum and maximum input volume range used for remapping.
+        /// </summary>
+        private static readonly Vector2 s_MinMaxInputVolume = new Vector2(-10.0f, 10.0f);
+
         [SerializeField]
         private GameObject offlineAvatar;
 
@@ -95,6 +105,33 @@ namespace XRMultiplayer
 
         private bool m_MicInitialized = false;
 
+        /// <summary>
+        /// Sets the input volume for the microphone.
+        /// Volume is expected in the range [-10, 10], which is remapped to a gain multiplier [0, 1].
+        /// If the volume is at or near the minimum, the microphone will be muted.
+        /// </summary>
+        /// <param name="volume">The input volume in the range [-10, 10].</param>
+        public static void SetInputVolume(float volume)
+        {
+            volume = Mathf.Clamp(volume, s_MinMaxInputVolume.x, s_MinMaxInputVolume.y);
+
+#if UNITY_EDITOR
+            // Remap from [-10, 10] to [0, 1]
+            s_InputVolumeGain = Mathf.InverseLerp(s_MinMaxInputVolume.x, s_MinMaxInputVolume.y, volume);
+#elif UNITY_ANDROID
+            s_InputVolumeGain = volume;
+#endif
+
+            if (volume <= (s_MinMaxInputVolume.x + 0.05f))
+            {
+                s_Muted = true;
+            }
+            else
+            {
+                s_Muted = false;
+            }
+        }
+
         /// <inheritdoc/>
         private void Start()
         {
@@ -136,7 +173,7 @@ namespace XRMultiplayer
         {
             if (!s_Muted)
             {
-                m_MicLoudness = LevelMax();
+                m_MicLoudness = LevelMax() * s_InputVolumeGain;
 
                 m_VoiceDestinationVolume = Mathf.Clamp01(Mathf.Lerp(m_VoiceDestinationVolume, m_MicLoudness, Time.deltaTime * m_MouthBlendSmoothing));
 
