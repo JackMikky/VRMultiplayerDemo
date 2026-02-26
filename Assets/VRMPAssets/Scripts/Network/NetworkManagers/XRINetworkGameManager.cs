@@ -171,6 +171,11 @@ namespace XRMultiplayer
         public Action<ulong, bool> OnPlayerStateChanged;
 
         /// <summary>
+        /// Event fired when a player joins. Passes current player count and max players.
+        /// </summary>
+        public event Action<int, int> OnPlayerCountChanged;
+
+        /// <summary>
         /// Action for when connection status is updated.
         /// </summary>
         public Action<string> OnConnectionUpdated;
@@ -202,6 +207,11 @@ namespace XRMultiplayer
         [SerializeField] public NetworkEmojiManager networkEmojiManager;
 
         private readonly List<ulong> m_CurrentPlayerIDs = new();
+
+        /// <summary>
+        /// The current number of connected players.
+        /// </summary>
+        public int CurrentPlayerCount => m_CurrentPlayerIDs.Count;
 
         /// <summary>
         /// Flagged whenever the application is in the process of shutting down.
@@ -349,6 +359,7 @@ namespace XRMultiplayer
         {
             m_Connected.Value = false;
             m_CurrentPlayerIDs.Clear();
+            OnPlayerCountChanged?.Invoke(0, maxPlayers);
             PlayerHudNotification.Instance.ShowText($"<b>Status:</b> Disconnected");
             // Check if authenticated on disconnect.
             //if (IsAuthenticated())
@@ -415,6 +426,7 @@ namespace XRMultiplayer
             {
                 m_CurrentPlayerIDs.Add(playerID);
                 OnPlayerStateChanged?.Invoke(playerID, true);
+                OnPlayerCountChanged?.Invoke(m_CurrentPlayerIDs.Count, maxPlayers);
             }
             else
             {
@@ -433,6 +445,7 @@ namespace XRMultiplayer
             {
                 m_CurrentPlayerIDs.Remove(playerID);
                 OnPlayerStateChanged?.Invoke(playerID, false);
+                OnPlayerCountChanged?.Invoke(m_CurrentPlayerIDs.Count, maxPlayers);
             }
             else
             {
