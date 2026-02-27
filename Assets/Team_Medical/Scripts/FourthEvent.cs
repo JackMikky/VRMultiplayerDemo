@@ -6,6 +6,8 @@ public class FourthEvent : MonoBehaviour
     [SerializeField] GameObject allowedPartner;  // 衝突フラグ用
     [SerializeField] GameObject Box;  // 臓器出現用
 
+    [SerializeField] GameObject clearsystem;  // clear
+
     public AudioClip sfx;
     [Range(0f, 1f)] public float volume = 1.0f;
 
@@ -71,6 +73,8 @@ public class FourthEvent : MonoBehaviour
             FreezeRigidbodiesCompletely(gameObject);
             FreezeRigidbodiesCompletely(allowedPartner);
             FreezeRigidbodiesCompletely(Box);
+
+            clearsystem.SetActive(true);
 
             _stuck = true;
         }

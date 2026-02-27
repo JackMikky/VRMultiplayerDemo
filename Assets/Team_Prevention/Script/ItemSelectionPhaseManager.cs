@@ -2,6 +2,10 @@ using Assets.Team_Prevention.Script;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using static UnityEngine.XR.OpenXR.Features.Interactions.HandInteractionProfile;
 
 /// <summary>
 /// アイテム選択フェーズを管理するマネージャー。
@@ -77,20 +81,30 @@ public class ItemSelectionPhaseManager : MonoBehaviour
     [SerializeField, Tooltip("アイテムの元位置情報を持っているリセットマネージャー")]
     private ItemResetButtonManager itemResetButtonManager;
 
-
     // 取得した ItemData とシーン上の元オブジェクトの紐付け
     private Dictionary<ItemData, Transform> worldItemMap = new Dictionary<ItemData, Transform>();
-
 
     // ★ 追加: 保持上限
     private const int MaxKeep = 5;
 
+    private XRBaseInteractor _leftHandInteractor;
     // ★ 追加: すでに Use 済みの SpotId を記録する
     private HashSet<int> _usedSpotIds = new HashSet<int>();
 
+    // ★ 追加: Near/Far 吸い寄せ→「手元に来たら取得」用
+    [Header("Near/Far 取得判定（手元到達）")]
+    [SerializeField, Tooltip("吸い寄せたアイテムが手元(attachTransform)へこの距離以内に来たら取得する")]
+    private float _nearFarPickupDistance = 0.02f;
+
+    // 吸い寄せ中（selectEntered 済み）アイテムを記録
+    private readonly Dictionary<XRGrabInteractable, XRBaseInteractor> _pendingNearFar = new Dictionary<XRGrabInteractable, XRBaseInteractor>();
+
+    // ★ 追加: XRGrabInteractable の購読管理（解除用）
+    private readonly List<XRGrabInteractable> _subscribedGrabInteractables = new List<XRGrabInteractable>();
 
     private void OnDestroy()
     {
+        UnsubscribeItemEvents();
         ClearAllItems();
     }
 
@@ -130,8 +144,8 @@ public class ItemSelectionPhaseManager : MonoBehaviour
                     useBtn = buttonObjects.Find("Use")?.GetComponent<Button>()
                                ?? FindDeepChildByName(buttonObjects, "Use")?.GetComponent<Button>();
 
-                    if (removeBtn == null) Debug.LogError("[ItemSelectionPhaseManager] Remove Button が見つかりません。");
-                    if (useBtn == null) Debug.LogError("[ItemSelectionPhaseManager] Use Button が見つかりません。");
+                    if (removeBtn == null) { Debug.LogError("[ItemSelectionPhaseManager] Remove Button が見つかりません。"); }
+                    if (useBtn == null) { Debug.LogError("[ItemSelectionPhaseManager] Use Button が見つかりません。"); }
                 }
                 else
                 {
@@ -150,8 +164,8 @@ public class ItemSelectionPhaseManager : MonoBehaviour
                     downBtn = itemSelectButton.Find("Down")?.GetComponent<Button>()
                            ?? FindDeepChildByName(itemSelectButton, "Down")?.GetComponent<Button>();
 
-                    if (upBtn == null) Debug.LogError("[ItemSelectionPhaseManager] Up Button(Upper) が見つかりません。");
-                    if (downBtn == null) Debug.LogError("[ItemSelectionPhaseManager] Down Button が見つかりません。");
+                    if (upBtn == null) { Debug.LogError("[ItemSelectionPhaseManager] Up Button(Upper) が見つかりません。"); }
+                    if (downBtn == null) { Debug.LogError("[ItemSelectionPhaseManager] Down Button が見つかりません。"); }
                 }
                 else
                 {
@@ -159,10 +173,10 @@ public class ItemSelectionPhaseManager : MonoBehaviour
                 }
 
                 // 取得できたものを代入
-                if (removeBtn != null) removeButton = removeBtn;
-                if (useBtn != null) useButton = useBtn;
-                if (upBtn != null) upButton = upBtn;
-                if (downBtn != null) downButton = downBtn;
+                if (removeBtn != null) { removeButton = removeBtn; }
+                if (useBtn != null) { useButton = useBtn; }
+                if (upBtn != null) { upButton = upBtn; }
+                if (downBtn != null) { downButton = downBtn; }
             }
         }
 
@@ -171,14 +185,14 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         {
             removeButton.onClick.AddListener(() =>
             {
-                if (_selectedItem == null) return;
+                if (_selectedItem == null) { return; }
 
                 // ★ 削除対象の ItemData をローカルに退避
                 var removedItemData = _selectedItem;
 
                 // Player から削除
                 var info = targetPlayer.ItemsList.Find(i => i.Name == removedItemData.Name);
-                if (info != null) targetPlayer.RemoveItem(info);
+                if (info != null) { targetPlayer.RemoveItem(info); }
 
                 // ★ 元のオブジェクトを元位置に戻す
                 if (itemResetButtonManager != null &&
@@ -218,25 +232,48 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         {
             useButton.onClick.AddListener(() =>
             {
-                if (targetPlayer == null) return;
+                if (_selectedItem == null) { return; }
 
                 int spotId = targetPlayer.CurrentSpotId;
 
-                // SpotId == 0 は今まで通り「何もしない」
+                if (targetPlayer == null)
+                {
+                    return;
+                }
+
+                if (_leftHandInteractor == null)
+                {
+                    Debug.LogWarning("[ItemSelectionPhaseManager] leftController 配下に XRBaseInteractor が見つかりません。");
+                    return;
+                }
+
+                //SpotId == 0 は今まで通り「何もしない」
                 if (spotId == 0)
                 {
-                    Debug.Log("[ItemSelectionPhaseManager] CurrentSpotId == 0 のため、Use ボタンは何もしません。");
+                    var spawner = FindFirstObjectByType<ItemUseSpawner>();
+                    if (spawner != null && leftController != null)
+                    {
+                        var created = spawner.SpawnAndAttachToInteractor(_leftHandInteractor, _selectedItem.Name, null, leftController.transform);
+                        if (created == null)
+                        {
+                            Debug.LogWarning($"[ItemSelectionPhaseManager] Spawner 経由の生成に失敗（フォールバックを試行）: {_selectedItem.Name}");
+                            var fallback = targetPlayer.PreviewSpawnItemToHand(_selectedItem, _leftHandInteractor);
+                            if (fallback == null)
+                            {
+                                Debug.LogWarning($"[ItemSelectionPhaseManager] フォールバック生成にも失敗: {_selectedItem.Name}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var created = targetPlayer.PreviewSpawnItemToHand(_selectedItem);
+                        if (created == null)
+                        {
+                            Debug.LogWarning($"[ItemSelectionPhaseManager] 左手への生成に失敗: {_selectedItem.Name}");
+                        }
+                    }
                     return;
                 }
-
-                // ★ すでにこの SpotId で Use 済みなら何もしない（念のためチェック）
-                if (_usedSpotIds.Contains(spotId))
-                {
-                    Debug.Log($"[ItemSelectionPhaseManager] SpotId {spotId} ではすでにアイテム使用済みのため、Use できません。");
-                    return;
-                }
-
-                if (_selectedItem == null) return;
 
                 bool used = targetPlayer.UsedItem(_selectedItem, spotId);
 
@@ -258,13 +295,23 @@ public class ItemSelectionPhaseManager : MonoBehaviour
 
         // Up / Down ボタン登録
         if (upButton != null)
+        {
             upButton.onClick.AddListener(SelectPrevItem);
+        }
 
         if (downButton != null)
+        {
             downButton.onClick.AddListener(SelectNextItem);
+        }
 
         // ★ 最初は何も選択されていない状態にしてボタン無効化
         ApplySelection();
+
+        _leftHandInteractor = ResolveInteractorFromController(leftController);
+        targetPlayer.HandInteractor = _leftHandInteractor;
+
+        // ★ Near/Far のイベント購読開始
+        SubscribeItemEvents();
     }
 
     private void OnDisable()
@@ -275,8 +322,199 @@ public class ItemSelectionPhaseManager : MonoBehaviour
 
     private void Update()
     {
-        CheckCollisionAndRemoveItems();
+        // Near/Far の selectEntered で拾うため、距離判定は行わない
         UpdateUseButtonState();
+    }
+
+    private void LateUpdate()
+    {
+        // ★ フレーム終端の pose 更新後に「手元到達チェック」
+        ProcessPendingNearFarPickups();
+    }
+
+    /// <summary>
+    /// itemsContainer 配下の XRGrabInteractable の selectEntered/selectExited を購読する。
+    /// </summary>
+    private void SubscribeItemEvents()
+    {
+        UnsubscribeItemEvents();
+
+        if (itemsContainer == null)
+        {
+            Debug.LogWarning("[ItemSelectionPhaseManager] itemsContainer が未設定です。");
+            return;
+        }
+
+        var grabs = itemsContainer.GetComponentsInChildren<XRGrabInteractable>(true);
+        if (grabs == null || grabs.Length == 0)
+        {
+            Debug.LogWarning("[ItemSelectionPhaseManager] itemsContainer 配下に XRGrabInteractable が見つかりません。");
+            return;
+        }
+
+        for (int i = 0; i < grabs.Length; i++)
+        {
+            var grab = grabs[i];
+            if (grab == null)
+            {
+                continue;
+            }
+
+            grab.selectEntered.AddListener(OnWorldItemSelectEntered);
+            grab.selectExited.AddListener(OnWorldItemSelectExited);
+
+            _subscribedGrabInteractables.Add(grab);
+        }
+    }
+
+    private void UnsubscribeItemEvents()
+    {
+        for (int i = 0; i < _subscribedGrabInteractables.Count; i++)
+        {
+            var grab = _subscribedGrabInteractables[i];
+            if (grab == null)
+            {
+                continue;
+            }
+
+            grab.selectEntered.RemoveListener(OnWorldItemSelectEntered);
+            grab.selectExited.RemoveListener(OnWorldItemSelectExited);
+        }
+
+        _subscribedGrabInteractables.Clear();
+        _pendingNearFar.Clear();
+    }
+
+    /// <summary>
+    /// Near/Far で select が成立した瞬間（吸い寄せ開始）に呼ばれる。
+    /// ここでは「取得」はせず、手元到達待ちの対象として登録する。
+    /// </summary>
+    private void OnWorldItemSelectEntered(SelectEnterEventArgs args)
+    {
+        if (args == null)
+        {
+            return;
+        }
+
+        var grab = args.interactableObject as XRGrabInteractable;
+        if (grab == null)
+        {
+            return;
+        }
+
+        var interactor = args.interactorObject as XRBaseInteractor;
+        if (interactor == null)
+        {
+            return;
+        }
+
+        // 既に非表示なら対象外
+        if (!grab.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        // 上限なら何もしない（ただし消さない）
+        if (IsInventoryFull())
+        {
+            return;
+        }
+
+        // 手元に来たら拾うために記録
+        _pendingNearFar[grab] = interactor;
+    }
+
+    /// <summary>
+    /// select が外れたら（途中キャンセル等）待ち行列から外す。
+    /// </summary>
+    private void OnWorldItemSelectExited(SelectExitEventArgs args)
+    {
+        if (args == null)
+        {
+            return;
+        }
+
+        var grab = args.interactableObject as XRGrabInteractable;
+        if (grab == null)
+        {
+            return;
+        }
+
+        _pendingNearFar.Remove(grab);
+    }
+
+    /// <summary>
+    /// Near/Far で吸い寄せ中のアイテムが interactor.attachTransform 近傍へ来たら取得する。
+    /// </summary>
+    private void ProcessPendingNearFarPickups()
+    {
+        if (_pendingNearFar.Count == 0)
+        {
+            return;
+        }
+
+        if (IsInventoryFull())
+        {
+            return;
+        }
+
+        // 走査中に remove するので一旦リスト化
+        var keys = ListPool<XRGrabInteractable>.Get();
+        try
+        {
+            foreach (var kv in _pendingNearFar)
+            {
+                keys.Add(kv.Key);
+            }
+
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var grab = keys[i];
+                if (grab == null)
+                {
+                    _pendingNearFar.Remove(grab);
+                    continue;
+                }
+
+                if (!_pendingNearFar.TryGetValue(grab, out var interactor) || interactor == null)
+                {
+                    _pendingNearFar.Remove(grab);
+                    continue;
+                }
+
+                if (!grab.gameObject.activeInHierarchy)
+                {
+                    _pendingNearFar.Remove(grab);
+                    continue;
+                }
+
+                Transform hand = (interactor.transform != null) ? interactor.transform : interactor.attachTransform;
+                float d = Vector3.Distance(grab.transform.position, hand.position);
+                Debug.Log($"アイテム取得：{grab.name}:{d} {_nearFarPickupDistance} \n {d <= _nearFarPickupDistance}");
+                if (!(d <= _nearFarPickupDistance))
+                {
+                    continue;
+                }
+
+                // ★ 手元に来た：取得（成功時のみ消す）
+                bool obtained = AddItemToPlayer(grab.gameObject);
+                if (!obtained)
+                {
+                    // 取得できないなら待ち続けるとループするので、ここでは外す
+                    _pendingNearFar.Remove(grab);
+                    continue;
+                }
+
+                hiddenItems.Add(grab.gameObject);
+                grab.gameObject.SetActive(false);
+
+                _pendingNearFar.Remove(grab);
+            }
+        }
+        finally
+        {
+            ListPool<XRGrabInteractable>.Release(keys);
+        }
     }
 
     /// <summary>
@@ -289,38 +527,12 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         return (uiCount >= MaxKeep) || (playerCount >= MaxKeep);
     }
 
-    /// <summary>
-    /// コントローラー/手との衝突をチェックしてアイテムを隠す
-    /// </summary>
-    private void CheckCollisionAndRemoveItems()
-    {
-        if (itemsContainer == null) return;
-
-        foreach (Transform item in itemsContainer.transform)
-        {
-            if (item.gameObject.activeSelf && IsCollidingWithControllerOrHand(item.gameObject))
-            {
-                // ★ 追加：上限に達していたら何もしない（アイテムを消さず、保存もしない）
-                if (IsInventoryFull())
-                {
-                    // 上限時はスキップ（ログ連打を避けるため、ここではログを出さない）
-                    continue;
-                }
-
-                // アイテムを隠す
-                hiddenItems.Add(item.gameObject);
-                item.gameObject.SetActive(false);
-
-                // PlayerInfoのItemsListに追加
-                AddItemToPlayer(item.gameObject);
-            }
-        }
-    }
-
     private void UpdateUseButtonState()
     {
         if (useButton == null || targetPlayer == null)
+        {
             return;
+        }
 
         bool hasSelectedItem = (_selectedItem != null);
 
@@ -333,7 +545,6 @@ public class ItemSelectionPhaseManager : MonoBehaviour
             return;
         }
 
-
         // ★ すでにこの SpotId で Use 済みなら使用不可
         bool alreadyUsedAtThisSpot = _usedSpotIds.Contains(spotId);
 
@@ -344,17 +555,17 @@ public class ItemSelectionPhaseManager : MonoBehaviour
     // -----------------------------
     // ★ アイテム追加時 UI 作成処理 ＋ ItemData取得 ★
     // -----------------------------
-    private void AddItemToPlayer(GameObject item)
+    private bool AddItemToPlayer(GameObject item)
     {
         if (targetPlayer == null)
         {
             Debug.LogWarning("[ItemSelectionPhaseManager] PlayerInfo (targetPlayer) is not assigned.");
-            return;
+            return false;
         }
 
         if (IsInventoryFull())
         {
-            return;
+            return false;
         }
 
         ItemData itemData = null;
@@ -378,12 +589,12 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         if (itemData == null)
         {
             Debug.LogError($"[ItemSelectionPhaseManager] ItemDataが見つかりません: {item.name}");
-            return;
+            return false;
         }
 
         if (targetPlayer.ItemsList != null && targetPlayer.ItemsList.Count >= MaxKeep)
         {
-            return;
+            return false;
         }
 
         bool success = targetPlayer.GetItem(itemData);
@@ -419,11 +630,12 @@ public class ItemSelectionPhaseManager : MonoBehaviour
             {
                 Debug.LogWarning("[ItemSelectionPhaseManager] itemContentsPrefab または itemListContent が未設定です。");
             }
+
+            return true;
         }
-        else
-        {
-            Debug.LogWarning($"[ItemSelectionPhaseManager] アイテムの追加に失敗: {itemData.Name}（インベントリが満杯または重複）");
-        }
+
+        Debug.LogWarning($"[ItemSelectionPhaseManager] アイテムの追加に失敗: {itemData.Name}（インベントリが満杯または重複）");
+        return false;
     }
 
     // -----------------------------
@@ -431,7 +643,10 @@ public class ItemSelectionPhaseManager : MonoBehaviour
     // -----------------------------
     private void SelectNextItem()
     {
-        if (uiItemList.Count == 0) return;
+        if (uiItemList.Count == 0)
+        {
+            return;
+        }
 
         selectedIndex = Mathf.Min(selectedIndex + 1, uiItemList.Count - 1);
         ApplySelection();
@@ -439,7 +654,10 @@ public class ItemSelectionPhaseManager : MonoBehaviour
 
     private void SelectPrevItem()
     {
-        if (uiItemList.Count == 0) return;
+        if (uiItemList.Count == 0)
+        {
+            return;
+        }
 
         selectedIndex = Mathf.Max(selectedIndex - 1, 0);
         ApplySelection();
@@ -457,7 +675,10 @@ public class ItemSelectionPhaseManager : MonoBehaviour
             // ハイライト停止
             StopBlink();
 
-            if (removeButton != null) removeButton.interactable = false;
+            if (removeButton != null)
+            {
+                removeButton.interactable = false;
+            }
 
             // Useボタンは共通メソッドで制御
             UpdateUseButtonState();
@@ -466,7 +687,10 @@ public class ItemSelectionPhaseManager : MonoBehaviour
 
         _selectedItem = uiItemList[selectedIndex].ItemData;
 
-        if (removeButton != null) removeButton.interactable = true;
+        if (removeButton != null)
+        {
+            removeButton.interactable = true;
+        }
 
         // ★ ハイライト更新（新しい選択対象の OneItemContents を点滅）
         var selectedContents = uiItemList[selectedIndex];
@@ -487,8 +711,8 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         {
             selectedIndex = -1;
             _selectedItem = null;
-            if (removeButton != null) removeButton.interactable = false;
-            if (useButton != null) useButton.interactable = false;
+            if (removeButton != null) { removeButton.interactable = false; }
+            if (useButton != null) { useButton.interactable = false; }
             return;
         }
 
@@ -520,20 +744,6 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         return null;
     }
 
-    private bool IsCollidingWithControllerOrHand(GameObject item)
-    {
-        return IsColliding(item, leftController) || IsColliding(item, rightController) ||
-               IsColliding(item, leftHand) || IsColliding(item, rightHand);
-    }
-
-    private bool IsColliding(GameObject item, GameObject target)
-    {
-        if (target == null) return false;
-
-        float distanceThreshold = 0.1f; // しきい値
-        return Vector3.Distance(item.transform.position, target.transform.position) < distanceThreshold;
-    }
-
     /// <summary>
     /// Use 成功後に、選択中アイテムをプレイヤー・UI から削除し、
     /// 残っている場合は先頭アイテムを選択する。
@@ -541,7 +751,9 @@ public class ItemSelectionPhaseManager : MonoBehaviour
     private void RemoveSelectedItemAfterUse()
     {
         if (_selectedItem == null)
+        {
             return;
+        }
 
         var usedItemData = _selectedItem;
 
@@ -600,16 +812,11 @@ public class ItemSelectionPhaseManager : MonoBehaviour
     private void StartBlink(OneItemContents contents)
     {
         StopBlink(); // 以前の点滅を停止
-
         if (contents == null) return;
 
-        // ここで「光らせたい Image」を決める
-        // 例：OneItemContents のルート配下から最初に見つかった Image を対象にする
         _blinkTarget = contents.GetComponentInChildren<Image>(includeInactive: true);
-
         if (_blinkTarget == null) return;
 
-        // 元の色を覚えてから、ベース色を薄い青に設定
         _originalColor = _blinkTarget.color;
 
         var baseColor = _blinkColor;
@@ -619,7 +826,6 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         _blinkCo = StartCoroutine(BlinkRoutine());
     }
 
-    // 今の点滅を止めて元の色に戻す
     private void StopBlink()
     {
         if (_blinkCo != null)
@@ -634,16 +840,13 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         }
     }
 
-    // 点滅のコルーチン
     private System.Collections.IEnumerator BlinkRoutine()
     {
         float t = 0f;
         while (_blinkTarget != null)
         {
-            t += Time.unscaledDeltaTime; // UI なので TimeScale の影響を受けにくくする
-            // 0〜1 を往復する PingPong
+            t += Time.unscaledDeltaTime;
             float phase = Mathf.PingPong(t / Mathf.Max(_blinkPeriod, 0.01f), 1f);
-            // アルファを補間
             float a = Mathf.Lerp(_blinkMinAlpha, _blinkMaxAlpha, phase);
 
             var c = _blinkTarget.color;
@@ -654,7 +857,6 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         }
     }
 
-    // -------- ユーティリティ: 子孫を名前で再帰検索 --------
     private static Transform FindDeepChildByName(Transform parent, string name)
     {
         if (parent == null) return null;
@@ -667,6 +869,45 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         return null;
     }
 
+    private XRBaseInteractor ResolveInteractorFromController(GameObject controllerObject)
+    {
+        if (controllerObject == null)
+        {
+            return null;
+        }
+
+        var interactors = controllerObject.GetComponentsInChildren<XRBaseInteractor>(true);
+        if (interactors == null || interactors.Length == 0)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < interactors.Length; i++)
+        {
+            if (interactors[i] is XRDirectInteractor && interactors[i].gameObject.activeSelf)
+            {
+                return interactors[i];
+            }
+        }
+
+        for (int i = 0; i < interactors.Length; i++)
+        {
+            if (interactors[i] is NearFarInteractor && interactors[i].gameObject.activeSelf)
+            {
+                return interactors[i];
+            }
+        }
+
+        for (int i = 0; i < interactors.Length; i++)
+        {
+            if (interactors[i] is XRRayInteractor && interactors[i].gameObject.activeSelf)
+            {
+                return interactors[i];
+            }
+        }
+
+        return interactors[0];
+    }
 
     // ★ ここから追加: 全リセット用の公開メソッド ★
     /// <summary>
@@ -702,15 +943,43 @@ public class ItemSelectionPhaseManager : MonoBehaviour
         }
         uiItemList.Clear();
 
-        // --- 3. 内部状態リセット ---
         hiddenItems.Clear();
         selectedIndex = -1;
         _selectedItem = null;
 
-        // Remove / Use ボタン状態などを反映
-        ApplySelection();   // index=-1 なのでボタン無効化される & ハイライト解除
+        ApplySelection();
 
         Debug.Log("[ItemSelectionPhaseManager] インベントリUIと選択状態をリセットしました。");
     }
+}
 
+/// <summary>
+/// GCを減らすための簡易ListPool（UnityEngine.Pool が使えない環境向け）
+/// </summary>
+internal static class ListPool<T>
+{
+    private static readonly Stack<List<T>> _pool = new Stack<List<T>>();
+
+    public static List<T> Get()
+    {
+        if (_pool.Count > 0)
+        {
+            var list = _pool.Pop();
+            list.Clear();
+            return list;
+        }
+
+        return new List<T>(16);
+    }
+
+    public static void Release(List<T> list)
+    {
+        if (list == null)
+        {
+            return;
+        }
+
+        list.Clear();
+        _pool.Push(list);
+    }
 }

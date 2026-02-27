@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Assets.Team_Prevention.Script.Effects;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -10,7 +11,9 @@ namespace Assets.Team_Prevention.Script
 {
     /// <summary>
     /// XRGrabInteractable で掴んでいる最中にコントローラーのトリガーを押すと、
-    /// 指定した ParticleSystem エフェクトを再生し、Spotのエフェクトをトリガーするコンポーネント。
+    /// エフェクトを再生し、Spotのエフェクトをトリガーするコンポーネント。
+    /// FollowBody / WorldFixed などの SpawnMode でも動作するよう、
+    /// 「掴まれているか」ではなく「アクティブ化済みか」で判断します。
     /// </summary>
     [RequireComponent(typeof(XRGrabInteractable))]
     public class ItemEffectTrigger : MonoBehaviour
@@ -20,24 +23,61 @@ namespace Assets.Team_Prevention.Script
         /// </summary>
         public event Action<ItemEffectTrigger> OnEffectCompleted;
 
-        [Header("エフェクト設定")]
+        [Header("エフェクト設定（Particle）")]
         [Tooltip("再生する ParticleSystem（未設定時は子から自動取得）")]
         [SerializeField] private ParticleSystem _effectPrefab;
 
         [Tooltip("エフェクトを生成する位置（未設定時はこのオブジェクトの位置）")]
         [SerializeField] private Transform _effectSpawnPoint;
 
-        [Header("エフェクトの出現方式")]
+        [Header("エフェクトの出現方式（Particle）")]
         [Tooltip("エフェクトを「オブジェクトに追従」させるか、「ワールドに固定」するかを選択します。")]
         [SerializeField] private EffectSpawnMode _effectSpawnMode = EffectSpawnMode.Follow;
+
+        [Header("効果音（エフェクト開始時）")]
+        [Tooltip("SE再生に使う AudioSource（未設定時は自動で追加/取得します）")]
+        [SerializeField] private AudioSource _seAudioSource;
+
+        [Tooltip("トリガー押下（エフェクト開始）時に鳴らすSE")]
+        [SerializeField] private AudioClip _onTriggerSe;
+
+        [Tooltip("SE音量（PlayOneShotのvolumeScale）")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _onTriggerSeVolume = 1.0f;
+
+        [Header("汎用エフェクト（IEffectPlayer）")]
+        [Tooltip("子要素に付いている IEffectPlayer を自動取得して同時再生します。")]
+        [SerializeField] private bool _playChildEffectPlayers = true;
 
         [Tooltip("SpawnMode が WorldAtFixedPoint のとき、ここに指定した Transform のワールド座標に固定生成します（オブジェクト位置に依存しない）。")]
         [SerializeField] private Transform _fixedWorldSpawnPoint;
 
+        /// <summary>
+        /// エフェクトの出現モードを定義します。
+        /// </summary>
         public enum EffectSpawnMode
         {
+            /// <summary>
+            /// Follow (0)
+            /// 発生元オブジェクトに追従して生成します。生成時に spawn point の子オブジェクトとして作成し、
+            /// その後も位置・回転を追従します。
+            /// 用途例: 所持中のアイテムに付随する継続的なエフェクト（光、オーラ等）。
+            /// </summary>
             Follow = 0,
+
+            /// <summary>
+            /// WorldAtSpawnPoint (1)
+            /// 発生時の spawn point のワールド位置・回転をコピーして独立して生成します（以後追従しない）。
+            /// 用途例: 生成時点の位置に固定したい一時的エフェクト（爆発、着弾エフェクト等）。
+            /// </summary>
             WorldAtSpawnPoint = 1,
+
+            /// <summary>
+            /// WorldAtFixedPoint (2)
+            /// あらかじめ指定した固定ワールド座標（_fixedWorldSpawnPoint）に生成します。
+            /// 発生元の位置に依存せず常に同じ場所に出したいエフェクト向け。
+            /// 用途例: ステージ上の特定地点でのみ表示するエフェクト。
+            /// </summary>
             WorldAtFixedPoint = 2
         }
 
@@ -57,6 +97,16 @@ namespace Assets.Team_Prevention.Script
 
         [Tooltip("トリガー入力に使用する Input Action Reference（未設定時は activate を使用）")]
         [SerializeField] private InputActionReference _triggerActionReference;
+
+        [Tooltip("true のとき、このコンポーネントが _triggerActionReference.action を Enable/Disable します。false のとき参照のみ（所有しない）")]
+        [SerializeField] private bool _manageTriggerActionEnabledState = false;
+
+        [Header("生成後の自動開始（任意）")]
+        [Tooltip("true のとき、トリガー入力ではなく「手元に生成（アクティブ化）後」に自動でエフェクトを開始します。")]
+        [SerializeField] private bool _autoStartAfterActivated = true;
+
+        [Tooltip("_autoStartAfterActivated が true のときの遅延秒数")]
+        [SerializeField] private float _autoStartDelaySeconds = 1.5f;
 
         [Header("PlayerInfo連携")]
         [Tooltip("PlayerInfo への参照（FindObjectOfType で自動取得可能）")]
@@ -80,6 +130,26 @@ namespace Assets.Team_Prevention.Script
         private ItemDataHolder _itemDataHolder;
 
         private Coroutine _effectCompletionRoutine;
+        private Coroutine _autoStartRoutine;
+
+        /// <summary>
+        /// true のとき、このアイテムは「手元に出現済み（使用可能）」状態です。
+        /// FollowHand: OnSelectEntered で true になります。
+        /// FollowBody / WorldFixed: SetCurrentInteractorForFollowMode で true になります。
+        /// </summary>
+        private bool _isActivated = false;
+
+        /// <summary>
+        /// しきい値を跨いだ瞬間（押下エッジ）検出用
+        /// </summary>
+        private bool _wasTriggerPressed = false;
+
+        /// <summary>
+        /// _triggerAction を自分で Enable/Disable して良いか（所有しているか）
+        /// - InputActionReference から来た場合は「このコンポーネントの所有物」とみなし制御してよい
+        /// - Interactor から拾った activateActionValue は共有物になり得るため制御しない
+        /// </summary>
+        private bool _ownsTriggerAction = false;
 
         private void Awake()
         {
@@ -100,6 +170,16 @@ namespace Assets.Team_Prevention.Script
             {
                 _playerInfo = FindFirstObjectByType<PlayerInfo>();
             }
+
+            // SE用 AudioSource の準備（未設定なら自動付与）
+            if (_seAudioSource == null)
+            {
+                _seAudioSource = GetComponent<AudioSource>();
+                if (_seAudioSource == null)
+                {
+                    _seAudioSource = gameObject.AddComponent<AudioSource>();
+                }
+            }
         }
 
         private void OnEnable()
@@ -110,10 +190,15 @@ namespace Assets.Team_Prevention.Script
                 _grabInteractable.selectExited.AddListener(OnSelectExited);
             }
 
+            // ActionReference が指定されている場合：参照はするが「所有」は任意
             if (_triggerActionReference != null)
             {
                 _triggerAction = _triggerActionReference.action;
-                if (_triggerAction != null)
+
+                // 所有判定：明示的に「管理する」設定のときのみ
+                _ownsTriggerAction = _manageTriggerActionEnabledState;
+
+                if (_ownsTriggerAction && _triggerAction != null)
                 {
                     _triggerAction.Enable();
                 }
@@ -128,10 +213,17 @@ namespace Assets.Team_Prevention.Script
                 _grabInteractable.selectExited.RemoveListener(OnSelectExited);
             }
 
-            if (_triggerAction != null)
+            // 「所有している」場合のみ Disable
+            if (_ownsTriggerAction && _triggerAction != null)
             {
                 _triggerAction.Disable();
             }
+
+            _triggerAction = null;
+            _ownsTriggerAction = false;
+            _wasTriggerPressed = false;
+
+            StopAutoStartRoutine();
 
             if (_effectCompletionRoutine != null)
             {
@@ -145,20 +237,16 @@ namespace Assets.Team_Prevention.Script
             _currentInteractor = args.interactorObject;
             _hasTriggered = false;
 
+            // FollowHand の場合は掴み時にアクティブ化
+            _isActivated = true;
+
+            // 下記の Setup 内で共有Actionに差し替わる可能性があるので、エッジ検出状態はリセット
+            _wasTriggerPressed = false;
+
             // Interactor から Input Action を取得（未設定時のフォールバック）
-            if (_triggerActionReference == null && _currentInteractor is XRBaseInputInteractor inputInteractor)
-            {
-                // activateActionValue プロパティから InputActionProperty を取得
-                var activateProperty = GetActivateAction(inputInteractor);
-                if (activateProperty != null)
-                {
-                    _triggerAction = activateProperty;
-                    if (_triggerAction != null)
-                    {
-                        _triggerAction.Enable();
-                    }
-                }
-            }
+            SetupTriggerActionFromInteractor(_currentInteractor);
+
+            TryStartAutoEffect();
         }
 
         /// <summary>
@@ -167,23 +255,92 @@ namespace Assets.Team_Prevention.Script
         private void OnSelectExited(SelectExitEventArgs args)
         {
             _currentInteractor = null;
+            _wasTriggerPressed = false;
 
-            // フォールバックで取得した Action をクリーンアップ
-            if (_triggerActionReference == null && _triggerAction != null)
+            StopAutoStartRoutine();
+
+            // Interactor から拾った共有Actionは Disable しない（他の動作と両立するため）
+            if (_triggerActionReference == null)
             {
-                _triggerAction.Disable();
                 _triggerAction = null;
+                _ownsTriggerAction = false;
             }
         }
 
         private void Update()
         {
-            // オブジェクトが掴まれていない場合は処理しない
-            if (_currentInteractor == null)
+            // 自動開始モードの場合、入力で開始しない
+            if (_autoStartAfterActivated)
             {
                 return;
             }
 
+            // 手元に出現済み（アクティブ化）でない場合は処理しない
+            if (!_isActivated)
+            {
+                return;
+            }
+
+            // 押下エッジでのみ発火（押しっぱなしで連続発火しない）
+            if (!WasTriggerJustPressed())
+            {
+                return;
+            }
+
+            TryTriggerEffect();
+        }
+
+        private void TryStartAutoEffect()
+        {
+            if (!_autoStartAfterActivated)
+            {
+                return;
+            }
+
+            if (!_isActivated)
+            {
+                return;
+            }
+
+            StopAutoStartRoutine();
+            _autoStartRoutine = StartCoroutine(AutoStartAfterDelay());
+        }
+
+        private IEnumerator AutoStartAfterDelay()
+        {
+            float delay = Mathf.Max(0f, _autoStartDelaySeconds);
+
+            if (delay > 0f)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+            else
+            {
+                yield return null;
+            }
+
+            // 待機中に非アクティブ化/破棄されていたら中断
+            if (!_isActivated)
+            {
+                yield break;
+            }
+
+            TryTriggerEffect();
+        }
+
+        private void StopAutoStartRoutine()
+        {
+            if (_autoStartRoutine == null)
+            {
+                return;
+            }
+
+            StopCoroutine(_autoStartRoutine);
+            _autoStartRoutine = null;
+        }
+
+        private void TryTriggerEffect()
+        {
             // 複数回トリガー不可で既に発動済みの場合はスキップ
             if (!_allowMultipleTriggers && _hasTriggered)
             {
@@ -196,26 +353,79 @@ namespace Assets.Team_Prevention.Script
                 return;
             }
 
-            // コントローラーのトリガー入力をチェック
-            if (IsTriggerPressed())
-            {
-                float duration = PlayEffect();
-                TriggerSpotEffect();
+            float seDuration = PlayTriggerSeAndGetDuration();
+            float particleDuration = PlayParticleEffect();
 
-                if (_effectCompletionRoutine != null)
+            float childEffectsDuration = _playChildEffectPlayers ? PlayChildEffectPlayers() : 0f;
+
+            float duration = Mathf.Max(seDuration, particleDuration, childEffectsDuration);
+
+            TriggerSpotEffect();
+
+            if (_effectCompletionRoutine != null)
+            {
+                StopCoroutine(_effectCompletionRoutine);
+            }
+
+            _effectCompletionRoutine = StartCoroutine(InvokeEffectCompletedAfter(duration));
+
+            _hasTriggered = true;
+            _lastTriggerTime = Time.time;
+        }
+
+        private float PlayChildEffectPlayers()
+        {
+            float maxDuration = 0f;
+
+            var monos = GetComponentsInChildren<MonoBehaviour>(true);
+            if (monos == null || monos.Length == 0)
+            {
+                return 0f;
+            }
+
+            foreach (var mono in monos)
+            {
+                // null チェック・自身の除外（将来 IEffectPlayer を実装しても事故らない）
+                if (mono == null || mono == this)
                 {
-                    StopCoroutine(_effectCompletionRoutine);
+                    continue;
                 }
 
-                _effectCompletionRoutine = StartCoroutine(InvokeEffectCompletedAfter(duration));
+                if (!(mono is IEffectPlayer player))
+                {
+                    continue;
+                }
 
-                _hasTriggered = true;
-                _lastTriggerTime = Time.time;
+                float d = 0f;
+                try
+                {
+                    d = player.Play();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[ItemEffectTrigger] IEffectPlayer.Play() に失敗しました: {ex}", this);
+                }
+
+                maxDuration = Mathf.Max(maxDuration, Mathf.Max(0f, d));
             }
+
+            return maxDuration;
+        }
+
+        private float PlayTriggerSeAndGetDuration()
+        {
+            if (_seAudioSource == null || _onTriggerSe == null)
+            {
+                return 0f;
+            }
+
+            _seAudioSource.PlayOneShot(_onTriggerSe, _onTriggerSeVolume);
+            return Mathf.Max(0f, _onTriggerSe.length);
         }
 
         private IEnumerator InvokeEffectCompletedAfter(float duration)
         {
+            // duration が正の値の場合のみ待機
             if (duration > 0f)
             {
                 yield return new WaitForSeconds(duration);
@@ -227,10 +437,8 @@ namespace Assets.Team_Prevention.Script
 
             OnEffectCompleted?.Invoke(this);
 
-            // エフェクト完了後、自分自身（手元の生成オブジェクト）を削除する設定なら実行
             if (_destroySelfAfterEffect)
             {
-                // 次フレームで選択解除してから破棄する（XRの内部状態回避）
                 yield return null;
                 TryDeselectAndDestroySelf();
             }
@@ -240,7 +448,7 @@ namespace Assets.Team_Prevention.Script
         {
             try
             {
-                // まずは interactionManager 経由で SelectExit を試みる
+                // InteractionManager 経由で選択解除を試みる（FollowHand のみ有効）
                 var manager = _grabInteractable != null && _grabInteractable.interactionManager != null
                     ? _grabInteractable.interactionManager
                     : FindFirstObjectByType<XRInteractionManager>();
@@ -250,14 +458,12 @@ namespace Assets.Team_Prevention.Script
                     manager.SelectExit(_currentInteractor, _grabInteractable);
                     return;
                 }
-                // フォールバック：Interactor に EndManualInteraction があれば呼ぶ
-                if (_currentInteractor is XRBaseInteractor xrBase && xrBase != null)
+
+                // フォールバック: リフレクションで EndManualInteraction を呼び出す
+                if (_currentInteractor is XRBaseInteractor xrBase)
                 {
                     var method = xrBase.GetType().GetMethod("EndManualInteraction");
-                    if (method != null)
-                    {
-                        method.Invoke(xrBase, null);
-                    }
+                    method?.Invoke(xrBase, null);
                 }
             }
             catch (Exception ex)
@@ -266,10 +472,9 @@ namespace Assets.Team_Prevention.Script
             }
             finally
             {
-                // 最終的に自分自身を破棄（nullチェックして安全に）
-                if (this != null && this.gameObject != null)
+                if (this != null && gameObject != null)
                 {
-                    Destroy(this.gameObject);
+                    Destroy(gameObject);
                 }
             }
         }
@@ -281,43 +486,38 @@ namespace Assets.Team_Prevention.Script
                 return null;
             }
 
-            // リフレクションで activateActionValue プロパティを取得
+            // リフレクションで activateActionValue プロパティから InputAction を取得
             var propertyInfo = interactor.GetType().GetProperty("activateActionValue");
-            if (propertyInfo != null)
+            if (propertyInfo?.GetValue(interactor) is InputActionProperty inputActionProperty)
             {
-                var actionProperty = propertyInfo.GetValue(interactor);
-                if (actionProperty is InputActionProperty inputActionProperty)
-                {
-                    return inputActionProperty.action;
-                }
+                return inputActionProperty.action;
             }
 
             return null;
         }
 
         /// <summary>
-        /// コントローラーのトリガーが押されているかチェック
+        /// トリガー押下の「瞬間」を検出（しきい値を跨いだ立ち上がりのみ true）
         /// </summary>
-        private bool IsTriggerPressed()
+        private bool WasTriggerJustPressed()
         {
             if (_triggerAction == null)
             {
+                _wasTriggerPressed = false;
                 return false;
             }
 
-            // Input Action の値を取得（float 値）
-            float triggerValue = _triggerAction.ReadValue<float>();
-            return triggerValue >= _triggerThreshold;
+            bool isPressed = _triggerAction.ReadValue<float>() >= _triggerThreshold;
+            bool justPressed = isPressed && !_wasTriggerPressed;
+
+            _wasTriggerPressed = isPressed;
+            return justPressed;
         }
 
-        /// <summary>
-        /// エフェクトを再生。待機用の duration を返す（再生できない場合は 0）。
-        /// </summary>
-        private float PlayEffect()
+        private float PlayParticleEffect()
         {
             if (_effectPrefab == null)
             {
-                Debug.LogWarning($"[ItemEffectTrigger] ParticleSystem が設定されていません: {gameObject.name}", this);
                 return 0f;
             }
 
@@ -327,46 +527,7 @@ namespace Assets.Team_Prevention.Script
 
             try
             {
-                Vector3 p = new Vector3();
-                Quaternion r = new Quaternion();
-                switch (_effectSpawnMode)
-                {
-                    case EffectSpawnMode.Follow:
-                    {
-                        // 子として生成（手/アイテムの動きに追従）
-                        effectInstance = Instantiate(_effectPrefab, spawnPoint);
-                        effectInstance.transform.localPosition = Vector3.zero;
-                        effectInstance.transform.localRotation = Quaternion.identity;
-                        break;
-                    }
-
-                    case EffectSpawnMode.WorldAtFixedPoint:
-                    {
-                        if (_fixedWorldSpawnPoint == null)
-                        {
-                            Debug.LogWarning("[ItemEffectTrigger] SpawnMode=WorldAtFixedPoint ですが、_fixedWorldSpawnPoint が未設定です。WorldAtSpawnPoint として生成します。", this);
-                            p = spawnPoint.position;
-                            r = spawnPoint.rotation;
-                            effectInstance = Instantiate(_effectPrefab, p, r);
-                            break;
-                        }
-
-                        p = _fixedWorldSpawnPoint.position;
-                        r = _fixedWorldSpawnPoint.rotation;
-                        effectInstance = Instantiate(_effectPrefab, p, r);
-                        break;
-                    }
-
-                    case EffectSpawnMode.WorldAtSpawnPoint:
-                    default:
-                    {
-                        // 生成時点のワールド座標に固定（その場に残る）
-                        p = spawnPoint.position;
-                        r = spawnPoint.rotation;
-                        effectInstance = Instantiate(_effectPrefab, p, r);
-                        break;
-                    }
-                }
+                effectInstance = SpawnParticleByMode(spawnPoint);
             }
             catch (Exception ex)
             {
@@ -382,13 +543,48 @@ namespace Assets.Team_Prevention.Script
 
             effectInstance.Play();
 
-            // 自動削除（ParticleSystem の duration に合わせる）
             float duration = effectInstance.main.duration + effectInstance.main.startLifetime.constantMax;
             Destroy(effectInstance.gameObject, duration);
 
             Debug.Log($"[ItemEffectTrigger] エフェクト再生: {gameObject.name}, Mode={_effectSpawnMode}", this);
 
             return Mathf.Max(0f, duration);
+        }
+
+        /// <summary>
+        /// EffectSpawnMode に応じた位置・回転で ParticleSystem をインスタンス化します。
+        /// </summary>
+        private ParticleSystem SpawnParticleByMode(Transform spawnPoint)
+        {
+            switch (_effectSpawnMode)
+            {
+                case EffectSpawnMode.Follow:
+                    {
+                        // 発生元に子として追従生成
+                        var instance = Instantiate(_effectPrefab, spawnPoint);
+                        instance.transform.localPosition = Vector3.zero;
+                        instance.transform.localRotation = Quaternion.identity;
+                        return instance;
+                    }
+
+                case EffectSpawnMode.WorldAtFixedPoint:
+                    {
+                        if (_fixedWorldSpawnPoint == null)
+                        {
+                            Debug.LogWarning("[ItemEffectTrigger] SpawnMode=WorldAtFixedPoint ですが、_fixedWorldSpawnPoint が未設定です。WorldAtSpawnPoint として生成します。", this);
+                            // フォールバック: spawnPoint のワールド座標を使用
+                            return Instantiate(_effectPrefab, spawnPoint.position, spawnPoint.rotation);
+                        }
+
+                        return Instantiate(_effectPrefab, _fixedWorldSpawnPoint.position, _fixedWorldSpawnPoint.rotation);
+                    }
+
+                case EffectSpawnMode.WorldAtSpawnPoint:
+                default:
+                    {
+                        return Instantiate(_effectPrefab, spawnPoint.position, spawnPoint.rotation);
+                    }
+            }
         }
 
         /// <summary>
@@ -410,17 +606,17 @@ namespace Assets.Team_Prevention.Script
 
             ItemData itemData = _itemDataHolder.ItemData;
 
-            // PlayerInfo から現在のSpot IDを取得
             var itemBoxComponent = _playerInfo.GetComponentInChildren<UI.ItemBoxComponent>();
             if (itemBoxComponent == null)
             {
-                Debug.LogWarning($"[ItemEffectTrigger] ItemBoxComponent が見つかりません", this);
+                Debug.LogWarning("[ItemEffectTrigger] ItemBoxComponent が見つかりません", this);
                 return;
             }
 
             int currentSpotId = itemBoxComponent.currentSpotId;
 
-            var isZeroSpot = (currentSpotId == 0);
+            // デバッグ: Spot未確定(0) の場合に Fallback ID を使用
+            bool isZeroSpot = (currentSpotId == 0);
             if (isZeroSpot && _debugEnableSpotPreviewWhenZero)
             {
                 if (_debugFallbackSpotIdWhenZero <= 0)
@@ -435,7 +631,6 @@ namespace Assets.Team_Prevention.Script
 
             bool isCorrectSpot = (itemData.CorrectUseSpotId == currentSpotId);
 
-            // SpotEffectController を取得してエフェクトを発動
             var spotController = SpotEffectController.GetControllerForSpot(currentSpotId);
             if (spotController != null)
             {
@@ -447,7 +642,7 @@ namespace Assets.Team_Prevention.Script
                 Debug.LogWarning($"[ItemEffectTrigger] Spot {currentSpotId} のコントローラーが見つかりません", this);
             }
 
-            // デバッグ確認（spot=0）ではインベントリ消費を抑制（副作用対策）
+            // デバッグモードで Spot 未確定のとき、インベントリを消費しない
             if (isZeroSpot && _debugEnableSpotPreviewWhenZero && _debugDoNotConsumeInventoryWhenZero)
             {
                 return;
@@ -460,11 +655,77 @@ namespace Assets.Team_Prevention.Script
         {
             _triggerThreshold = Mathf.Clamp01(_triggerThreshold);
             _cooldownTime = Mathf.Max(0f, _cooldownTime);
+            _onTriggerSeVolume = Mathf.Clamp01(_onTriggerSeVolume);
 
             if (_debugFallbackSpotIdWhenZero < 0)
             {
                 _debugFallbackSpotIdWhenZero = 0;
             }
+
+            _autoStartDelaySeconds = Mathf.Max(0f, _autoStartDelaySeconds);
+        }
+
+        /// <summary>
+        /// 追従方式など「XRのSelectを使わない」構成向けに、入力元Interactorを外部から注入します。
+        /// FollowBody / WorldFixed の SpawnMode でアイテムが手元に出現したタイミングで呼び出してください。
+        /// </summary>
+        public void SetCurrentInteractorForFollowMode(IXRSelectInteractor interactor)
+        {
+            if (interactor == null)
+            {
+                Debug.LogWarning("[ItemEffectTrigger] SetCurrentInteractorForFollowMode: interactor が null です。", this);
+                return;
+            }
+
+            _currentInteractor = interactor;
+            _hasTriggered = false;
+            _isActivated = true;
+
+            _wasTriggerPressed = false;
+
+            SetupTriggerActionFromInteractor(_currentInteractor);
+
+            TryStartAutoEffect();
+        }
+
+        public void Deactivate()
+        {
+            _isActivated = false;
+            _currentInteractor = null;
+            _wasTriggerPressed = false;
+
+            StopAutoStartRoutine();
+
+            if (_ownsTriggerAction && _triggerAction != null)
+            {
+                _triggerAction.Disable();
+            }
+
+            _triggerAction = null;
+            _ownsTriggerAction = false;
+        }
+
+        private void SetupTriggerActionFromInteractor(IXRSelectInteractor interactor)
+        {
+            if (_triggerActionReference != null)
+            {
+                return;
+            }
+
+            if (!(interactor is XRBaseInputInteractor inputInteractor))
+            {
+                return;
+            }
+
+            var action = GetActivateAction(inputInteractor);
+            if (action == null)
+            {
+                return;
+            }
+
+            // 共有され得るActionなので、このコンポーネントでは所有しない（Enable/Disableしない）
+            _triggerAction = action;
+            _ownsTriggerAction = false;
         }
     }
 }

@@ -7,59 +7,65 @@ using Assets.Team_Prevention.Script;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using System.Text;
 
 /// <summary>
-/// ƒvƒŒƒCƒ„[î•ñ‚ğŠÇ—‚·‚éƒNƒ‰ƒXiÃ~ƒIƒuƒWƒFƒNƒg‚ÖƒAƒ^ƒbƒ`j
-/// ƒvƒŒƒCƒ„[‚Ì Transform ‚ğQÆ‚µ‚ÄŠeíˆ—‚ğs‚¤
+/// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹ï¼ˆé™æ­¢ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¸ã‚¢ã‚¿ãƒƒãƒï¼‰
+/// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã® Transform ã‚’å‚ç…§ã—ã¦å„ç¨®å‡¦ç†ã‚’è¡Œã†
 /// </summary>
 public class MainPlayer : MonoBehaviour
 {
-    // --- ƒvƒŒƒCƒ„[QÆi“®‚­ƒIƒuƒWƒFƒNƒgj ---
-    [Header("ƒvƒŒƒCƒ„[QÆ")]
-    [Tooltip("ÀÛ‚É“®‚­ƒvƒŒƒCƒ„[‚ÌGameObjecti•K{j")]
+    // --- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‚ç…§ï¼ˆå‹•ãã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼‰ ---
+    [Header("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‚ç…§")]
+    [Tooltip("å®Ÿéš›ã«å‹•ããƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®GameObjectï¼ˆå¿…é ˆï¼‰")]
     public GameObject PlayerObject;
 
-    [Header("”»’è‘ÎÛi“ª‚È‚Çj")]
-    [Tooltip("ƒvƒŒƒCƒ„[‚Ì“ª‚È‚ÇAˆÊ’u”»’è‚Ég‚¤ƒIƒuƒWƒFƒNƒgi”CˆÓj")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ÎÛiï¿½ï¿½ï¿½È‚Çj")]
+    [Tooltip("ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ì“ï¿½ï¿½È‚ÇAï¿½Ê’uï¿½ï¿½ï¿½ï¿½Égï¿½ï¿½ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½iï¿½Cï¿½Ój")]
     [SerializeField] public GameObject HeadObject;
 
-    // --- •\¦/UI ---
+    // --- è¡¨ç¤º/UI ---
     [Header("UI")]
-    [Tooltip("‘Ì—Í•\¦Text (TMP_Text)")]
+    [Tooltip("ä½“åŠ›è¡¨ç¤ºText (TMP_Text)")]
     public TMP_Text healthText;
 
-    // --- ˜AŒgƒRƒ“ƒ|[ƒlƒ“ƒg ---
-    [Header("˜AŒgƒRƒ“ƒ|[ƒlƒ“ƒg")]
+    // --- é€£æºã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ ---
+    [Header("é€£æºã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ")]
     [SerializeField] private ItemBoxComponent itemBoxComponent;
 
-    // --- ƒXƒ|ƒbƒg^ƒtƒF[ƒY”»’è—p ---
-    [Header("ƒXƒ|ƒbƒg”»’è—pƒIƒuƒWƒFƒNƒg")]
+    // --- ã‚¹ãƒãƒƒãƒˆï¼ãƒ•ã‚§ãƒ¼ã‚ºåˆ¤å®šç”¨ ---
+    [Header("ã‚¹ãƒãƒƒãƒˆåˆ¤å®šç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ")]
     public GameObject Phase1Object;
     public GameObject Phase2Object;
     public GameObject Phase3Object;
 
-    [Header("‘SƒXƒ|ƒbƒg“’B‚É–³Œø‰»‚·‚éƒIƒuƒWƒFƒNƒg")]
+    [Header("å…¨ã‚¹ãƒãƒƒãƒˆåˆ°é”æ™‚ã«ç„¡åŠ¹åŒ–ã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ")]
     [SerializeField] private GameObject allSpotsCompletedObject;
 
-    // --- ƒTƒEƒ“ƒh ---
-    [Header("ƒTƒEƒ“ƒh")]
-    [SerializeField] private AudioSource audioSource;           // Ä¶‚Ég‚¤ AudioSourcei”CˆÓ‚ÌGameObject‚ÉƒAƒ^ƒbƒ`j
-    [SerializeField] private AudioSource loopAudioSource;       // ƒ‹[ƒv—p‚Ì•Ê‚ÌAudioSource
-    [SerializeField] private AudioClip correctClip;             // ³‰ğ‚ÌƒNƒŠƒbƒv
-    [SerializeField] private AudioClip wrongClip;               // Œë‚è‚ÌƒNƒŠƒbƒv
-    [SerializeField] private AudioClip fireClip;                // ”R‚¦‚Ä‚¢‚é‰¹
+    // --- ã‚µã‚¦ãƒ³ãƒ‰ ---
+    [Header("ã‚µã‚¦ãƒ³ãƒ‰")]
+    [SerializeField] private AudioSource audioSource;           // å†ç”Ÿã«ä½¿ã† AudioSourceï¼ˆä»»æ„ã®GameObjectã«ã‚¢ã‚¿ãƒƒãƒï¼‰
+    [SerializeField] private AudioSource loopAudioSource;       // ãƒ«ãƒ¼ãƒ—ç”¨ã®åˆ¥ã®AudioSource
+    [SerializeField] private AudioClip correctClip;             // æ­£è§£æ™‚ã®ã‚¯ãƒªãƒƒãƒ—
+    [SerializeField] private AudioClip wrongClip;               // èª¤ã‚Šæ™‚ã®ã‚¯ãƒªãƒƒãƒ—
+    [SerializeField] private AudioClip fireClip;                // ç‡ƒãˆã¦ã„ã‚‹éŸ³
 
-    // --- ƒXƒe[ƒ^ƒX ---
-    [Header("ƒXƒe[ƒ^ƒX")]
+    // --- ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ ---
+    [Header("ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹")]
     [Range(0, 100)] public float CurrentHP = 100f;
     public float MaxHP = 100f;
     public float Score = 100f;
 
-    // --- ƒAƒCƒeƒ€ ---
-    [Header("ƒCƒ“ƒxƒ“ƒgƒŠiÅ‘å5ŒÂj")]
+    // --- ã‚¢ã‚¤ãƒ†ãƒ  ---
+    [Header("ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªï¼ˆæœ€å¤§5å€‹ï¼‰")]
     public List<ItemInfo> ItemsList = new List<ItemInfo>(5);
 
-    // --- ƒCƒxƒ“ƒg ---
+
+    // â˜… è¿½åŠ ï¼šä½¿ç”¨ã—ãŸã‚¢ã‚¤ãƒ†ãƒ ï¼‹Spot ã®ãƒ­ã‚°
+    private readonly List<string> _usedLogs = new List<string>();
+
+
+    // --- ã‚¤ãƒ™ãƒ³ãƒˆ ---
     public event System.Action<float, float> OnHPChanged;        // (CurrentHP, MaxHP)
     public event System.Action<float> OnScoreChanged;            // (Score)
     public event System.Action<float> OnItemUsed;                // (+/- point)
@@ -67,22 +73,53 @@ public class MainPlayer : MonoBehaviour
     public event System.Action<ItemInfo> OnItemRemoved;
     public event System.Action<List<ItemInfo>> OnInventoryChanged;
 
-    // --- “à•”ó‘ÔiƒXƒ|ƒbƒg“’Bƒgƒ‰ƒbƒLƒ“ƒOj ---
+    // --- å†…éƒ¨çŠ¶æ…‹ï¼ˆã‚¹ãƒãƒƒãƒˆåˆ°é”ãƒˆãƒ©ãƒƒã‚­ãƒ³ã‚°ï¼‰ ---
     private bool visitedSpot1 = false;
     private bool visitedSpot2 = false;
     private bool visitedSpot3 = false;
 
-    [Header("ƒAƒCƒeƒ€¶¬İ’è")]
+    [Header("ã‚¢ã‚¤ãƒ†ãƒ ç”Ÿæˆè¨­å®š")]
     [SerializeField] private Assets.Team_Prevention.Script.ItemUseSpawner _itemUseSpawner;
 
-    [Tooltip("‚±‚ÌƒvƒŒƒCƒ„[‚ÌèiInteractorj‚ğ–¾¦w’è‚µ‚½‚¢ê‡‚Éİ’è‚µ‚Ä‚­‚¾‚³‚¢B–¢İ’è‚È‚ç–{ƒIƒuƒWƒFƒNƒg”z‰º‚©‚ç©“®ŒŸo‚µ‚Ü‚·B")]
-    [SerializeField] private XRBaseInteractor _preferredInteractor;
+    [Tooltip("ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ‰‹ï¼ˆInteractorï¼‰ã‚’æ˜ç¤ºæŒ‡å®šã—ãŸã„å ´åˆã«è¨­å®šã—ã¦ãã ã•ã„ã€‚æœªè¨­å®šãªã‚‰æœ¬ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé…ä¸‹ã‹ã‚‰è‡ªå‹•æ¤œå‡ºã—ã¾ã™ã€‚")]
+    [SerializeField] public XRBaseInteractor HandInteractor;
+
+    [SerializeField] private NetworkScoreManager _networkScoreManager;
+
+    [Header("UI")]
+    [Tooltip("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚¹ã‚³ã‚¢Text (TMP_Text)")]
+    public TMP_Text PlayerScoreText;
 
     public int CurrentSpotId { get; private set; }
     private void Start()
     {
-        // ‰Šú•\¦
+        // åˆæœŸè¡¨ç¤º
         if (healthText != null) healthText.text = CurrentHP.ToString();
+
+        if (_networkScoreManager == null)
+        {
+            _networkScoreManager = FindFirstObjectByType<NetworkScoreManager>();
+        }
+    }
+
+
+    private void OnEnable()
+    {
+        if (_networkScoreManager == null)
+            _networkScoreManager = FindFirstObjectByType<NetworkScoreManager>();
+
+        if (_networkScoreManager != null)
+        {
+            _networkScoreManager.OnScoresUpdated += UpdatePlayerScoreText;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_networkScoreManager != null)
+        {
+            _networkScoreManager.OnScoresUpdated -= UpdatePlayerScoreText;
+        }
     }
 
     private void Update()
@@ -90,7 +127,7 @@ public class MainPlayer : MonoBehaviour
         if (itemBoxComponent == null) return;
         if (PlayerObject == null) return;
 
-        // ”»’è‘ÎÛ‚Ìƒ[ƒ‹ƒhÀ•WiHeadObject ‚ªİ’è‚³‚ê‚Ä‚¢‚ê‚Î‚»‚ê‚ğg‚¤A‚È‚¯‚ê‚Î PlayerObjectA‚³‚ç‚ÉÅŒã‚ÌƒtƒH[ƒ‹ƒoƒbƒN‚Æ‚µ‚Ä©gj
+        // åˆ¤å®šå¯¾è±¡ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ï¼ˆHeadObject ãŒè¨­å®šã•ã‚Œã¦ã„ã‚Œã°ãã‚Œã‚’ä½¿ã†ã€ãªã‘ã‚Œã° PlayerObjectã€ã•ã‚‰ã«æœ€å¾Œã®ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ã¨ã—ã¦è‡ªèº«ï¼‰
         Vector3 selfPos;
         if (HeadObject != null)
         {
@@ -104,7 +141,7 @@ public class MainPlayer : MonoBehaviour
         int spot = 0;
         bool inPhase2 = false;
 
-        // Collider.bounds.Contains ‚É‚æ‚é—Ìˆæ”»’è
+        // Collider.bounds.Contains ã«ã‚ˆã‚‹é ˜åŸŸåˆ¤å®š
         if (Phase1Object != null)
         {
             var col1 = Phase1Object.GetComponentInChildren<Collider>();
@@ -136,14 +173,14 @@ public class MainPlayer : MonoBehaviour
             }
         }
 
-        // Spot•ÏX ItemBoxComponent ‚É”½‰f
+        // Spotå¤‰æ›´æ™‚ ItemBoxComponent ã«åæ˜ 
         if (itemBoxComponent.currentSpotId != spot)
         {
             itemBoxComponent.currentSpotId = spot;
             // Debug.Log($"[MainPlayer] Spot changed -> {itemBoxComponent.currentSpotId}");
         }
 
-        // ƒtƒF[ƒY2‘Øİ’†‚Í‰ÎĞ‰¹ƒ‹[ƒvA”²‚¯‚½‚ç’â~
+        // ãƒ•ã‚§ãƒ¼ã‚º2æ»åœ¨ä¸­ã¯ç«ç½éŸ³ãƒ«ãƒ¼ãƒ—ã€æŠœã‘ãŸã‚‰åœæ­¢
         if (loopAudioSource != null)
         {
             if (inPhase2)
@@ -164,7 +201,7 @@ public class MainPlayer : MonoBehaviour
             }
         }
 
-        // ‘SƒXƒ|ƒbƒg“’B‚Ì•\¦§Œä
+        // å…¨ã‚¹ãƒãƒƒãƒˆåˆ°é”æ™‚ã®è¡¨ç¤ºåˆ¶å¾¡
         if (visitedSpot1 && visitedSpot2 && visitedSpot3 && allSpotsCompletedObject != null)
         {
             allSpotsCompletedObject.SetActive(false);
@@ -173,12 +210,85 @@ public class MainPlayer : MonoBehaviour
         CurrentSpotId = spot;
     }
 
-    // --- ƒXƒe[ƒ^ƒX‘€ì ---
+    private void UpdatePlayerScoreText()
+    {
+        if (PlayerScoreText == null)
+            return;
+
+        if (_networkScoreManager == null)
+            _networkScoreManager = FindFirstObjectByType<NetworkScoreManager>();
+
+        if (_networkScoreManager == null)
+        {
+            PlayerScoreText.text = "ã‚¹ã‚³ã‚¢æƒ…å ±ãªã—ï¼ˆManager æœªSpawnï¼‰";
+            return;
+        }
+
+        var list = _networkScoreManager.GetAllScores();
+        if (list == null || list.Count == 0)
+        {
+            PlayerScoreText.text = "nothing score inform yet";
+            return;
+        }
+
+        // è¡¨ç¤ºç”¨ãƒ“ãƒ«ãƒ€ãƒ¼
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        foreach (var ps in list)
+        {
+            string name = ps.playerName;
+            if (string.IsNullOrEmpty(name))
+                name = $"Player {ps.clientId}";
+
+            sb.AppendLine($"{name} : {ps.score:0}");
+
+            // â˜… ä½¿ç”¨ã—ãŸã‚¢ã‚¤ãƒ†ãƒ ï¼‹Spotæƒ…å ±ã‚‚è¡¨ç¤º
+            if (!string.IsNullOrEmpty(ps.usedInfo))
+            {
+                sb.AppendLine($"  Used: {ps.usedInfo}");
+            }
+
+            sb.AppendLine(); // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã”ã¨ã«ç©ºè¡Œ
+        }
+
+        PlayerScoreText.text = sb.ToString();
+    }
+
+    private void ReportScoreToNetwork()
+    {
+        if (_networkScoreManager == null)
+        {
+            _networkScoreManager = FindFirstObjectByType<NetworkScoreManager>();
+        }
+
+        if (_networkScoreManager == null)
+        {
+            Debug.LogWarning("[MainPlayer] NetworkScoreManager ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ï¼ˆã¾ã  Spawn ã•ã‚Œã¦ã„ãªã„å¯èƒ½æ€§ï¼‰ã€‚");
+            return;
+        }
+
+        if (!_networkScoreManager.IsSpawned)
+        {
+            Debug.LogWarning("[MainPlayer] NetworkScoreManager ã¯å­˜åœ¨ã™ã‚‹ãŒ NetworkObject ãŒ Spawn ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+            return;
+        }
+
+        // â˜… ä½¿ç”¨ãƒ­ã‚°ã‚’1ã¤ã®æ–‡å­—åˆ—ã«ã¾ã¨ã‚ã‚‹
+        string usedInfo = BuildUsedInfo();
+
+        // â˜… ã‚¹ã‚³ã‚¢ + ä½¿ç”¨ã‚¢ã‚¤ãƒ†ãƒ æƒ…å ±ã‚’é€ä¿¡
+        _networkScoreManager.ReportLocalScore(CurrentHP, usedInfo);
+    }
+
+
+    // --- ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹æ“ä½œ ---
     public void ResetHPToMax()
     {
         CurrentHP = MaxHP;
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
         if (healthText != null) healthText.text = CurrentHP.ToString();
+        ReportScoreToNetwork();
+        UpdatePlayerScoreText();     // â˜… è¿½åŠ 
     }
 
     public void Damage(float amount)
@@ -186,6 +296,8 @@ public class MainPlayer : MonoBehaviour
         CurrentHP = Mathf.Clamp(CurrentHP - amount, 0f, MaxHP);
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
         if (healthText != null) healthText.text = CurrentHP.ToString();
+        ReportScoreToNetwork();
+        UpdatePlayerScoreText();     // â˜… è¿½åŠ 
     }
 
     public void Heal(float amount)
@@ -193,12 +305,15 @@ public class MainPlayer : MonoBehaviour
         CurrentHP = Mathf.Clamp(CurrentHP + amount, 0f, MaxHP);
         OnHPChanged?.Invoke(CurrentHP, MaxHP);
         if (healthText != null) healthText.text = CurrentHP.ToString();
+        ReportScoreToNetwork();
+        UpdatePlayerScoreText();     // â˜… è¿½åŠ 
     }
 
     public void AddScore(float points)
     {
         Score += points;
         OnScoreChanged?.Invoke(Score);
+        ReportScoreToNetwork();
     }
 
     public void DeductScore(float points)
@@ -206,9 +321,10 @@ public class MainPlayer : MonoBehaviour
         Score -= points;
         if (Score < 0f) Score = 0f;
         OnScoreChanged?.Invoke(Score);
+        ReportScoreToNetwork();
     }
 
-    // --- ƒCƒ“ƒxƒ“ƒgƒŠ‘€ì ---
+    // --- ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªæ“ä½œ ---
     public void AllClear()
     {
         ItemsList.Clear();
@@ -219,14 +335,14 @@ public class MainPlayer : MonoBehaviour
     {
         if (data == null) return false;
 
-        // ãŒÀƒ`ƒFƒbƒN
+        // ä¸Šé™ãƒã‚§ãƒƒã‚¯
         if (ItemsList.Count >= 5)
         {
             Debug.LogWarning("Inventory full (max 5).");
             return false;
         }
 
-        // –¢g—p‚Ì“¯–¼ƒAƒCƒeƒ€‚ª‚ ‚éê‡‚Íd•¡æ“¾‚µ‚È‚¢
+        // æœªä½¿ç”¨ã®åŒåã‚¢ã‚¤ãƒ†ãƒ ãŒã‚ã‚‹å ´åˆã¯é‡è¤‡å–å¾—ã—ãªã„
         var existing = ItemsList.Find(i => i.Name == data.Name && !i.IsUsed);
         if (existing != null)
         {
@@ -261,7 +377,7 @@ public class MainPlayer : MonoBehaviour
         return false;
     }
 
-    // --- ƒAƒCƒeƒ€g—p ---
+    // --- ã‚¢ã‚¤ãƒ†ãƒ ä½¿ç”¨ ---
     public bool UsedItem(ItemData data, int currentSpotId)
     {
         if (data == null) return false;
@@ -280,7 +396,7 @@ public class MainPlayer : MonoBehaviour
 
         if (data.CorrectUseSpotId == currentSpotId)
         {
-            applied = rawPoint;               // ‰Á“_iHP‰ñ•œˆµ‚¢j
+            applied = rawPoint;               // åŠ ç‚¹ï¼ˆHPå›å¾©æ‰±ã„ï¼‰
             Heal(applied);
 
             if (audioSource != null && correctClip != null)
@@ -290,7 +406,7 @@ public class MainPlayer : MonoBehaviour
         }
         else
         {
-            applied = -Mathf.Abs(rawPoint);   // Œ¸“_iƒ_ƒ[ƒWˆµ‚¢j
+            applied = -Mathf.Abs(rawPoint);   // æ¸›ç‚¹ï¼ˆãƒ€ãƒ¡ãƒ¼ã‚¸æ‰±ã„ï¼‰
             Damage(Mathf.Abs(applied));
 
             if (audioSource != null && wrongClip != null)
@@ -303,11 +419,21 @@ public class MainPlayer : MonoBehaviour
         OnItemUsed?.Invoke(applied);
 
         Debug.Log($"Used item: {data.Name}, spot={currentSpotId}, point change={applied}");
+        TrySpawnItemToInteractor(data);
+
+
+        // â˜… ã“ã“ã‚’è¿½åŠ ï¼šä½¿ç”¨ãƒ­ã‚°ã«è¿½è¨˜
+        string log = $"{data.Name}@Spot{currentSpotId}";
+        _usedLogs.Add(log);
+
+        // â˜… ä½¿ç”¨ãƒ­ã‚°ã‚‚å«ã‚ã¦ã‚¹ã‚³ã‚¢æƒ…å ±ã‚’ãƒãƒƒãƒˆã¸é€ã‚‹
+        ReportScoreToNetwork();
+
         return true;
     }
 
     /// <summary>
-    /// ƒfƒoƒbƒO/Šm”F—pFƒAƒCƒeƒ€‚ğug—pv‚¹‚¸‚ÉèŒ³‚Ö¶¬‚µ‚Ä’Í‚Ü‚¹‚éiƒCƒ“ƒxƒ“ƒgƒŠÁ”ï‚È‚µj
+    /// ãƒ‡ãƒãƒƒã‚°/ç¢ºèªç”¨ï¼šã‚¢ã‚¤ãƒ†ãƒ ã‚’ã€Œä½¿ç”¨ã€ã›ãšã«æ‰‹å…ƒã¸ç”Ÿæˆã—ã¦æ´ã¾ã›ã‚‹ï¼ˆã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªæ¶ˆè²»ãªã—ï¼‰
     /// </summary>
     public XRGrabInteractable PreviewSpawnItemToHand(Assets.Team_Prevention.Script.ItemData data)
     {
@@ -320,7 +446,51 @@ public class MainPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// ¶¬‚É¬Œ÷‚µ‚½‚ç XRGrabInteractable ‚ğ•Ô‚·B¸”s‚Í nullB
+    /// æŒ‡å®šã—ãŸ Interactor ã®æ‰‹å…ƒã¸ã‚¢ã‚¤ãƒ†ãƒ ã‚’ç”Ÿæˆã—ã¦æ´ã¾ã›ã¾ã™ï¼ˆã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªæ¶ˆè²»ãªã—ï¼‰ã€‚
+    /// ItemSelectionPhaseManager ãªã©ã€Œã©ã®æ‰‹ã«å‡ºã™ã‹ã€ãŒæ±ºã¾ã£ã¦ã„ã‚‹ã‚±ãƒ¼ã‚¹å‘ã‘ã€‚
+    /// </summary>
+    public XRGrabInteractable PreviewSpawnItemToHand(ItemData data, XRBaseInteractor interactor)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
+        if (interactor == null)
+        {
+            Debug.LogWarning("[MainPlayer] PreviewSpawnItemToHand: interactor ãŒ null ã§ã™ã€‚");
+            return null;
+        }
+
+        var spawner = _itemUseSpawner;
+        if (spawner == null)
+        {
+            spawner = FindFirstObjectByType<Assets.Team_Prevention.Script.ItemUseSpawner>();
+            if (spawner == null)
+            {
+                Debug.LogWarning("[MainPlayer] ItemUseSpawner ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚ã‚¢ã‚¤ãƒ†ãƒ ã‚’æ‰‹å…ƒã«ç”Ÿæˆã§ãã¾ã›ã‚“ã€‚");
+                return null;
+            }
+        }
+
+        XRGrabInteractable created = spawner.SpawnAndAttachToInteractor(interactor, data.Name);
+        if (created == null)
+        {
+            created = spawner.SpawnAndAttachToInteractor(interactor);
+        }
+
+        if (created == null)
+        {
+            Debug.LogWarning($"[MainPlayer] ã‚¢ã‚¤ãƒ†ãƒ ã®ç”Ÿæˆã¾ãŸã¯æ‰‹å‹•æ´ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ: {data.Name}");
+            return null;
+        }
+
+        Debug.Log($"[MainPlayer] æŒ‡å®šInteractorã¸ç”Ÿæˆã—ã¦æ´ã¾ã›ã¾ã—ãŸ: {data.Name}, interactor={interactor.name}");
+        return created;
+    }
+
+    /// <summary>
+    /// ç”Ÿæˆã«æˆåŠŸã—ãŸã‚‰ XRGrabInteractable ã‚’è¿”ã™ã€‚å¤±æ•—æ™‚ã¯ nullã€‚
     /// </summary>
     private XRGrabInteractable TrySpawnItemToInteractor(Assets.Team_Prevention.Script.ItemData data)
     {
@@ -335,7 +505,7 @@ public class MainPlayer : MonoBehaviour
             spawner = FindFirstObjectByType<Assets.Team_Prevention.Script.ItemUseSpawner>();
             if (spawner == null)
             {
-                Debug.LogWarning("[MainPlayer] ItemUseSpawner ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñBƒAƒCƒeƒ€‚ğèŒ³‚É¶¬‚Å‚«‚Ü‚¹‚ñB");
+                Debug.LogWarning("[MainPlayer] ItemUseSpawner ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚ã‚¢ã‚¤ãƒ†ãƒ ã‚’æ‰‹å…ƒã«ç”Ÿæˆã§ãã¾ã›ã‚“ã€‚");
                 return null;
             }
         }
@@ -343,7 +513,7 @@ public class MainPlayer : MonoBehaviour
         XRBaseInteractor targetInteractor = ResolveInteractorForThisPlayer();
         if (targetInteractor == null)
         {
-            Debug.LogWarning("[MainPlayer] ‚±‚ÌƒvƒŒƒCƒ„[”z‰º‚É XRBaseInteractor ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB_preferredInteractor ‚ğİ’è‚µ‚Ä‚­‚¾‚³‚¢B");
+            Debug.LogWarning("[MainPlayer] ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼é…ä¸‹ã« XRBaseInteractor ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚_preferredInteractor ã‚’è¨­å®šã—ã¦ãã ã•ã„ã€‚");
             return null;
         }
 
@@ -355,19 +525,19 @@ public class MainPlayer : MonoBehaviour
 
         if (created == null)
         {
-            Debug.LogWarning("[MainPlayer] ƒAƒCƒeƒ€‚Ì¶¬‚Ü‚½‚Íè“®’Í‚İ‚É¸”s‚µ‚Ü‚µ‚½B");
+            Debug.LogWarning("[MainPlayer] ã‚¢ã‚¤ãƒ†ãƒ ã®ç”Ÿæˆã¾ãŸã¯æ‰‹å‹•æ´ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
             return null;
         }
 
-        Debug.Log($"[MainPlayer] ƒAƒCƒeƒ€‚ğèŒ³‚É¶¬‚µ‚Ä’Í‚Ü‚¹‚Ü‚µ‚½: {data.Name}");
+        Debug.Log($"[MainPlayer] ã‚¢ã‚¤ãƒ†ãƒ ã‚’æ‰‹å…ƒã«ç”Ÿæˆã—ã¦æ´ã¾ã›ã¾ã—ãŸ: {data.Name}");
         return created;
     }
 
     private XRBaseInteractor ResolveInteractorForThisPlayer()
     {
-        if (_preferredInteractor != null)
+        if (HandInteractor != null)
         {
-            return _preferredInteractor;
+            return HandInteractor;
         }
 
         if (PlayerObject == null)
@@ -375,7 +545,7 @@ public class MainPlayer : MonoBehaviour
             return null;
         }
 
-        // 1) PlayerObject ‚Ìu“¯ŠK‘wv(= e”z‰º = sibling) ‚©‚ç’T‚·
+        // 1) PlayerObject ã®ã€ŒåŒéšå±¤ã€(= è¦ªé…ä¸‹ = sibling) ã‹ã‚‰æ¢ã™
         Transform parent = PlayerObject.transform.parent;
         if (parent != null)
         {
@@ -387,7 +557,7 @@ public class MainPlayer : MonoBehaviour
             }
         }
 
-        // 2) ƒtƒH[ƒ‹ƒoƒbƒNFPlayerObject ‚Ìq‚©‚ç’T‚·i\‘¢·ˆÙ‚É”õ‚¦‚éj
+        // 2) ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ï¼šPlayerObject ã®å­ã‹ã‚‰æ¢ã™ï¼ˆæ§‹é€ å·®ç•°ã«å‚™ãˆã‚‹ï¼‰
         var children = PlayerObject.GetComponentsInChildren<XRBaseInteractor>(true);
         return ResolveByPriority(children);
     }
@@ -399,7 +569,7 @@ public class MainPlayer : MonoBehaviour
             return null;
         }
 
-        // —Dæ“xFDirect ¨ Ray ¨ ‚»‚êˆÈŠO
+        // å„ªå…ˆåº¦ï¼šDirect â†’ Ray â†’ ãã‚Œä»¥å¤–
         for (int i = 0; i < interactors.Length; i++)
         {
             if (interactors[i] is XRDirectInteractor)
@@ -418,4 +588,24 @@ public class MainPlayer : MonoBehaviour
 
         return interactors[0];
     }
+
+
+    private string BuildUsedInfo()
+    {
+        if (_usedLogs.Count == 0)
+            return "";
+
+        var sb = new StringBuilder();
+
+        // ä¾‹: "æ¶ˆç«å™¨@Spot2, é€šå ±@Spot1, ..."
+        for (int i = 0; i < _usedLogs.Count; i++)
+        {
+            sb.Append(_usedLogs[i]);
+            if (i < _usedLogs.Count - 1)
+                sb.Append(", ");
+        }
+
+        return sb.ToString();
+    }
+
 }
