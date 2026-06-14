@@ -47,7 +47,7 @@ namespace XRMultiplayer
         [SerializeField] private float m_RefreshCooldownTime = .5f;
 
         [Header("Connection Texts")]
-        [SerializeField] private string[] m_InputIPAdress = new string[4];
+        private string[] m_InputIPAdress = {"192","168","1","0"};
 
         [SerializeField] private TMP_InputField[] m_IPInputFields;
 
@@ -114,6 +114,8 @@ namespace XRMultiplayer
                 Destroy(t.gameObject);
             }
 
+            InitializeIPFields();
+
             for (int i = 0; i < m_Dropdowns.Length; i++)
             {
                 int index = i;
@@ -147,6 +149,26 @@ namespace XRMultiplayer
             this.OnConnectionFailed.RemoveAllListeners();
 
             SessionManager.status.Unsubscribe(ConnectedUpdated);
+        }
+
+        private void InitializeIPFields()
+        {
+            isChangingFromDropdown = true;
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (m_Dropdowns[i] != null && m_IPInputFields[i] != null)
+                {
+                    string defaultText = m_Dropdowns[i].options[m_Dropdowns[i].value].text;
+
+                    m_InputIPAdress[i] = defaultText;
+                    m_IPInputFields[i].text = defaultText;
+                }
+            }
+
+            isChangingFromDropdown = false;
+            Debug.Log($"[Initialized] default IP: {GetFullIPAddress()}");
+            this.UpdateIP();
         }
 
         public void CreateLobby()
@@ -474,6 +496,7 @@ namespace XRMultiplayer
             isChangingFromDropdown = false;
 
             Debug.Log($"[Dropdown Changed] Input Field[{index}]Change to: {selectedText}£¬Full IP: {GetFullIPAddress()}");
+            this.UpdateIP();
         }
 
         private void UpdateDropdownSelection(TMP_Dropdown dropdown, string targetValue)
