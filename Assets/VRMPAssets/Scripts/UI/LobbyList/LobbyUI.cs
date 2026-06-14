@@ -1,11 +1,12 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
+using System.Net;
 using TMPro;
-using Unity.Services.Multiplayer;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using Unity.Services.Multiplayer;
+using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace XRMultiplayer
 {
@@ -46,12 +47,21 @@ namespace XRMultiplayer
         [SerializeField] private float m_RefreshCooldownTime = .5f;
 
         [Header("Connection Texts")]
+        [SerializeField] private string[] m_InputIPAdress = new string[4];
+
+        [SerializeField] private TMP_InputField[] m_IPInputFields;
+
         [SerializeField]
         private TMP_Text m_ConnectionUpdatedText;
 
         [SerializeField] private TMP_Text m_ConnectionSuccessText;
 
         [SerializeField] private TMP_Text m_ConnectionFailedText;
+
+        [SerializeField] private TMP_Dropdown[] m_Dropdowns;
+
+        private bool isChangingFromInput = false;
+        private bool isChangingFromDropdown = false;
 
         [Header("Room Creation")]
         [SerializeField]
@@ -102,6 +112,19 @@ namespace XRMultiplayer
             foreach (Transform t in m_LobbyListParent)
             {
                 Destroy(t.gameObject);
+            }
+
+            for (int i = 0; i < m_Dropdowns.Length; i++)
+            {
+                int index = i;
+                if (m_Dropdowns[i] != null)
+                {
+                    m_Dropdowns[i].onValueChanged.RemoveAllListeners();
+                    m_Dropdowns[i].onValueChanged.AddListener((valueIndex) =>
+                    {
+                        OnDropdownValueChanged(index, valueIndex);
+                    });
+                }
             }
         }
 
@@ -399,6 +422,88 @@ namespace XRMultiplayer
         public void SetIP(string address)
         {
             SetIPAsync(address);
+        }
+
+        public void UpdateIP()
+        {
+            this.SetIPAsync(this.GetFullIPAddress());
+        }
+
+        public void SetFirstIPBlock(string address) => this.SetIPByIndex(0, address);
+
+        public void SetSecondIPBlock(string address) => this.SetIPByIndex(1, address);
+
+        public void SetThirdIPBlock(string address) => this.SetIPByIndex(2, address);
+
+        public void SetFourthIPBlock(string address) => this.SetIPByIndex(3, address);
+
+        private void SetIPByIndex(int index, string address)
+        {
+            if (isChangingFromDropdown) return;
+
+            if (index < 0 || index >= m_InputIPAdress.Length || index >= m_Dropdowns.Length) return;
+
+            address = address.Trim();
+            if (string.IsNullOrEmpty(address)) address = "0";
+
+            m_InputIPAdress[index] = address;
+
+            isChangingFromInput = true;
+            UpdateDropdownSelection(m_Dropdowns[index], address);
+            isChangingFromInput = false;
+
+            Debug.Log($"[Input Changed] Full IP: {GetFullIPAddress()}");
+            this.UpdateIP();
+        }
+
+        private void OnDropdownValueChanged(int index, int valueIndex)
+        {
+            if (isChangingFromInput) return;
+
+            if (index < 0 || index >= m_Dropdowns.Length || index >= m_IPInputFields.Length) return;
+            if (m_Dropdowns[index] == null || m_IPInputFields[index] == null) return;
+
+            string selectedText = m_Dropdowns[index].options[valueIndex].text;
+
+            m_InputIPAdress[index] = selectedText;
+
+            isChangingFromDropdown = true;
+
+            m_IPInputFields[index].text = selectedText;
+
+            isChangingFromDropdown = false;
+
+            Debug.Log($"[Dropdown Changed] Input Field[{index}]Change to: {selectedText}£¬Full IP: {GetFullIPAddress()}");
+        }
+
+        private void UpdateDropdownSelection(TMP_Dropdown dropdown, string targetValue)
+        {
+            int targetIndex = -1;
+            for (int i = 0; i < dropdown.options.Count; i++)
+            {
+                if (dropdown.options[i].text == targetValue)
+                {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            if (targetIndex != -1)
+            {
+                dropdown.value = targetIndex;
+            }
+            else
+            {
+                TMP_Dropdown.OptionData newOption = new TMP_Dropdown.OptionData(targetValue);
+                dropdown.options.Add(newOption);
+                dropdown.value = dropdown.options.Count - 1;
+            }
+            dropdown.RefreshShownValue();
+        }
+
+        private string GetFullIPAddress()
+        {
+            return string.Join(".", m_InputIPAdress);
         }
 
         /// <summary>
