@@ -47,7 +47,7 @@ namespace XRMultiplayer
         [SerializeField] private float m_RefreshCooldownTime = .5f;
 
         [Header("Connection Texts")]
-        private string[] m_InputIPAdress = {"192","168","1","0"};
+        private string[] m_InputIPAdress = { "192", "168", "1", "0" };
 
         [SerializeField] private TMP_InputField[] m_IPInputFields;
 
@@ -163,6 +163,11 @@ namespace XRMultiplayer
 
                     m_InputIPAdress[i] = defaultText;
                     m_IPInputFields[i].text = defaultText;
+                    int index = i;
+                    m_IPInputFields[i].onEndEdit.AddListener((value) =>
+                    {
+                        OnIPInputEndEdit(index, value);
+                    });
                 }
             }
 
@@ -468,6 +473,8 @@ namespace XRMultiplayer
             address = address.Trim();
             if (string.IsNullOrEmpty(address)) address = "0";
 
+            if (m_InputIPAdress[index].Equals(address)) return;
+
             m_InputIPAdress[index] = address;
 
             isChangingFromInput = true;
@@ -475,6 +482,26 @@ namespace XRMultiplayer
             isChangingFromInput = false;
 
             Debug.Log($"[Input Changed] Full IP: {GetFullIPAddress()}");
+            this.UpdateIP();
+        }
+
+        private void OnIPInputEndEdit(int index, string value)
+        {
+            if (isChangingFromDropdown) return;
+
+            if (m_IPInputFields[index] == null || m_IPInputFields[index] == null) return;
+
+            if (m_InputIPAdress[index].Equals(value)) return;
+
+            m_InputIPAdress[index] = value;
+
+            isChangingFromInput = true;
+
+            this.UpdateDropdownSelection(m_Dropdowns[index], value);
+
+            isChangingFromInput = false;
+
+            Debug.Log($"[Dropdown Changed] Input Field[{index}]Change to: {value} Full IP: {GetFullIPAddress()}");
             this.UpdateIP();
         }
 
@@ -487,6 +514,8 @@ namespace XRMultiplayer
 
             string selectedText = m_Dropdowns[index].options[valueIndex].text;
 
+            if (m_InputIPAdress[index].Equals(selectedText)) return;
+
             m_InputIPAdress[index] = selectedText;
 
             isChangingFromDropdown = true;
@@ -495,7 +524,7 @@ namespace XRMultiplayer
 
             isChangingFromDropdown = false;
 
-            Debug.Log($"[Dropdown Changed] Input Field[{index}]Change to: {selectedText}£¬Full IP: {GetFullIPAddress()}");
+            Debug.Log($"[Dropdown Changed] Input Field[{index}]Change to: {selectedText} Full IP: {GetFullIPAddress()}");
             this.UpdateIP();
         }
 

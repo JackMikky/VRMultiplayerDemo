@@ -4936,7 +4936,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 394746613}
   m_TextViewport: {fileID: 738881330}
   m_TextComponent: {fileID: 695406876}
   m_Placeholder: {fileID: 1304143033}
@@ -6167,7 +6167,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 206997746}
   m_TextViewport: {fileID: 1296401059}
   m_TextComponent: {fileID: 1488700236}
   m_Placeholder: {fileID: 600370337}
@@ -6629,7 +6629,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1978254769}
   m_TextViewport: {fileID: 1684368446}
   m_TextComponent: {fileID: 126845008}
   m_Placeholder: {fileID: 1270773257}
@@ -10810,7 +10810,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1388998401}
   m_TextViewport: {fileID: 2083111702}
   m_TextComponent: {fileID: 330026850}
   m_Placeholder: {fileID: 61163450}
@@ -11202,6 +11202,11 @@ PrefabInstance:
     - target: {fileID: 840361795433974674, guid: fce5d703064a3e147ae724820b0529e8,
         type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2155173520926119282, guid: fce5d703064a3e147ae724820b0529e8,
+        type: 3}
+      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2437056062397615397, guid: fce5d703064a3e147ae724820b0529e8,
