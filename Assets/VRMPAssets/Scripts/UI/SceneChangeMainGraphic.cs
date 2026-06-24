@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,8 @@ namespace VRMPAssets.Scripts.UI
         [SerializeField] private RawImage mainGraphicImage;
 
         [SerializeField] private Button mainGraphicButton;
+
+        [SerializeField] private TMP_Text titleUI;
 
         [Header("SubGraphics")]
         [SerializeField] private List<SubGraphicSetting> subGraphics;
@@ -104,9 +107,9 @@ namespace VRMPAssets.Scripts.UI
             }
         }
 
-        public void UpdateMainGraphic(Texture2D texture, string roomName, SceneChangeSubGraphic subGraphic)
+        public void UpdateMainGraphic(Texture2D texture, string roomName, string title, SceneChangeSubGraphic subGraphic)
         {
-            ApplyMainGraphicUpdate(texture, roomName);
+            ApplyMainGraphicUpdate(texture, roomName, title);
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
             {
@@ -129,16 +132,17 @@ namespace VRMPAssets.Scripts.UI
                         this.subDialog.SetActive(false);
                         SetStandbyObjects(false);
                         currentSubGraphicSetting = subGraphics[subGraphicIndex];
-                        UpdateMainGraphicClientRpc(subGraphicIndex, roomName);
+                        UpdateMainGraphicClientRpc(subGraphicIndex, roomName, title);
                     }
                 }
             }
         }
 
-        private void ApplyMainGraphicUpdate(Texture2D texture, string roomName)
+        private void ApplyMainGraphicUpdate(Texture2D texture, string roomName, string title)
         {
             confirmButton.onClick.RemoveAllListeners();
             this.mainGraphicImage.texture = texture;
+            this.titleUI.text = title;
             confirmButton.onClick.AddListener(() =>
             {
                 if (IsHost)
@@ -155,14 +159,14 @@ namespace VRMPAssets.Scripts.UI
         }
 
         [ClientRpc]
-        private void UpdateMainGraphicClientRpc(int subGraphicIndex, string roomName)
+        private void UpdateMainGraphicClientRpc(int subGraphicIndex, string roomName, string title)
         {
             if (!IsHost)
             {
                 if (subGraphicIndex >= 0 && subGraphicIndex < subGraphics.Count)
                 {
                     Texture2D texture = subGraphics[subGraphicIndex].graphic.GraphicTexture;
-                    ApplyMainGraphicUpdate(texture, roomName);
+                    ApplyMainGraphicUpdate(texture, roomName, title);
                     currentSubGraphicSetting = subGraphics[subGraphicIndex];
                     SetStandbyObjects(false);
                 }

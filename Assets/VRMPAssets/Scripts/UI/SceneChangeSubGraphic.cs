@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
+using TMPro;
 
 namespace VRMPAssets.Scripts.UI
 {
@@ -9,6 +10,10 @@ namespace VRMPAssets.Scripts.UI
         [SerializeField] private string changeRoomName;
 
         private Button _button;
+
+        [SerializeField] private string title;
+
+        [SerializeField] private TMP_Text titleUI;
 
         [Header("Graphics")]
         [SerializeField] private SceneChangeMainGraphic mainGraphic;
@@ -34,13 +39,14 @@ namespace VRMPAssets.Scripts.UI
                     }
                     else
                     {
-                        mainGraphic.UpdateMainGraphic(graphicTexture, changeRoomName, this);
+                        mainGraphic.UpdateMainGraphic(this.graphicTexture, this.changeRoomName, this.title, this);
                         mainGraphic.HideOtherBackgrounds(this);
                         ShowBackgroundForAll();
                     }
                 }
             });
             background.SetActive(false);
+            this.titleUI.text = title;
         }
 
         private void Start()
@@ -50,7 +56,7 @@ namespace VRMPAssets.Scripts.UI
 
         public void SetDefaultGraphic()
         {
-            mainGraphic.UpdateMainGraphic(graphicTexture, changeRoomName, this);
+            mainGraphic.UpdateMainGraphic(this.graphicTexture, this.changeRoomName, this.title, this);
             mainGraphic.HideOtherBackgrounds(this);
 
             background.SetActive(true);
