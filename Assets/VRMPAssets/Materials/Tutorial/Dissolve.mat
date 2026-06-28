@@ -66,15 +66,16 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _BoardWidth: 0.534
+    - _BoardWidth: 0.1
     - _CastShadows: 1
     - _Cull: 2
+    - _DissolveAmount: 0
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _Edge: 0.1
     - _Float: -0.11
-    - _NoiseIntensity: 0.3
-    - _NoiseScale: 20
+    - _NoiseIntensity: 0.005
+    - _NoiseScale: 5
     - _NoiseSpeed: 0.1
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -90,6 +91,7 @@ Material:
     - _ZWrite: 0
     - _ZWriteControl: 0
     m_Colors:
+    - _Board: {r: 0, g: 1, b: 0, a: 0}
     - _EdgesColor: {r: 2.996078, g: 0.8627451, b: 0, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _Position: {r: 0, g: -3.39, b: 0, a: 0}
