@@ -3790,8 +3790,8 @@
     "m_ObjectId": "5ed9e35256694e54a6a240919b711265",
     "m_Title": "Textures",
     "m_Position": {
-        "x": 68.0,
-        "y": -194.0
+        "x": 68.00018310546875,
+        "y": -194.00003051757813
     }
 }
 
@@ -5754,11 +5754,11 @@
     "m_AllowMaterialOverride": false,
     "m_SurfaceType": 1,
     "m_ZTestMode": 4,
-    "m_ZWriteControl": 1,
+    "m_ZWriteControl": 0,
     "m_AlphaMode": 0,
     "m_RenderFace": 2,
     "m_AlphaClip": true,
-    "m_CastShadows": true,
+    "m_CastShadows": false,
     "m_ReceiveShadows": false,
     "m_DisableTint": false,
     "m_AdditionalMotionVectorMode": 0,
