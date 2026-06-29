@@ -27,12 +27,12 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _ALPHAPREMULTIPLY_ON
+  - _RECEIVE_SHADOWS_OFF
   - _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -62,10 +62,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClip: 0
+    - _AlphaClip: 1
     - _AlphaToMask: 0
-    - _Blend: 0
-    - _BlendModePreserveSpecular: 1
+    - _Blend: 85.01
+    - _BlendModePreserveSpecular: 0
     - _BoardWidth: 0.43
     - _CastShadows: 1
     - _Cull: 2
@@ -73,18 +73,19 @@ Material:
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _Edge: 0.1
-    - _Float: 86.6
-    - _NoiseIntensity: 0.5
-    - _NoiseScale: 250
+    - _Float: 0.38
+    - _NoiseIntensity: 1.25
+    - _NoiseScale: 200
     - _NoiseSpeed: 0.1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _ReceiveShadows: 1
+    - _ReceiveShadows: 0
     - _Smoothness: 0.4
     - _Speed: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
+    - _Thickness: 0.57
     - _WorkflowMode: 0
     - _XRMotionVectorsPass: 1
     - _ZTest: 4
@@ -92,8 +93,9 @@ Material:
     - _ZWriteControl: 0
     m_Colors:
     - _Board: {r: 0, g: 0, b: 0, a: 0}
-    - _EdgesColor: {r: 0.5008225, g: 0, b: 9.44974, a: 1}
+    - _EdgesColor: {r: 0.44557187, g: 0, b: 33.89676, a: 1}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _Position: {r: 0, g: -3.39, b: 0, a: 0}
+    - _Thickness: {r: -1.37, g: 0.25, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
