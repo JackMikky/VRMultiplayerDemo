@@ -11,15 +11,53 @@ namespace XRMultiplayer
         [SerializeField] private TMP_Text pointText;
         [SerializeField] private CutomizeTrigger cutomizeTrigger;
 
+        [Header("Shader Settings")]
+        [Tooltip("Shader property name, e.g., _Blend or Blend")]
+        [SerializeField] private string ballDissolvProperty = "_Blend";
+
+        [Tooltip("Duration of the dissolve or materialization effect (seconds)")]
+        [SerializeField] private float effectDuration = 0.5f;
+
+        [Tooltip("Time the ball falls naturally through the hoop before disappearing")]
+        [SerializeField] private float delayBeforeDissolve = 0.1f;
+
+        [SerializeField] private Material ballMat;
+
+        [Header("Audio Settings")]
+        [SerializeField] private AudioSource audioSource;
+
+        [Tooltip("Sound played immediately when entering the hoop")]
+        [SerializeField] private AudioClip scoreSFX;
+
+        [Tooltip("Sound played when the ball fully reappears at the reset position")]
+        [SerializeField] private AudioClip respawnSFX;
+
         private int currentPoints = 0;
+        private int propertyID;
+        private bool isEntered = false;
 
         private void Start()
         {
             UpdatePointText();
 
+            // Cache shader property ID for performance optimization
+            propertyID = Shader.PropertyToID(ballDissolvProperty);
+
             if (cutomizeTrigger != null)
             {
                 cutomizeTrigger.OnTriggerAction += HandleTriggerAction;
+            }
+
+            // Initialize material state
+            if (ballMat != null)
+            {
+                ballMat.SetFloat(propertyID, 1f);
+            }
+
+            // Try to grab an AudioSource on the same GameObject if not assigned
+            if (audioSource == null)
+            {
+                TryGetComponent(out audioSource);
             }
         }
 
@@ -41,11 +79,26 @@ namespace XRMultiplayer
 
         private void OnBallEnter(Collider ballCollider)
         {
+            // Flag to prevent multiple trigger invocations in a single score event
+            if (isEntered)
+            {
+                return;
+            }
+            isEntered = true;
+
             currentPoints++;
             UpdatePointText();
+
+            // Play scoring sound effect instantly
+            PlaySound(scoreSFX);
+
             GameObject rootBallObject = ballCollider.transform.root.gameObject;
+
+            // Force the XR Interaction Toolkit to drop the ball if held
             ForceDropBall(rootBallObject);
-            ResetBallPosition(rootBallObject);
+
+            // Execute the sequential visual/physical lifecycle flow
+            StartCoroutine(BallTeleportFlow(rootBallObject));
         }
 
         private void ForceDropBall(GameObject ballRoot)
@@ -63,46 +116,77 @@ namespace XRMultiplayer
             }
         }
 
-        private void ResetBallPosition(GameObject ballRoot)
+        private IEnumerator BallTeleportFlow(GameObject ballRoot)
         {
-            if (resetPosition == null)
-            {
-                return;
-            }
+            Rigidbody rb = ballRoot.GetComponent<Rigidbody>();
 
-            if (ballRoot.TryGetComponent<Rigidbody>(out Rigidbody rb))
+            // Let the ball fall naturally through the ring based on physics
+            yield return new WaitForSeconds(delayBeforeDissolve);
+
+            // Lock the physics system during the dissolve phase
+            if (rb != null)
             {
                 rb.isKinematic = true;
-
-                ballRoot.transform.position = resetPosition.position;
-                ballRoot.transform.rotation = resetPosition.rotation;
-
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
-                rb.Sleep();
-
-                ballRoot.SetActive(false);
-
-                StartCoroutine(ReenablePhysicsNextFrame(rb));
             }
-            else
+
+            // Phase 1: Smoothly dissolve the ball (Blend goes from 1 to 0)
+            if (ballMat != null && ballMat.HasProperty(propertyID))
             {
-                ballRoot.transform.position = resetPosition.position;
-                ballRoot.transform.rotation = resetPosition.rotation;
+                float elapsed = 0f;
+                while (elapsed < effectDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float blendValue = Mathf.Lerp(1f, 0f, elapsed / effectDuration);
+                    ballMat.SetFloat(propertyID, blendValue);
+                    yield return null;
+                }
+                ballMat.SetFloat(propertyID, 0f);
             }
-        }
 
-        private IEnumerator ReenablePhysicsNextFrame(Rigidbody rb)
-        {
-            yield return new WaitForSeconds(0.5f);
-                rb.gameObject.SetActive(true);
-            yield return new WaitForSeconds(0.5f);
+            // Phase 2: Teleport the root object silently to the reset point
+            ballRoot.transform.position = resetPosition.position;
+            ballRoot.transform.rotation = resetPosition.rotation;
+            if (rb != null)
+            {
+                rb.Sleep();
+            }
 
+            yield return new WaitForSeconds(0.125f);
+            PlaySound(respawnSFX);
+            // Phase 3: Smoothly materialize the ball back in (Blend goes from 0 to 1)
+            if (ballMat != null && ballMat.HasProperty(propertyID))
+            {
+                float elapsed = 0f;
+                while (elapsed < effectDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float blendValue = Mathf.Lerp(0f, 1f, elapsed / effectDuration);
+                    ballMat.SetFloat(propertyID, blendValue);
+                    yield return null;
+                }
+                ballMat.SetFloat(propertyID, 1f);
+            }
+
+            // Phase 4: Re-enable the physics engine controls safely on the next physics frame
+            yield return new WaitForFixedUpdate();
             if (rb != null)
             {
                 rb.isKinematic = false;
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
+            }
+
+            // Reset state flag to allow the next score event
+            isEntered = false;
+        }
+
+        private void PlaySound(AudioClip clip)
+        {
+            if (audioSource != null && clip != null)
+            {
+                audioSource.PlayOneShot(clip);
             }
         }
 

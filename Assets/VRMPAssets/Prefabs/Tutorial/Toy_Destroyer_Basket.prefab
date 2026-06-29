@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 191712044382349539}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.70710576, y: -0, z: -0, w: 0.70710784}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -5.729, y: 0.285, z: -2.7}
   m_LocalScale: {x: 7.6760597, y: 7.6760597, z: 7.6760597}
   m_ConstrainProportionsScale: 0
@@ -77,6 +77,13 @@ MonoBehaviour:
   resetPosition: {fileID: 0}
   pointText: {fileID: 0}
   cutomizeTrigger: {fileID: 8620338331153583898}
+  ballDissolvProperty: _Blend
+  effectDuration: 1.85
+  delayBeforeDissolve: 0.1
+  ballMat: {fileID: 2100000, guid: b19dbc57883b7e740b85122c9a9c6508, type: 2}
+  audioSource: {fileID: 0}
+  scoreSFX: {fileID: 8300000, guid: 72daea89530e3404aa743dbb4c3ca5ef, type: 3}
+  respawnSFX: {fileID: 8300000, guid: 4024f919706a0714ea70d26e2ebe351f, type: 3}
 --- !u!1 &533562416316707995
 GameObject:
   m_ObjectHideFlags: 0
