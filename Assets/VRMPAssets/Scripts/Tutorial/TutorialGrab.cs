@@ -40,7 +40,6 @@ namespace XRMultiplayer
         {
             UpdatePointText();
 
-            // Cache shader property ID for performance optimization
             propertyID = Shader.PropertyToID(ballDissolvProperty);
 
             if (cutomizeTrigger != null)
@@ -48,13 +47,11 @@ namespace XRMultiplayer
                 cutomizeTrigger.OnTriggerAction += HandleTriggerAction;
             }
 
-            // Initialize material state
             if (ballMat != null)
             {
                 ballMat.SetFloat(propertyID, 1f);
             }
 
-            // Try to grab an AudioSource on the same GameObject if not assigned
             if (audioSource == null)
             {
                 TryGetComponent(out audioSource);
@@ -79,7 +76,6 @@ namespace XRMultiplayer
 
         private void OnBallEnter(Collider ballCollider)
         {
-            // Flag to prevent multiple trigger invocations in a single score event
             if (isEntered)
             {
                 return;
@@ -120,10 +116,8 @@ namespace XRMultiplayer
         {
             Rigidbody rb = ballRoot.GetComponent<Rigidbody>();
 
-            // Let the ball fall naturally through the ring based on physics
             yield return new WaitForSeconds(delayBeforeDissolve);
 
-            // Lock the physics system during the dissolve phase
             if (rb != null)
             {
                 rb.isKinematic = true;
@@ -131,7 +125,6 @@ namespace XRMultiplayer
                 rb.angularVelocity = Vector3.zero;
             }
 
-            // Phase 1: Smoothly dissolve the ball (Blend goes from 1 to 0)
             if (ballMat != null && ballMat.HasProperty(propertyID))
             {
                 float elapsed = 0f;
@@ -145,7 +138,6 @@ namespace XRMultiplayer
                 ballMat.SetFloat(propertyID, 0f);
             }
 
-            // Phase 2: Teleport the root object silently to the reset point
             ballRoot.transform.position = resetPosition.position;
             ballRoot.transform.rotation = resetPosition.rotation;
             if (rb != null)
@@ -155,7 +147,6 @@ namespace XRMultiplayer
 
             yield return new WaitForSeconds(0.125f);
             PlaySound(respawnSFX);
-            // Phase 3: Smoothly materialize the ball back in (Blend goes from 0 to 1)
             if (ballMat != null && ballMat.HasProperty(propertyID))
             {
                 float elapsed = 0f;
@@ -169,7 +160,6 @@ namespace XRMultiplayer
                 ballMat.SetFloat(propertyID, 1f);
             }
 
-            // Phase 4: Re-enable the physics engine controls safely on the next physics frame
             yield return new WaitForFixedUpdate();
             if (rb != null)
             {
@@ -177,8 +167,6 @@ namespace XRMultiplayer
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }
-
-            // Reset state flag to allow the next score event
             isEntered = false;
         }
 
