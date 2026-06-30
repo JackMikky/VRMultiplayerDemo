@@ -25,7 +25,8 @@ Material:
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _DIRECTION_DOWN
   m_InvalidKeywords:
   - _RECEIVE_SHADOWS_OFF
   - _SURFACE_TYPE_TRANSPARENT
@@ -69,6 +70,7 @@ Material:
     - _BoardWidth: 0.43
     - _CastShadows: 1
     - _Cull: 2
+    - _DIRECTION: 1
     - _DissolveAmount: 1
     - _DstBlend: 10
     - _DstBlendAlpha: 10
