@@ -7,9 +7,9 @@ namespace XRMultiplayer
     /// A simple class used for callbacks when OnTriggerEnter or OnTriggerExit is called.
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class CutomizeTrigger : MonoBehaviour
+    public class CustomizeTrigger : MonoBehaviour
     {
-        [SerializeField]private string targetTag = "";
+        [SerializeField] private string targetTag = "";
         public Action<Collider, bool> OnTriggerAction;
         public Collider subTriggerCollider;
 
@@ -21,8 +21,7 @@ namespace XRMultiplayer
 
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log(other.tag);
-            if (!String.IsNullOrEmpty(targetTag)&& other.CompareTag(targetTag))
+            if (!String.IsNullOrEmpty(targetTag) && other.CompareTag(targetTag))
             {
                 OnTriggerAction?.Invoke(other, true);
                 return;

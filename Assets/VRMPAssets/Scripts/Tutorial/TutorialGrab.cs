@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace XRMultiplayer
@@ -9,38 +10,38 @@ namespace XRMultiplayer
     {
         [SerializeField] private Transform resetPosition;
         [SerializeField] private TMP_Text pointText;
-        [SerializeField] private CutomizeTrigger cutomizeTrigger;
+        [SerializeField] private CustomizeTrigger cutomizeTrigger;
+
+        [Header("Ball Settings")]
+        [SerializeField] private PhysicsMaterial bouncy;
+
+        [SerializeField] private PhysicsMaterial notBouncy;
+        [SerializeField] private Collider ballCollider;
+        [SerializeField] private XRGrabInteractable xRGrabInteractable;
 
         [Header("Shader Settings")]
-        [Tooltip("Shader property name, e.g., _Blend or Blend")]
-        [SerializeField] private string ballDissolvProperty = "_Blend";
+        [SerializeField] private string ballDissolveProperty = "_Blend";
 
-        [Tooltip("Duration of the dissolve or materialization effect (seconds)")]
         [SerializeField] private float effectDuration = 0.5f;
-
-        [Tooltip("Time the ball falls naturally through the hoop before disappearing")]
         [SerializeField] private float delayBeforeDissolve = 0.1f;
-
         [SerializeField] private Material ballMat;
 
         [Header("Audio Settings")]
         [SerializeField] private AudioSource audioSource;
 
-        [Tooltip("Sound played immediately when entering the hoop")]
         [SerializeField] private AudioClip scoreSFX;
-
-        [Tooltip("Sound played when the ball fully reappears at the reset position")]
         [SerializeField] private AudioClip respawnSFX;
 
         private int currentPoints = 0;
         private int propertyID;
         private bool isEntered = false;
 
+        private InteractionLayerMask originalInteractionLayer;
+
         private void Start()
         {
             UpdatePointText();
-
-            propertyID = Shader.PropertyToID(ballDissolvProperty);
+            propertyID = Shader.PropertyToID(ballDissolveProperty);
 
             if (cutomizeTrigger != null)
             {
@@ -56,6 +57,11 @@ namespace XRMultiplayer
             {
                 TryGetComponent(out audioSource);
             }
+
+            if (xRGrabInteractable != null)
+            {
+                originalInteractionLayer = xRGrabInteractable.interactionLayers;
+            }
         }
 
         private void OnDestroy()
@@ -66,49 +72,44 @@ namespace XRMultiplayer
             }
         }
 
-        private void HandleTriggerAction(Collider other, bool isEnter)
+        private void HandleTriggerAction(Collider _ballCollider, bool isEnter)
         {
             if (isEnter)
             {
-                OnBallEnter(other);
+                OnBallEnter(_ballCollider);
             }
         }
 
         private void OnBallEnter(Collider ballCollider)
         {
-            if (isEntered)
-            {
-                return;
-            }
+            if (isEntered) return;
             isEntered = true;
 
             currentPoints++;
             UpdatePointText();
-
-            // Play scoring sound effect instantly
             PlaySound(scoreSFX);
 
             GameObject rootBallObject = ballCollider.transform.root.gameObject;
 
-            // Force the XR Interaction Toolkit to drop the ball if held
-            ForceDropBall(rootBallObject);
+            ForceDropAndDisableInteraction(rootBallObject);
 
-            // Execute the sequential visual/physical lifecycle flow
             StartCoroutine(BallTeleportFlow(rootBallObject));
         }
 
-        private void ForceDropBall(GameObject ballRoot)
+        private void ForceDropAndDisableInteraction(GameObject ballRoot)
         {
-            if (ballRoot.TryGetComponent<XRGrabInteractable>(out XRGrabInteractable grabInteractable))
+            if (xRGrabInteractable != null)
             {
-                if (grabInteractable.isSelected)
+                if (xRGrabInteractable.isSelected)
                 {
-                    var interactionManager = grabInteractable.interactionManager;
+                    var interactionManager = xRGrabInteractable.interactionManager;
                     if (interactionManager != null)
                     {
-                        interactionManager.CancelInteractableSelection((IXRSelectInteractable)grabInteractable);
+                        interactionManager.CancelInteractableSelection((IXRSelectInteractable)xRGrabInteractable);
                     }
                 }
+
+                xRGrabInteractable.interactionLayers = 0;
             }
         }
 
@@ -140,13 +141,17 @@ namespace XRMultiplayer
 
             ballRoot.transform.position = resetPosition.position;
             ballRoot.transform.rotation = resetPosition.rotation;
+
             if (rb != null)
             {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
                 rb.Sleep();
             }
 
             yield return new WaitForSeconds(0.125f);
             PlaySound(respawnSFX);
+
             if (ballMat != null && ballMat.HasProperty(propertyID))
             {
                 float elapsed = 0f;
@@ -160,13 +165,20 @@ namespace XRMultiplayer
                 ballMat.SetFloat(propertyID, 1f);
             }
 
-            yield return new WaitForFixedUpdate();
             if (rb != null)
             {
                 rb.isKinematic = false;
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }
+
+            yield return new WaitForFixedUpdate();
+
+            if (xRGrabInteractable != null)
+            {
+                xRGrabInteractable.interactionLayers = originalInteractionLayer;
+            }
+
             isEntered = false;
         }
 
@@ -184,6 +196,16 @@ namespace XRMultiplayer
             {
                 pointText.text = currentPoints.ToString();
             }
+        }
+
+        public void OnBallGrabbed()
+        {
+            this.ballCollider.material = this.notBouncy;
+        }
+
+        public void OnBallReleased()
+        {
+            this.ballCollider.material = this.bouncy;
         }
     }
 }
