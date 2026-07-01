@@ -2,9 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace XRMultiplayer
 {
+    public enum GameState
+    {
+        Initialize,
+        Win,
+        Draw,
+        End
+    }
+
     public class TicTacToeGameManager : MonoBehaviour
     {
         public static TicTacToeGameManager Instance;
@@ -16,6 +25,18 @@ namespace XRMultiplayer
 
         private bool playerTurn = true;
         private bool gameOver = false;
+
+        [Header("Game UI")]
+        [SerializeField] private GameObject frameObject;
+
+        [SerializeField] private GameObject[] gameUIObjects;
+        [SerializeField] private Animator animator;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip winClip;
+        [SerializeField] private AudioClip defeatClip;
+        [SerializeField] private AudioClip drawClip;
+
+        public CustomEvent<GameState> onGameEnd;
 
         private void Awake()
         {
@@ -32,6 +53,7 @@ namespace XRMultiplayer
             {
                 board[i] = CellState.Empty;
             }
+            this.SetGameEndUI(GameState.Initialize, false);
         }
 
         public void SelectCell(int index)
@@ -51,6 +73,7 @@ namespace XRMultiplayer
             {
                 Debug.Log("Player Win!");
                 gameOver = true;
+                this.OnGameEnd(GameState.Win, true);
                 StartCoroutine(ResetGameAfterDelay());
                 return;
             }
@@ -59,6 +82,7 @@ namespace XRMultiplayer
             {
                 Debug.Log("Draw");
                 gameOver = true;
+                this.OnGameEnd(GameState.Draw, false);
                 StartCoroutine(ResetGameAfterDelay());
                 return;
             }
@@ -80,6 +104,7 @@ namespace XRMultiplayer
             {
                 Debug.Log("CPU Win!");
                 gameOver = true;
+                this.OnGameEnd(GameState.Win, false);
                 StartCoroutine(ResetGameAfterDelay());
                 yield break;
             }
@@ -88,6 +113,7 @@ namespace XRMultiplayer
             {
                 Debug.Log("Draw");
                 gameOver = true;
+                this.OnGameEnd(GameState.Draw, false);
                 StartCoroutine(ResetGameAfterDelay());
                 yield break;
             }
@@ -97,7 +123,7 @@ namespace XRMultiplayer
 
         private int GetCpuMove()
         {
-            if (Random.value <= 0.7f)
+            if (Random.value <= 0.9f)
             {
                 int blockIndex = FindBlockingMove();
 
@@ -222,9 +248,65 @@ namespace XRMultiplayer
 
         private IEnumerator ResetGameAfterDelay()
         {
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(4f);
 
             ResetGame();
+        }
+
+        private void OnGameEnd(GameState state, bool isPlayerWin)
+        {
+            this.SetGameEndUI(state, isPlayerWin);
+            animator.Play("GameEndUI", 0, 0f);
+            onGameEnd.Invoke(state);
+        }
+
+        private void SetGameEndUI(GameState state, bool isPlayerWin)
+        {
+            switch (state)
+            {
+                case GameState.Initialize:
+                    this.frameObject.SetActive(false);
+                    foreach (var item in this.gameUIObjects)
+                    {
+                        item.SetActive(false);
+                    }
+                    break;
+
+                case GameState.Win:
+
+                    this.frameObject.SetActive(true);
+
+                    if (isPlayerWin)
+                    {
+                        this.gameUIObjects[0].SetActive(true);
+                        this.gameUIObjects[1].SetActive(false);
+                        this.gameUIObjects[2].SetActive(false);
+                        if (!audioSource.isPlaying) audioSource.PlayOneShot(winClip);
+                    }
+                    else
+                    {
+                        this.gameUIObjects[0].SetActive(false);
+                        this.gameUIObjects[1].SetActive(true);
+                        this.gameUIObjects[2].SetActive(false);
+                        if (!audioSource.isPlaying) audioSource.PlayOneShot(defeatClip);
+                    }
+
+                    break;
+
+                case GameState.Draw:
+                    this.frameObject.SetActive(true);
+                    this.gameUIObjects[0].SetActive(false);
+                    this.gameUIObjects[1].SetActive(false);
+                    this.gameUIObjects[2].SetActive(true);
+                    if (!audioSource.isPlaying) audioSource.PlayOneShot(drawClip);
+                    break;
+
+                case GameState.End:
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         private void ResetGame()
@@ -238,7 +320,7 @@ namespace XRMultiplayer
 
                 panels[i].ResetCell();
             }
-
+            this.SetGameEndUI(GameState.Initialize, false);
             Debug.Log("Game Reset");
         }
     }
