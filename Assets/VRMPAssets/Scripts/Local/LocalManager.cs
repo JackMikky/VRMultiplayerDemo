@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XRMultiplayer;
+using UnityEngine.InputSystem;
 
 public class LocalManager : MonoBehaviour
 {
@@ -19,6 +20,8 @@ public class LocalManager : MonoBehaviour
 
     public GameObject ItemBoxObject => itemBox;
 
+    public bool cursorEnable = true;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -28,6 +31,11 @@ public class LocalManager : MonoBehaviour
         }
 
         Instance = this;
+#if !UNITY_ANDROID
+        Cursor.visible = false;
+        cursorEnable = false;
+        Cursor.lockState = CursorLockMode.Locked;
+#endif
     }
 
     private void Start()
@@ -43,6 +51,22 @@ public class LocalManager : MonoBehaviour
                 Debug.Log("Fade in start");
             }
         });
+    }
+
+    private void Update()
+    {
+#if !UNITY_ANDROID
+
+        if (Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+        {
+            cursorEnable = !cursorEnable;
+
+            Cursor.visible = cursorEnable;
+            Cursor.lockState = cursorEnable
+                ? CursorLockMode.None
+                : CursorLockMode.Locked;
+        }
+#endif
     }
 
     public void SetLocalPreventionInvisibility(bool value)
