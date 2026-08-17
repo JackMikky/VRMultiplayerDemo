@@ -10510,6 +10510,7 @@ MonoBehaviour:
   contentRect: {fileID: 142742201}
   layoutGroup: {fileID: 142742203}
   scrollSpeed: 60
+  scrollDirection: 1
 --- !u!1 &1386252429
 GameObject:
   m_ObjectHideFlags: 0
