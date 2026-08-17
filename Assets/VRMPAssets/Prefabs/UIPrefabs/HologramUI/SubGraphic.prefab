@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Color: {r: 0, g: 1, b: 0.42227626, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -89,7 +89,6 @@ GameObject:
   - component: {fileID: 4988126423188329510}
   - component: {fileID: 6658188440869624990}
   - component: {fileID: 5694365418013085327}
-  - component: {fileID: 7433502317722190708}
   - component: {fileID: 1218079587948139456}
   - component: {fileID: 7715589145242965612}
   m_Layer: 5
@@ -166,7 +165,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2580717880283228393}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
   m_Name: 
@@ -267,31 +266,6 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls: []
---- !u!114 &7433502317722190708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2580717880283228393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4044770309
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 2
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &1218079587948139456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,7 +278,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a2687c7ed1e7dc4eaddbd5d3c8b6fc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  ShowTopMostFoldoutHeaderGroup: 1
   changeRoomName: Room1
   title: Room
   titleUI: {fileID: 3306742528098442369}

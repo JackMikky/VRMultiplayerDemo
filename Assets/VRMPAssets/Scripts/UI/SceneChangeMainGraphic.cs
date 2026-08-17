@@ -13,13 +13,11 @@ namespace VRMPAssets.Scripts.UI
         [SerializeField] private RawImage mainGraphicImage;
 
         [SerializeField] private Button mainGraphicButton;
-
         [SerializeField] private TMP_Text titleUI;
 
-        [Header("SubGraphics")]
+        [Header("SubGraphics Setup")]
         [SerializeField] private List<SubGraphicSetting> subGraphics;
-
-        private SubGraphicSetting currentSubGraphicSetting;
+        [SerializeField] private GameObject subGraphicsContent;
 
         [Header("SubDialog")]
         [SerializeField] private GameObject subDialog;
@@ -30,11 +28,15 @@ namespace VRMPAssets.Scripts.UI
         [Header("Random Selection")]
         [SerializeField] private bool selectRandomOnStart = true;
 
+        private SubGraphicSetting currentSubGraphicSetting;
+        private string currentRoomName;
+
         private void Awake()
         {
             var buttonImage = cancelButton.GetComponentInChildren<Image>();
             var originalColor = buttonImage.color;
             var originalZPosition = cancelButton.transform.localPosition.z;
+
             cancelButton.onClick.AddListener(() =>
             {
                 if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
@@ -51,6 +53,7 @@ namespace VRMPAssets.Scripts.UI
                     }
                 }
             });
+
             this.mainGraphicButton.onClick.AddListener(() =>
             {
                 if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
@@ -62,10 +65,11 @@ namespace VRMPAssets.Scripts.UI
                     }
                 }
             });
+
             this.subDialog.SetActive(false);
             foreach (var item in subGraphics)
             {
-                item.standbyObject.SetActive(false);
+                if (item.standbyObject != null) item.standbyObject.SetActive(false);
             }
         }
 
@@ -83,59 +87,51 @@ namespace VRMPAssets.Scripts.UI
 
         private void SelectDefaultSubGraphic()
         {
-            int index = 0;
-            SceneChangeSubGraphic defaultSubGraphic = subGraphics[index].graphic;
-
-            if (defaultSubGraphic != null)
+            if (subGraphics[0].graphic != null)
             {
-                defaultSubGraphic.SetDefaultGraphic();
-                currentSubGraphicSetting = subGraphics[index];
-                Debug.Log($"SubGraphic selected: {index}");
+                SelectSubGraphicInternal(subGraphics[0].graphic);
             }
         }
 
         private void SelectRandomSubGraphic()
         {
             int randomIndex = Random.Range(0, subGraphics.Count);
-            SceneChangeSubGraphic randomSubGraphic = subGraphics[randomIndex].graphic;
-
-            if (randomSubGraphic != null)
+            if (subGraphics[randomIndex].graphic != null)
             {
-                randomSubGraphic.SetDefaultGraphic();
-                currentSubGraphicSetting = subGraphics[randomIndex];
-                Debug.Log($"Random SubGraphic selected: {randomIndex}");
+                SelectSubGraphicInternal(subGraphics[randomIndex].graphic);
             }
         }
 
-        public void UpdateMainGraphic(Texture2D texture, string roomName, string title, SceneChangeSubGraphic subGraphic)
+        public void OnSubGraphicClicked(SceneChangeSubGraphic clickedSubGraphic)
         {
-            ApplyMainGraphicUpdate(texture, roomName, title);
-
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
             {
-                if (IsHost)
+                if (!IsHost) return;
+            }
+
+            SelectSubGraphicInternal(clickedSubGraphic);
+
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient && IsHost)
+            {
+                SyncSelectedRoomClientRpc(clickedSubGraphic.ChangeRoomName, clickedSubGraphic.Title);
+            }
+        }
+
+        private void SelectSubGraphicInternal(SceneChangeSubGraphic subGraphic)
+        {
+            this.currentRoomName = subGraphic.ChangeRoomName;
+
+            for (int i = 0; i < subGraphics.Count; i++)
+            {
+                if (subGraphics[i].graphic != null && subGraphics[i].graphic.ChangeRoomName == currentRoomName)
                 {
-                    int subGraphicIndex = -1;
-                    if (subGraphics != null)
-                    {
-                        for (int i = 0; i < subGraphics.Count; i++)
-                        {
-                            if (subGraphics[i].graphic == subGraphic)
-                            {
-                                subGraphicIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                    if (subGraphicIndex >= 0)
-                    {
-                        this.subDialog.SetActive(false);
-                        SetStandbyObjects(false);
-                        currentSubGraphicSetting = subGraphics[subGraphicIndex];
-                        UpdateMainGraphicClientRpc(subGraphicIndex, roomName, title);
-                    }
+                    currentSubGraphicSetting = subGraphics[i];
+                    break;
                 }
             }
+
+            ApplyMainGraphicUpdate(subGraphic.GraphicTexture, subGraphic.ChangeRoomName, subGraphic.Title);
+            UpdateAllSubGraphicBackgrounds(currentRoomName);
         }
 
         private void ApplyMainGraphicUpdate(Texture2D texture, string roomName, string title)
@@ -143,33 +139,67 @@ namespace VRMPAssets.Scripts.UI
             confirmButton.onClick.RemoveAllListeners();
             this.mainGraphicImage.texture = texture;
             this.titleUI.text = title;
+
             confirmButton.onClick.AddListener(() =>
             {
                 if (IsHost)
                 {
                     this.subDialog.SetActive(false);
                     mainGraphicButton.interactable = false;
-                    foreach (var subGraphic in subGraphics)
+
+                    SceneChangeSubGraphic[] allSubGraphics = subGraphicsContent.GetComponentsInChildren<SceneChangeSubGraphic>(true);
+                    foreach (var sg in allSubGraphics)
                     {
-                        subGraphic.graphic.UpdateInteractable(false);
+                        sg.UpdateInteractable(false);
                     }
+
                     XRINetworkGameManager.Instance.networkSceneManager.LoadSceneByNameWithWarpFadeOut(roomName);
                 }
             });
         }
 
+        private void UpdateAllSubGraphicBackgrounds(string activeRoomName)
+        {
+            SceneChangeSubGraphic[] allSubGraphics = subGraphicsContent.GetComponentsInChildren<SceneChangeSubGraphic>(true);
+            foreach (var sg in allSubGraphics)
+            {
+                bool isSelected = (sg.ChangeRoomName == activeRoomName);
+                sg.SetBackgroundActive(isSelected);
+            }
+        }
+
         [ClientRpc]
-        private void UpdateMainGraphicClientRpc(int subGraphicIndex, string roomName, string title)
+        private void SyncSelectedRoomClientRpc(string roomName, string title)
         {
             if (!IsHost)
             {
-                if (subGraphicIndex >= 0 && subGraphicIndex < subGraphics.Count)
+                SceneChangeSubGraphic[] allSubGraphics = subGraphicsContent.GetComponentsInChildren<SceneChangeSubGraphic>(true);
+                Texture2D texture = null;
+
+                foreach (var sg in allSubGraphics)
                 {
-                    Texture2D texture = subGraphics[subGraphicIndex].graphic.GraphicTexture;
-                    ApplyMainGraphicUpdate(texture, roomName, title);
-                    currentSubGraphicSetting = subGraphics[subGraphicIndex];
-                    SetStandbyObjects(false);
+                    if (sg.ChangeRoomName == roomName)
+                    {
+                        texture = sg.GraphicTexture;
+                        break;
+                    }
                 }
+
+                this.currentRoomName = roomName;
+                for (int i = 0; i < subGraphics.Count; i++)
+                {
+                    if (subGraphics[i].graphic != null && subGraphics[i].graphic.ChangeRoomName == roomName)
+                    {
+                        currentSubGraphicSetting = subGraphics[i];
+                        break;
+                    }
+                }
+
+                if (texture != null)
+                {
+                    ApplyMainGraphicUpdate(texture, roomName, title);
+                }
+                UpdateAllSubGraphicBackgrounds(roomName);
             }
         }
 
@@ -177,7 +207,10 @@ namespace VRMPAssets.Scripts.UI
         private void ShowStandbyObjectClientRpc()
         {
             SetStandbyObjects(false);
-            this.currentSubGraphicSetting.standbyObject.SetActive(true);
+            if (currentSubGraphicSetting != null && currentSubGraphicSetting.standbyObject != null)
+            {
+                currentSubGraphicSetting.standbyObject.SetActive(true);
+            }
         }
 
         [ClientRpc]
@@ -188,37 +221,10 @@ namespace VRMPAssets.Scripts.UI
 
         private void SetStandbyObjects(bool value)
         {
-            this.subGraphics.ForEach(sg => sg.standbyObject.SetActive(value));
-        }
-
-        [ClientRpc]
-        private void SetSubDialogActiveClientRpc(bool value)
-        {
-            this.subDialog.SetActive(value);
-            if (!IsHost && value)
+            this.subGraphics.ForEach(sg =>
             {
-                this.confirmButton.interactable |= false;
-                this.cancelButton.interactable |= false;
-            }
-        }
-
-        public void HideOtherBackgrounds(SceneChangeSubGraphic activeSubGraphic)
-        {
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
-            {
-                if (!IsHost)
-                {
-                    return;
-                }
-            }
-
-            foreach (var subGraphic in subGraphics)
-            {
-                if (subGraphic.graphic != activeSubGraphic)
-                {
-                    subGraphic.graphic.HideBackground();
-                }
-            }
+                if (sg.standbyObject != null) sg.standbyObject.SetActive(value);
+            });
         }
     }
 }
