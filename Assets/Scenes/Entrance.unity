@@ -22487,6 +22487,21 @@ PrefabInstance:
       propertyPath: warpController
       value: 
       objectReference: {fileID: 1688267072}
+    - target: {fileID: 9030155836920605376, guid: b30a13dd96c673c49914f0d08ee35a89,
+        type: 3}
+      propertyPath: sceneList.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9030155836920605376, guid: b30a13dd96c673c49914f0d08ee35a89,
+        type: 3}
+      propertyPath: sceneList.Array.data[5].sceneID
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9030155836920605376, guid: b30a13dd96c673c49914f0d08ee35a89,
+        type: 3}
+      propertyPath: sceneList.Array.data[5].sceneName
+      value: Defence
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
