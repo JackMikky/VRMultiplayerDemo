@@ -478,8 +478,8 @@ GameObject:
   - component: {fileID: 295004525}
   - component: {fileID: 295004524}
   - component: {fileID: 295004523}
-  - component: {fileID: 295004522}
   - component: {fileID: 295004521}
+  - component: {fileID: 295004528}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -502,7 +502,7 @@ MonoBehaviour:
   m_InteractionManager: {fileID: 0}
   m_Colliders: []
   m_InteractionLayers:
-    m_Bits: 1
+    m_Bits: 3
   m_DistanceCalculationMode: 1
   m_SelectMode: 0
   m_FocusMode: 1
@@ -522,34 +522,10 @@ MonoBehaviour:
       m_Calls: []
   m_HoverEntered:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 295004522}
-        m_TargetAssemblyTypeName: MultiPartOutline, Assembly-CSharp
-        m_MethodName: EnableOutline
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_HoverExited:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 295004522}
-        m_TargetAssemblyTypeName: MultiPartOutline, Assembly-CSharp
-        m_MethodName: DisableOutline
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_FirstSelectEntered:
     m_PersistentCalls:
       m_Calls: []
@@ -583,19 +559,6 @@ MonoBehaviour:
   m_StartingHoverFilters: []
   m_StartingSelectFilters: []
   m_StartingInteractionStrengthFilters: []
---- !u!114 &295004522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 295004520}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b259c45ce6491174b99052276fc968a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiPartOutline
-  outlineMaterial: {fileID: 2100000, guid: 9cbe1fbd3b1bfb14b896e2b7cdcbd9f7, type: 2}
 --- !u!136 &295004523
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -690,6 +653,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &295004528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295004520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7daad8e8181158440a1f905e5ad4e3e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRHoverOutlineProxy
+  outlineLayerName: Outline
+  includeChildren: 1
+  hideDelay: 0.05
+  keepOutlineWhileSelected: 1
 --- !u!1 &342388137
 GameObject:
   m_ObjectHideFlags: 0
@@ -797,8 +776,8 @@ GameObject:
   - component: {fileID: 384671937}
   - component: {fileID: 384671936}
   - component: {fileID: 384671935}
-  - component: {fileID: 384671934}
   - component: {fileID: 384671939}
+  - component: {fileID: 384671941}
   m_Layer: 0
   m_Name: s
   m_TagString: Untagged
@@ -806,19 +785,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &384671934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 384671933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b259c45ce6491174b99052276fc968a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiPartOutline
-  outlineMaterial: {fileID: 2100000, guid: 9cbe1fbd3b1bfb14b896e2b7cdcbd9f7, type: 2}
 --- !u!65 &384671935
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -926,7 +892,7 @@ MonoBehaviour:
   m_InteractionManager: {fileID: 0}
   m_Colliders: []
   m_InteractionLayers:
-    m_Bits: 1
+    m_Bits: 3
   m_DistanceCalculationMode: 1
   m_SelectMode: 0
   m_FocusMode: 1
@@ -946,34 +912,10 @@ MonoBehaviour:
       m_Calls: []
   m_HoverEntered:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 384671934}
-        m_TargetAssemblyTypeName: MultiPartOutline, Assembly-CSharp
-        m_MethodName: EnableOutline
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_HoverExited:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 384671934}
-        m_TargetAssemblyTypeName: MultiPartOutline, Assembly-CSharp
-        m_MethodName: DisableOutline
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_FirstSelectEntered:
     m_PersistentCalls:
       m_Calls: []
@@ -1007,6 +949,22 @@ MonoBehaviour:
   m_StartingHoverFilters: []
   m_StartingSelectFilters: []
   m_StartingInteractionStrengthFilters: []
+--- !u!114 &384671941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 384671933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7daad8e8181158440a1f905e5ad4e3e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRHoverOutlineProxy
+  outlineLayerName: Outline
+  includeChildren: 1
+  hideDelay: 0.05
+  keepOutlineWhileSelected: 1
 --- !u!1 &521811800
 GameObject:
   m_ObjectHideFlags: 0
