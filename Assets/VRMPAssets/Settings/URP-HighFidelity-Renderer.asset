@@ -1,5 +1,25 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8785002261979522214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22dcc01ab6f0cf242ba265231106089a, type: 3}
+  m_Name: OutlineRendererFeature
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineRendererFeature
+  m_Active: 1
+  m_OutlineMaterial: {fileID: 2100000, guid: 1c4ec848374e35b4bb97df0cb834c495, type: 2}
+  settings:
+    outlineColor: {r: 1, g: 0, b: 0, a: 1}
+    outlineWidth: 1
+    downSampleScale: 2
+    blurIterations: 1
+    blurSpread: 0.6
 --- !u!114 &-8669544905872021352
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,7 +184,8 @@ MonoBehaviour:
   - {fileID: 6762313730440351010}
   - {fileID: -8528691108408706604}
   - {fileID: -8669544905872021352}
-  m_RendererFeatureMap: adc0de57c6d2eee5b8d828d08d46db9de4e216b3250c392022cda4728290d85dd43944b49f00a48998683361d796af87
+  - {fileID: -8785002261979522214}
+  m_RendererFeatureMap: adc0de57c6d2eee5b8d828d08d46db9de4e216b3250c392022cda4728290d85dd43944b49f00a48998683361d796af875a1bb5d7fc661586
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}

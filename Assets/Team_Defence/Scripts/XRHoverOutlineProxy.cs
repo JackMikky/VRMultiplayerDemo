@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -7,7 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 public class XRHoverOutlineProxy : MonoBehaviour
 {
     [Header("Outline")]
-    [SerializeField] private string outlineLayerName = "Outline";
+    [SerializeField] private Renderer[] outlineRenderers;
 
     [SerializeField] private bool includeChildren = true;
 
@@ -17,27 +16,21 @@ public class XRHoverOutlineProxy : MonoBehaviour
     [SerializeField] private bool keepOutlineWhileSelected = true;
 
     private XRSimpleInteractable interactable;
-    private int outlineLayer = -1;
 
     private int hoverCount;
     private int selectCount;
     private float hideTimer = -1f;
 
-    private readonly List<Renderer> outlineRenderers = new List<Renderer>();
-
     private void Awake()
     {
         interactable = GetComponent<XRSimpleInteractable>();
 
-        outlineLayer = LayerMask.NameToLayer(outlineLayerName);
-        if (outlineLayer == -1)
+        if (outlineRenderers == null || outlineRenderers.Length == 0)
         {
-            Debug.LogError($"Layer '{outlineLayerName}' does not exist.", this);
-            return;
+            outlineRenderers = includeChildren
+                ? GetComponentsInChildren<Renderer>(true)
+                : GetComponents<Renderer>();
         }
-
-        CreateOutlineProxies();
-        SetOutlineVisible(false);
     }
 
     private void OnEnable()
@@ -121,58 +114,13 @@ public class XRHoverOutlineProxy : MonoBehaviour
         }
     }
 
-    private void CreateOutlineProxies()
-    {
-        MeshRenderer[] meshRenderers = includeChildren
-            ? GetComponentsInChildren<MeshRenderer>(true)
-            : GetComponents<MeshRenderer>();
-
-        foreach (MeshRenderer sourceRenderer in meshRenderers)
-        {
-            if (sourceRenderer.gameObject.name.Contains("OutlineProxy"))
-            {
-                continue;
-            }
-
-            MeshFilter sourceMeshFilter = sourceRenderer.GetComponent<MeshFilter>();
-            if (sourceMeshFilter == null || sourceMeshFilter.sharedMesh == null)
-            {
-                continue;
-            }
-
-            GameObject proxy = new GameObject(sourceRenderer.gameObject.name + "_OutlineProxy");
-            proxy.layer = outlineLayer;
-
-            proxy.transform.SetParent(sourceRenderer.transform, false);
-            proxy.transform.localPosition = Vector3.zero;
-            proxy.transform.localRotation = Quaternion.identity;
-            proxy.transform.localScale = Vector3.one;
-
-            MeshFilter proxyMeshFilter = proxy.AddComponent<MeshFilter>();
-            proxyMeshFilter.sharedMesh = sourceMeshFilter.sharedMesh;
-
-            MeshRenderer proxyRenderer = proxy.AddComponent<MeshRenderer>();
-
-            // Mask pass では overrideMaterial を使うので、見た目用 material は何でもよいです。
-            // ただし Renderer が有効に描画対象になるため、元 material を入れておきます。
-            proxyRenderer.sharedMaterials = sourceRenderer.sharedMaterials;
-
-            // 影や通常描画には使わない
-            proxyRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            proxyRenderer.receiveShadows = false;
-
-            outlineRenderers.Add(proxyRenderer);
-        }
-    }
-
     private void SetOutlineVisible(bool visible)
     {
-        foreach (Renderer outlineRenderer in outlineRenderers)
+        if (OutlineRendererFeature.Instance == null)
         {
-            if (outlineRenderer != null)
-            {
-                outlineRenderer.enabled = visible;
-            }
+            return;
         }
+
+        OutlineRendererFeature.Instance.SetOutlineTargets(visible ? outlineRenderers : null);
     }
 }
