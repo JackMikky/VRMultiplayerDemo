@@ -1,119 +1,67 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Netcode;
+using TMPro;
 
 namespace VRMPAssets.Scripts.UI
 {
-    public class SceneChangeSubGraphic : NetworkBehaviour
+    public class SceneChangeSubGraphic : MonoBehaviour
     {
         [SerializeField] private string changeRoomName;
+        public string ChangeRoomName => changeRoomName;
 
-        private Button _button;
+        [SerializeField] private string title;
+        public string Title => title;
+
+        [SerializeField] private TMP_Text titleUI;
 
         [Header("Graphics")]
         [SerializeField] private SceneChangeMainGraphic mainGraphic;
 
         [SerializeField] private RawImage roomGraphicImage;
-
         [SerializeField] private Texture2D graphicTexture;
-
         public Texture2D GraphicTexture => graphicTexture;
 
         [SerializeField] private GameObject background;
 
+        private Button _button;
+
         private void Awake()
         {
             _button = GetComponent<Button>();
+            if (titleUI != null) titleUI.text = title;
+            if (background != null) background.SetActive(false);
+
             _button.onClick.AddListener(() =>
             {
-                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
+                if (mainGraphic != null)
                 {
-                    if (!IsHost)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        mainGraphic.UpdateMainGraphic(graphicTexture, changeRoomName, this);
-                        mainGraphic.HideOtherBackgrounds(this);
-                        ShowBackgroundForAll();
-                    }
+                    mainGraphic.OnSubGraphicClicked(this);
                 }
             });
-            background.SetActive(false);
         }
 
         private void Start()
         {
-            roomGraphicImage.texture = graphicTexture;
-        }
-
-        public void SetDefaultGraphic()
-        {
-            mainGraphic.UpdateMainGraphic(graphicTexture, changeRoomName, this);
-            mainGraphic.HideOtherBackgrounds(this);
-
-            background.SetActive(true);
-        }
-
-        public void ShowBackgroundForAll()
-        {
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
+            if (roomGraphicImage != null)
             {
-                if (IsHost)
-                {
-                    background.SetActive(true);
-                    ShowBackgroundClientRpc();
-                }
-            }
-            else
-            {
-                background.SetActive(true);
+                roomGraphicImage.texture = graphicTexture;
             }
         }
 
-        [ClientRpc]
-        private void ShowBackgroundClientRpc()
+        public void SetBackgroundActive(bool active)
         {
-            if (!IsHost)
+            if (background != null)
             {
-                background.SetActive(true);
-            }
-        }
-
-        public void HideBackground()
-        {
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient)
-            {
-                if (IsHost)
-                {
-                    HideBackgroundForAll();
-                }
-            }
-            else
-            {
-                background.SetActive(false);
-            }
-        }
-
-        private void HideBackgroundForAll()
-        {
-            background.SetActive(false);
-            HideBackgroundClientRpc();
-        }
-
-        [ClientRpc]
-        private void HideBackgroundClientRpc()
-        {
-            if (!IsHost)
-            {
-                background.SetActive(false);
+                background.SetActive(active);
             }
         }
 
         public void UpdateInteractable(bool interactable)
         {
-            _button.interactable = interactable;
+            if (_button != null)
+            {
+                _button.interactable = interactable;
+            }
         }
     }
 }

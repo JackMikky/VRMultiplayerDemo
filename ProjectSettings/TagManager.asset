@@ -19,6 +19,7 @@ TagManager:
   - AssemblyTarget_2
   - AssemblyTarget_3
   - AssemblyTarget_4
+  - TutorialBall
   layers:
   - Default
   - TransparentFX

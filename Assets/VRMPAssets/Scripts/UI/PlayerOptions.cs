@@ -275,6 +275,8 @@ namespace XRMultiplayer
             float perc = Mathf.Lerp(-10, 10, volume);
 #elif UNITY_ANDROID
             float perc = Mathf.Lerp(1, 50, volume);
+#else
+            float perc = Mathf.Lerp(1, 50, volume);
 #endif
             //m_VoiceChatManager.SetInputVolume(perc);
             OfflinePlayerAvatar.SetInputVolume(perc);

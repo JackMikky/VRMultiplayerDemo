@@ -8,8 +8,10 @@ public class EditorComponent : MonoBehaviour
     {
 #if UNITY_EDITOR
         this.gameObject.SetActive(!deviceTestMode);
-#else
+#elif PLATFORM_ANDROID
         this.gameObject.SetActive(false);
+#else
+        this.gameObject.SetActive(true);
 #endif
     }
 }
