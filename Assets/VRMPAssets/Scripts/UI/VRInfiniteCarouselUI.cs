@@ -22,14 +22,30 @@ namespace VRMPAssets.Scripts.UI
 
         public ScrollDirection scrollDirection = ScrollDirection.Right;
 
+        private const int MaxDuplicatePasses = 8;
+
         private bool isHovering = false;
+        private bool isInitialized = false;
         private float movedDistance = 0f;
         private RectTransform viewportRect;
 
-        private void OnEnable()
+        private void Awake()
         {
             viewportRect = GetComponent<RectTransform>();
-            AutoDuplicateItemsIfNeeded();
+        }
+
+        private void OnEnable()
+        {
+            if (!isInitialized)
+            {
+                AutoDuplicateItemsIfNeeded();
+                isInitialized = true;
+            }
+        }
+
+        private void OnDisable()
+        {
+            isHovering = false;
         }
 
         private void AutoDuplicateItemsIfNeeded()
@@ -37,68 +53,61 @@ namespace VRMPAssets.Scripts.UI
             if (contentRect == null || contentRect.childCount == 0 || viewportRect == null)
                 return;
 
-            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
 
-            float totalContentWidth = contentRect.rect.width;
             float requiredWidth = viewportRect.rect.width * 2f;
 
             int originalChildCount = contentRect.childCount;
+            int pass = 0;
 
-            while (totalContentWidth < requiredWidth && originalChildCount > 0)
+            while (contentRect.rect.width < requiredWidth && pass++ < MaxDuplicatePasses)
             {
+                float previousWidth = contentRect.rect.width;
+
                 for (int i = 0; i < originalChildCount; i++)
                 {
                     Transform childToClone = contentRect.GetChild(i);
                     Instantiate(childToClone.gameObject, contentRect);
                 }
 
-                Canvas.ForceUpdateCanvases();
-                totalContentWidth = contentRect.rect.width;
+                LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+
+                if (contentRect.rect.width <= previousWidth)
+                    break;
             }
         }
 
         private void Update()
         {
-            if (isHovering || contentRect.childCount < 2)
+            if (isHovering || contentRect == null || contentRect.childCount < 2)
                 return;
 
+            float direction = scrollDirection == ScrollDirection.Right ? -1f : 1f;
             float step = scrollSpeed * Time.deltaTime;
-            float spacing = layoutGroup != null ? layoutGroup.spacing : 0;
+            float spacing = layoutGroup != null ? layoutGroup.spacing : 0f;
 
-            if (scrollDirection == ScrollDirection.Right)
+            contentRect.anchoredPosition += new Vector2(step * direction, 0f);
+            movedDistance += step;
+
+            while (true)
             {
-                contentRect.anchoredPosition -= new Vector2(step, 0);
-                movedDistance += step;
+                int edgeIndex = scrollDirection == ScrollDirection.Right ? 0 : contentRect.childCount - 1;
 
-                RectTransform firstChild = contentRect.GetChild(0) as RectTransform;
-                if (firstChild == null) return;
+                if (!(contentRect.GetChild(edgeIndex) is RectTransform edgeChild))
+                    return;
 
-                float itemSpan = firstChild.rect.width + spacing;
+                float itemSpan = edgeChild.rect.width + spacing;
 
-                if (movedDistance >= itemSpan)
-                {
-                    firstChild.SetAsLastSibling();
-                    contentRect.anchoredPosition += new Vector2(itemSpan, 0);
-                    movedDistance -= itemSpan;
-                }
-            }
-            else
-            {
-                contentRect.anchoredPosition += new Vector2(step, 0);
-                movedDistance += step;
+                if (itemSpan <= 0f || movedDistance < itemSpan)
+                    return;
 
-                int lastIndex = contentRect.childCount - 1;
-                RectTransform lastChild = contentRect.GetChild(lastIndex) as RectTransform;
-                if (lastChild == null) return;
+                if (scrollDirection == ScrollDirection.Right)
+                    edgeChild.SetAsLastSibling();
+                else
+                    edgeChild.SetAsFirstSibling();
 
-                float itemSpan = lastChild.rect.width + spacing;
-
-                if (movedDistance >= itemSpan)
-                {
-                    lastChild.SetAsFirstSibling();
-                    contentRect.anchoredPosition -= new Vector2(itemSpan, 0);
-                    movedDistance -= itemSpan;
-                }
+                contentRect.anchoredPosition -= new Vector2(itemSpan * direction, 0f);
+                movedDistance -= itemSpan;
             }
         }
 
