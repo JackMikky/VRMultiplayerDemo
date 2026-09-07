@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dd12d3dcfd816c4f90987c39e10f051, type: 3}
+  m_Name: TestPistol
+  m_EditorClassIdentifier: Assembly-CSharp::Pistol
+  Category: 2
+  Name: TestGun
+  attackSpeed: 1
+  damage: 5
+  attackDistance: 10
+  Description: This is a Test Pistol Gun.
+  attackSounds:
+  - {fileID: 8300000, guid: f9ab20b4342184a46921955b3300481d, type: 3}
+  - {fileID: 8300000, guid: fc96ad27ad7acc246bc0bf45b3ffd5c8, type: 3}
+  - {fileID: 8300000, guid: e3a46507263c1f04d9cee05cf2ebc532, type: 3}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 448
+  muzzleHeight: 1.4
+  hitEffectPrefab: {fileID: 0}
+  showDebugRay: 1
+  debugRayDuration: 1
+  debugRayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  debugRayMissColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
