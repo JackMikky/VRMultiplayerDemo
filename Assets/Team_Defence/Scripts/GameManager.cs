@@ -37,11 +37,10 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Time.timeScale = 0f; // Pause the game at the start
-        if (gameStartUI != null)
-        {
-            gameStartUI.SetActive(true);
-        }
+        //if (gameStartUI != null)
+        //{
+        //    gameStartUI.SetActive(true);
+        //}
         if (gameEndUI != null)
         {
             gameEndUI.SetActive(false);
@@ -67,7 +66,6 @@ public class GameManager : MonoBehaviour
             gameEndUI.SetActive(true);
         }
         onGameEnd?.Invoke();
-        Time.timeScale = 0.25f;
         IsGameRunning = false;
     }
 
@@ -78,7 +76,6 @@ public class GameManager : MonoBehaviour
         {
             gameWinUI.SetActive(true);
         }
-        Time.timeScale = 0.25f;
         IsGameRunning = false;
         onPlayerWin?.Invoke();
     }
