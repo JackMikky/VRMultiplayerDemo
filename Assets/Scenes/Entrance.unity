@@ -11510,7 +11510,7 @@ PrefabInstance:
     - target: {fileID: 2396443454739078752, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 1911
+      value: 3959
       objectReference: {fileID: 0}
     - target: {fileID: 2400375398256290977, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
@@ -12072,6 +12072,11 @@ PrefabInstance:
       propertyPath: localChatManager
       value: 
       objectReference: {fileID: 415937435}
+    - target: {fileID: 7708991245126511089, guid: 77c77bfaf87e3b14a801327ee9c547eb,
+        type: 3}
+      propertyPath: m_RaycastMask.m_Bits
+      value: 2593
+      objectReference: {fileID: 0}
     - target: {fileID: 7788866391578950739, guid: 77c77bfaf87e3b14a801327ee9c547eb,
         type: 3}
       propertyPath: m_IsActive

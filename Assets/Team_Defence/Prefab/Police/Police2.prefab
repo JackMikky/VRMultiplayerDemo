@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 3162225461875005985}
   - component: {fileID: -439759263467744534}
   - component: {fileID: 865492742158486058}
+  - component: {fileID: 8371834294441699910}
+  - component: {fileID: 301759717377499157}
   m_Layer: 11
   m_Name: Police2
   m_TagString: Untagged
@@ -137,6 +139,94 @@ MonoBehaviour:
   interactedBehavior: {fileID: 0}
   activePanicBehavior: {fileID: 0}
   currentState: 4
+--- !u!114 &8371834294441699910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091489066321530029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a35f6cfbfba9b548aaa00d52cfe8a50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable
+  m_InteractionManager: {fileID: 0}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 3
+  m_DistanceCalculationMode: 1
+  m_SelectMode: 0
+  m_FocusMode: 1
+  m_CustomReticle: {fileID: 0}
+  m_AllowGazeInteraction: 0
+  m_AllowGazeSelect: 0
+  m_OverrideGazeTimeToSelect: 0
+  m_GazeTimeToSelect: 0.5
+  m_OverrideTimeToAutoDeselectGaze: 0
+  m_TimeToAutoDeselectGaze: 3
+  m_AllowGazeAssistance: 0
+  m_FirstHoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastHoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstFocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastFocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Activated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Deactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_StartingHoverFilters: []
+  m_StartingSelectFilters: []
+  m_StartingInteractionStrengthFilters: []
+--- !u!114 &301759717377499157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091489066321530029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7daad8e8181158440a1f905e5ad4e3e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRHoverOutlineProxy
+  outlineRenderers: []
+  includeChildren: 1
+  hideDelay: 0.05
+  keepOutlineWhileSelected: 1
 --- !u!1001 &290729428243731007
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -213,7 +303,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1550172739219789190, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7955130890625718801}
   m_SourcePrefab: {fileID: 100100000, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56, type: 3}
 --- !u!1 &1264298988669552569 stripped
 GameObject:
@@ -221,6 +315,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 290729428243731007}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7955130890625718801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1264298988669552569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379dfaef198e998439eaf42b210796a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XROutlineProxyIgnored
 --- !u!4 &1927647945293339907 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2218164963774615356, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56,

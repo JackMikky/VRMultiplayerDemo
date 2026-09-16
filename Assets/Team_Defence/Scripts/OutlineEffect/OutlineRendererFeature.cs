@@ -26,6 +26,7 @@ public class OutlineRendererFeature : ScriptableRendererFeature
     public Settings settings = new Settings();
 
     private OutlineRenderPass m_Pass;
+    private object m_CurrentOwner;
 
     public static OutlineRendererFeature Instance { get; private set; }
 
@@ -49,6 +50,23 @@ public class OutlineRendererFeature : ScriptableRendererFeature
     public void SetOutlineTargets(Renderer[] targets)
     {
         m_Pass.OutlineObjects = targets;
+    }
+
+    public void SetOutlineTargets(object owner, Renderer[] targets)
+    {
+        m_CurrentOwner = owner;
+        m_Pass.OutlineObjects = targets;
+    }
+
+    public void ClearOutlineTargets(object owner)
+    {
+        if (m_CurrentOwner != owner)
+        {
+            return;
+        }
+
+        m_CurrentOwner = null;
+        m_Pass.OutlineObjects = null;
     }
 
     protected override void Dispose(bool disposing)

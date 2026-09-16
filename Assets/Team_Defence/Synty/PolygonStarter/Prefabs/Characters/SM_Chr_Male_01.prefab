@@ -1241,6 +1241,7 @@ GameObject:
   - component: {fileID: 4976318088285564}
   - component: {fileID: 33755268053039000}
   - component: {fileID: 23697067328211260}
+  - component: {fileID: 1412664485994311697}
   m_Layer: 0
   m_Name: Character_Hair_Female_01
   m_TagString: Untagged
@@ -1319,6 +1320,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1412664485994311697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1546076888847760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379dfaef198e998439eaf42b210796a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XROutlineProxyIgnored
 --- !u!1 &1563931338448190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1814,6 +1827,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4793367160846090}
   - component: {fileID: 137579981741326652}
+  - component: {fileID: 3166205005860892337}
   m_Layer: 0
   m_Name: Character_Female_Face_01
   m_TagString: Untagged
@@ -1944,6 +1958,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000000059604645, y: 0.84644485, z: -0.031618536}
     m_Extent: {x: 1.021204, y: 0.94207895, z: 0.20335895}
   m_DirtyAABB: 0
+--- !u!114 &3166205005860892337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1957412144152276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379dfaef198e998439eaf42b210796a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XROutlineProxyIgnored
 --- !u!1 &1970766640170394
 GameObject:
   m_ObjectHideFlags: 0

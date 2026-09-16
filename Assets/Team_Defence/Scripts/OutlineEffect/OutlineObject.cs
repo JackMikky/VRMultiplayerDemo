@@ -19,7 +19,7 @@ public class OutlineObject : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             return;
         }
-        OutlineRendererFeature.Instance.SetOutlineTargets(outlineObjects);
+        OutlineRendererFeature.Instance.SetOutlineTargets(this, outlineObjects);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -28,6 +28,6 @@ public class OutlineObject : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             return;
         }
-        OutlineRendererFeature.Instance.SetOutlineTargets(null);
+        OutlineRendererFeature.Instance.ClearOutlineTargets(this);
     }
 }

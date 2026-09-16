@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3162225461875005985}
   - component: {fileID: -439759263467744534}
   - component: {fileID: 1306191266951545763}
+  - component: {fileID: 3960051078763358990}
+  - component: {fileID: 7337180207021353169}
   m_Layer: 11
   m_Name: CitizenPasserby
   m_TagString: Untagged
@@ -143,12 +145,100 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7091489066321530029}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b5d4d1b56a3d694f837709384ee2857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineObject
   outlineObjects: []
+--- !u!114 &3960051078763358990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091489066321530029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a35f6cfbfba9b548aaa00d52cfe8a50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable
+  m_InteractionManager: {fileID: 0}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 3
+  m_DistanceCalculationMode: 1
+  m_SelectMode: 0
+  m_FocusMode: 1
+  m_CustomReticle: {fileID: 0}
+  m_AllowGazeInteraction: 0
+  m_AllowGazeSelect: 0
+  m_OverrideGazeTimeToSelect: 0
+  m_GazeTimeToSelect: 0.5
+  m_OverrideTimeToAutoDeselectGaze: 0
+  m_TimeToAutoDeselectGaze: 3
+  m_AllowGazeAssistance: 0
+  m_FirstHoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastHoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstFocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastFocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Activated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Deactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_StartingHoverFilters: []
+  m_StartingSelectFilters: []
+  m_StartingInteractionStrengthFilters: []
+--- !u!114 &7337180207021353169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091489066321530029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7daad8e8181158440a1f905e5ad4e3e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRHoverOutlineProxy
+  outlineRenderers: []
+  includeChildren: 1
+  hideDelay: 0.05
+  keepOutlineWhileSelected: 1
 --- !u!1001 &5835325783456994566
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -529,7 +619,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1550172739219789190, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 449885248191398345}
   m_SourcePrefab: {fileID: 100100000, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56, type: 3}
 --- !u!4 &7151192976568546251 stripped
 Transform:
@@ -543,3 +637,15 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 9076623894770760951}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &449885248191398345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7527191402830276977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379dfaef198e998439eaf42b210796a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XROutlineProxyIgnored

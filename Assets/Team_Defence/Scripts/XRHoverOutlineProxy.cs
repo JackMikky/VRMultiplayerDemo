@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -27,9 +28,20 @@ public class XRHoverOutlineProxy : MonoBehaviour
 
         if (outlineRenderers == null || outlineRenderers.Length == 0)
         {
-            outlineRenderers = includeChildren
+            Renderer[] candidates = includeChildren
                 ? GetComponentsInChildren<Renderer>(true)
                 : GetComponents<Renderer>();
+
+            List<Renderer> filtered = new List<Renderer>(candidates.Length);
+            foreach (Renderer candidate in candidates)
+            {
+                if (candidate.GetComponent<XROutlineProxyIgnored>() == null)
+                {
+                    filtered.Add(candidate);
+                }
+            }
+
+            outlineRenderers = filtered.ToArray();
         }
     }
 
@@ -121,6 +133,13 @@ public class XRHoverOutlineProxy : MonoBehaviour
             return;
         }
 
-        OutlineRendererFeature.Instance.SetOutlineTargets(visible ? outlineRenderers : null);
+        if (visible)
+        {
+            OutlineRendererFeature.Instance.SetOutlineTargets(this, outlineRenderers);
+        }
+        else
+        {
+            OutlineRendererFeature.Instance.ClearOutlineTargets(this);
+        }
     }
 }
