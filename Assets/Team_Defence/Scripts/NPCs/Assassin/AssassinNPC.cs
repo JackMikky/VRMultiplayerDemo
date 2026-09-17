@@ -101,6 +101,11 @@ public class AssassinNPC : NPCBase
         if (agent != null) agent.autoTraverseOffMeshLink = false;
 
         ChangeToState(ThreateningState, AssassinState.Threatening);
+        //Test Code
+        if (target == null)
+        {
+            this.SetNavMeshTarget(NPCManager.Instance.vipTransform);
+        }
     }
 
     protected override void OnUpdate()

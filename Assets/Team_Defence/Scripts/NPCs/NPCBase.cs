@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 #if UNITY_EDITOR
 
@@ -72,6 +74,12 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
     public float CurrentHealth => currentHealth;
     public bool IsDead { get; private set; }
 
+    #region XR Settings
+
+    private XRSimpleInteractable interactable;
+
+    #endregion XR Settings
+
     #region Debug Settings
 
     [Space(10)]
@@ -98,13 +106,38 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
         myRenderer = GetComponentInChildren<Renderer>();
         anim = GetComponentInChildren<Animator>();
         StateMachine = new StateMachine();
+        if (interactable == null)
+        {
+            interactable = GetComponent<XRSimpleInteractable>();
+        }
 
         currentHealth = maxHealth;
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         Initialize();
+    }
+
+    protected virtual void OnEnable()
+    {
+        if (interactable != null)
+        {
+            interactable.selectEntered.AddListener(HandleSelectEntered);
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        if (interactable != null)
+        {
+            interactable.selectEntered.RemoveListener(HandleSelectEntered);
+        }
+    }
+
+    private void HandleSelectEntered(SelectEnterEventArgs args)
+    {
+        OnInteracted();
     }
 
     private void Update()

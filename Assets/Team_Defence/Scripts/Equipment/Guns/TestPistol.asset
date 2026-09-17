@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e3a46507263c1f04d9cee05cf2ebc532, type: 3}
   hitMask:
     serializedVersion: 2
-    m_Bits: 448
+    m_Bits: 2112
   muzzleHeight: 1.4
   hitEffectPrefab: {fileID: 0}
   showDebugRay: 1

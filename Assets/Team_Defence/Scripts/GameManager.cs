@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        IsGameRunning = true;
         //if (gameStartUI != null)
         //{
         //    gameStartUI.SetActive(true);

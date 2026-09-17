@@ -40,6 +40,9 @@ public class NPCManager : MonoBehaviour
     [SerializeField] private List<NPCBase> policeNPCs = new List<NPCBase>();
     [SerializeField] private List<NPCBase> vipNPCs = new List<NPCBase>();
 
+    [Header("Debug Settings")]
+    [SerializeField] private bool useMouseClickToSpawnSuspect = true;
+
     private void Awake()
     {
         if (Instance == null)
@@ -67,6 +70,7 @@ public class NPCManager : MonoBehaviour
 
     private void SpawnSuspectByClick()
     {
+        if (!useMouseClickToSpawnSuspect) return;
         if (!Application.isPlaying) return;
 
         if (GameManager.Instance == null || !GameManager.Instance.IsGameRunning) return;
@@ -203,6 +207,7 @@ public class NPCManager : MonoBehaviour
         if (npc != null && !assassinNPCs.Contains(npc))
         {
             assassinNPCs.Add(npc);
+            cachedSuspect = npc;
         }
     }
 
