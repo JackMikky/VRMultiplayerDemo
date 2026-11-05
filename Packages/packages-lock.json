@@ -131,7 +131,7 @@
       }
     },
     "com.unity.multiplayer.playmode": {
-      "version": "1.6.1",
+      "version": "1.6.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -140,7 +140,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.multiplayer.tools": {
-      "version": "2.2.6",
+      "version": "2.2.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {
