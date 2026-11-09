@@ -8,15 +8,14 @@ public enum CitizenState
 
 public enum AssassinState
 {
-    Threatening,
-    Staying,
-    Approaching,
-    Rushing,
-    NavLinking,
-    Interacted,
-    Preparing,
-    Attacking,
-    SeekingWeapon
+    Staying = 1,
+    Approaching = 2,
+    Rushing = 3,
+    NavLinking = 4,
+    Interacted = 5,
+    Attacking = 7,
+    SeekingWeapon = 8,
+    Wandering = 9
 }
 
 public enum PoliceState

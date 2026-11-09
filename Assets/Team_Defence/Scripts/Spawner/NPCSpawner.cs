@@ -75,17 +75,18 @@ public class NPCSpawner : MonoBehaviour
         bool isCitizen = spawnedNpc.TryGetComponent(out CitizenNPC citizen);
         if (isCitizen) citizens.Enqueue(citizen);
 
-        Vector2 offset = Random.insideUnitCircle * gatheringRadius;
-        Vector3 targetPosition = gatheringPoint + new Vector3(offset.x, 0f, offset.y);
-        if (!NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas)) return;
-
         if (isCitizen)
         {
-            citizen.ConfigureAudienceGathering(hit.position, vipTarget);
+            Vector2 offset = Random.insideUnitCircle * gatheringRadius;
+            Vector3 targetPosition = gatheringPoint + new Vector3(offset.x, 0f, offset.y);
+            if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas))
+            {
+                citizen.ConfigureAudienceGathering(hit.position, vipTarget);
+            }
         }
         else if (spawnedNpc.TryGetComponent(out AssassinNPC assassin))
         {
-            assassin.ConfigurePreparation(hit.position, vipTarget);
+            assassin.SetNavMeshTarget(vipTarget);
         }
     }
 

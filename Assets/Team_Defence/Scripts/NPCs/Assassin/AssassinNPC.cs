@@ -4,8 +4,7 @@ public class AssassinNPC : NPCBase
 {
     #region StateMachine
 
-    public ThreateningState ThreateningState { get; private set; }
-    public AssassinPreparingState PreparingState { get; private set; }
+    public AssassinWanderingState WanderingState { get; private set; }
     public AssassinStayingState StayingState { get; private set; }
     public AssassinApproachingState ApproachingState { get; private set; }
     public AssassinRushingState RushingState { get; private set; }
@@ -13,7 +12,6 @@ public class AssassinNPC : NPCBase
     public AssassinWeaponPickupState WeaponPickupState { get; private set; }
     public AssassinNavLinkState NavLinkState { get; private set; }
     public AssassinInteractedState InteractedState { get; private set; }
-
 
     [HideInInspector] public IState previousState;
     [HideInInspector] public AssassinState previousEnumState;
@@ -25,10 +23,6 @@ public class AssassinNPC : NPCBase
 
     [Header("Behavior Assets")]
     [Header("Movement")]
-    [SerializeField] private ScriptableMoveBehavior preparationBehavior;
-
-    public ScriptableMoveBehavior PreparationBehavior => preparationBehavior;
-
     [SerializeField] private ScriptableMoveBehavior approachingBehavior;
 
     public ScriptableMoveBehavior ApproachingBehavior => approachingBehavior;
@@ -58,13 +52,6 @@ public class AssassinNPC : NPCBase
     public ScriptableNavLinkBehavior NavLinkingBehavior => navLinkingBehavior;
 
     [HideInInspector] public float nextPathUpdateTime;
-    [HideInInspector] public bool reachedPreparationPoint;
-    [HideInInspector] public float preparationEndTime;
-
-    private Vector3 preparationPoint;
-
-    public bool HasPreparationPoint { get; private set; }
-    public Vector3 PreparationPoint => preparationPoint;
 
     #endregion Behavior Settings
 
@@ -76,17 +63,29 @@ public class AssassinNPC : NPCBase
     [Tooltip("Start running when distance to VIP is less than this")]
     public float startRunningDistance = 4.0f;
 
-    [Header("Stay Time Settings")]
-    [Tooltip("How long to idle after the threatening animation finishes")]
-    [SerializeField] private float stayDuration = 2.5f;
+    [Tooltip("Number of Staying animations selectable by StayingIndex")]
+    [SerializeField, Min(1)] private int stayingAnimationCount = 1;
 
-    [Header("Character Parameters")]
-    [SerializeField, Range(0.0f, 1.0f)] private float courage;
+    public int StayingAnimationCount => stayingAnimationCount;
 
-    public float Courage => courage;
+    [Header("Post-Pickup Wandering")]
+    [SerializeField, Min(0f)] private float minWanderDuration = 4f;
+    [SerializeField, Min(0f)] private float maxWanderDuration = 8f;
+    [SerializeField, Min(0.1f)] private float wanderRadius = 4f;
+    [SerializeField, Min(0.1f)] private float minWanderPauseInterval = 3f;
+    [SerializeField, Min(0.1f)] private float maxWanderPauseInterval = 6f;
+    [SerializeField, Range(0f, 1f)] private float wanderPauseChance = 0.35f;
+
+    public float MinWanderDuration => minWanderDuration;
+    public float MaxWanderDuration => maxWanderDuration;
+    public float WanderRadius => wanderRadius;
+    public float MinWanderPauseInterval => minWanderPauseInterval;
+    public float MaxWanderPauseInterval => maxWanderPauseInterval;
+    public float WanderPauseChance => wanderPauseChance;
 
     [Header("Weapon Pickup")]
     [SerializeField] private Transform weaponHoldPoint;
+
     [SerializeField, Min(0.1f)] private float weaponPickupDistance = 1.25f;
     [SerializeField, Min(0.05f)] private float weaponSearchInterval = 0.5f;
 
@@ -94,26 +93,17 @@ public class AssassinNPC : NPCBase
     public float WeaponPickupDistance => weaponPickupDistance;
     public float WeaponSearchInterval => weaponSearchInterval;
 
-    #region Animation hash cache
-
-    public static int ThreateningTrigger => AnimationConstants.Threatening;
-
-    #endregion Animation hash cache
-
     [Space(10)]
     [Header("Debug")]
-    [SerializeField] private AssassinState currentState = AssassinState.Threatening;
+    [SerializeField] private AssassinState currentState = AssassinState.Wandering;
 
     protected override void Awake()
     {
         base.Awake();
         this.npcType = NPCType.Assassin;
-        courage = Random.Range(0.0f, 1.0f);
-
         // Initialize the state machine and the various state classes
-        ThreateningState = new ThreateningState(this);
-        PreparingState = new AssassinPreparingState(this);
-        StayingState = new AssassinStayingState(this, this.stayDuration);
+        WanderingState = new AssassinWanderingState(this);
+        StayingState = new AssassinStayingState(this);
         ApproachingState = new AssassinApproachingState(this);
         RushingState = new AssassinRushingState(this);
         AttackState = new AssassinAttackState(this);
@@ -143,10 +133,7 @@ public class AssassinNPC : NPCBase
             Debug.LogWarning($"[{name}] Weapon hold point is not assigned; skipping weapon pickup.", this);
         }
 
-        if (HasPreparationPoint)
-            ChangeToState(PreparingState, AssassinState.Preparing);
-        else
-            ChangeToState(ThreateningState, AssassinState.Threatening);
+        ChangeToState(WanderingState, AssassinState.Wandering);
     }
 
     public bool TryEquipWeapon(WeaponObject weapon)
@@ -176,10 +163,7 @@ public class AssassinNPC : NPCBase
 
     public void ResumeAfterWeaponPickup()
     {
-        if (HasPreparationPoint)
-            ChangeToState(PreparingState, AssassinState.Preparing);
-        else
-            ChangeToState(ThreateningState, AssassinState.Threatening);
+        ChangeToState(WanderingState, AssassinState.Wandering);
     }
 
     protected override void OnUpdate()
@@ -203,21 +187,6 @@ public class AssassinNPC : NPCBase
     }
 
     #region Helpers exposed for states
-
-    public void ConfigurePreparation(Vector3 position, Transform vipTarget)
-    {
-        preparationPoint = position;
-        HasPreparationPoint = true;
-        SetNavMeshTarget(vipTarget);
-    }
-
-    public void SetDestinationToPreparationPoint()
-    {
-        if (agent != null && agent.enabled && agent.isOnNavMesh)
-        {
-            agent.SetDestination(preparationPoint);
-        }
-    }
 
     public void TargetDistanceCheckAndTransition()
     {
@@ -267,14 +236,6 @@ public class AssassinNPC : NPCBase
         if (target != null)
         {
             transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
-        }
-    }
-
-    public void StartMovingAfterThreaten()
-    {
-        if (StateMachine.CurrentState == ThreateningState)
-        {
-            ChangeToState(StayingState, AssassinState.Staying);
         }
     }
 
