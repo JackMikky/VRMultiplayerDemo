@@ -52,6 +52,12 @@ public class CitizenNPC : NPCBase
 
     [HideInInspector] public ScriptableBehaviorBase activePanicBehavior;
 
+    private bool isMovingToGatheringPoint;
+    private Vector3 gatheringPosition;
+    private Transform audienceLookTarget;
+
+    public bool IsMovingToGatheringPoint => isMovingToGatheringPoint;
+
     #endregion Behavior Settings
 
     [Space(10)]
@@ -75,7 +81,10 @@ public class CitizenNPC : NPCBase
         switch (this.CitizenType)
         {
             case CitizenType.Audience:
-                ChangeToState(WatchingState, CitizenState.Watching);
+                if (isMovingToGatheringPoint)
+                    ChangeToState(WalkingState, CitizenState.Wandering);
+                else
+                    ChangeToState(WatchingState, CitizenState.Watching);
                 break;
 
             case CitizenType.Passerby:
@@ -87,6 +96,37 @@ public class CitizenNPC : NPCBase
                 break;
         }
         NPCManager.Instance.RegisterCitizen(this);
+    }
+
+    protected override void OnUpdate()
+    {
+        if (StateMachine.CurrentState == WatchingState && audienceLookTarget != null)
+        {
+            LookAtPlayer(audienceLookTarget);
+        }
+    }
+
+    public void ConfigureAudienceGathering(Vector3 position, Transform lookTarget)
+    {
+        gatheringPosition = position;
+        audienceLookTarget = lookTarget;
+        isMovingToGatheringPoint = true;
+    }
+
+    public void StartGatheringMovement()
+    {
+        SetNavigationMode(useAgent: true);
+        SetAgentVelocity(Agent.speed, isStopped: false);
+        ResetMovementAnimationFlags();
+
+        if (Anim != null) Anim.SetBool(AnimationConstants.IsWalking, true);
+        if (Agent != null && Agent.enabled && Agent.isOnNavMesh) Agent.SetDestination(gatheringPosition);
+    }
+
+    public void CompleteAudienceGathering()
+    {
+        ChangeToState(WatchingState, CitizenState.Watching);
+        isMovingToGatheringPoint = false;
     }
 
     public void ChangeToState(IState newState, CitizenState enumState)

@@ -14,7 +14,9 @@ public enum AssassinState
     Rushing,
     NavLinking,
     Interacted,
-    Attacking
+    Preparing,
+    Attacking,
+    SeekingWeapon
 }
 
 public enum PoliceState

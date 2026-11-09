@@ -9,25 +9,33 @@ public class CitizenWalkingState : IState
 
     public void Enter()
     {
-        npc.MoveBehavior?.Enter(npc);
+        if (npc.IsMovingToGatheringPoint)
+            npc.StartGatheringMovement();
+        else
+            npc.MoveBehavior?.Enter(npc);
     }
 
     public void Update()
     {
-        npc.MoveBehavior?.UpdateBehavior(npc);
+        if (!npc.IsMovingToGatheringPoint)
+            npc.MoveBehavior?.UpdateBehavior(npc);
 
         if (npc.Agent != null && npc.Agent.enabled && !npc.Agent.pathPending)
         {
             if (npc.Agent.remainingDistance <= npc.Agent.stoppingDistance)
             {
-                npc.ChangeToState(npc.StayingState, CitizenState.Staying);
+                if (npc.IsMovingToGatheringPoint)
+                    npc.CompleteAudienceGathering();
+                else
+                    npc.ChangeToState(npc.StayingState, CitizenState.Staying);
             }
         }
     }
 
     public void Exit()
     {
-        npc.MoveBehavior?.Exit(npc);
+        if (!npc.IsMovingToGatheringPoint)
+            npc.MoveBehavior?.Exit(npc);
     }
 
     public void Dispose()

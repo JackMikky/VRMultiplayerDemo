@@ -116,7 +116,7 @@ MonoBehaviour:
   nextIdleActionTime: 0
   cachedIdleAnimationHashes: 
   currentWaypointStayDuration: 0
-  mark: {fileID: 1550172739219789190, guid: 9a96cbc1a1bfa4f4aa0fd373efd83e56, type: 3}
+  mark: {fileID: 4066507308939379593}
   currentEquipment: {fileID: 0}
   maxHealth: 100
   onDead:

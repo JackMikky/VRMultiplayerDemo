@@ -11,6 +11,11 @@ public class AssassinFlexibleAttackBehavior : ScriptableAttackBehavior
         npc.SetAgentVelocity(0f, isStopped: true);
         npc.ResetMovementAnimationFlags();
 
+        if (npc is AssassinNPC equippedAssassin && equippedAssassin.CurrentEquipment != null)
+        {
+            equippedAssassin.CurrentEquipment.SetVisible(true);
+        }
+
         if (npc.Target != null)
         {
             Vector3 lookTarget = new Vector3(npc.Target.position.x, npc.transform.position.y, npc.Target.position.z);
@@ -22,9 +27,9 @@ public class AssassinFlexibleAttackBehavior : ScriptableAttackBehavior
             npc.Anim.SetTrigger(Animator.StringToHash(attackTriggerName));
         }
 
-        if (npc is AssassinNPC assassin && assassin.CurrentEquipment != null)
+        if (npc is AssassinNPC attackingAssassin && attackingAssassin.CurrentEquipment != null)
         {
-            assassin.CurrentEquipment.UseWeapon(assassin.transform, assassin.Target);
+            attackingAssassin.CurrentEquipment.UseWeapon(attackingAssassin.transform, attackingAssassin.Target);
         }
 
         Debug.Log("[Behavior] The assassin successfully launches an attack!");
@@ -34,5 +39,10 @@ public class AssassinFlexibleAttackBehavior : ScriptableAttackBehavior
     { }
 
     public override void Exit(NPCBase npc)
-    { }
+    {
+        if (npc is AssassinNPC assassin && assassin.CurrentEquipment != null)
+        {
+            assassin.CurrentEquipment.SetVisible(false);
+        }
+    }
 }

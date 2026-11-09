@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        IsGameRunning = true;
         //if (gameStartUI != null)
         //{
         //    gameStartUI.SetActive(true);
@@ -54,7 +55,6 @@ public class GameManager : MonoBehaviour
             gameStartUI.SetActive(false);
         }
         onGameStart?.Invoke();
-        Time.timeScale = 1f;
         IsGameRunning = true;
     }
 

@@ -31,13 +31,26 @@ public class AssassinRushingBehavior : ScriptableMoveBehavior
 
         if (npc is AssassinNPC assassin)
         {
-            float distance = Vector3.Distance(assassin.transform.position, assassin.Target.position);
-            float attackDist = assassin.CurrentEquipment.Equipment != null ? assassin.CurrentEquipment.Equipment.attackDistance : 1.5f;
+            Vector3 targetOffset = assassin.Target.position - assassin.transform.position;
+            targetOffset.y = 0f;
+            float distance = targetOffset.magnitude;
 
-            if (distance <= attackDist)
+            if (assassin.Agent != null && assassin.Agent.enabled && assassin.Agent.isOnNavMesh)
             {
-                assassin.ChangeToState(assassin.AttackState, AssassinState.Attacking);
-                return;
+                ScriptableEquipmentBase equipment = assassin.CurrentEquipment != null
+                    ? assassin.CurrentEquipment.Equipment
+                    : null;
+
+                bool reachedAttackRange = equipment != null
+                    ? distance <= Mathf.Max(0f, equipment.attackDistance)
+                    : !assassin.Agent.pathPending
+                        && assassin.Agent.remainingDistance <= assassin.Agent.stoppingDistance;
+
+                if (reachedAttackRange)
+                {
+                    assassin.ChangeToState(assassin.AttackState, AssassinState.Attacking);
+                    return;
+                }
             }
 
             if (distance > assassin.startRunningDistance)

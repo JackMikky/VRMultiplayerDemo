@@ -1,4 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class NPCSpawner : MonoBehaviour
 {
@@ -8,79 +11,149 @@ public class NPCSpawner : MonoBehaviour
         Sphere
     }
 
-    private enum SpawnType
-    {
-        Random,
-        Fixed
-    }
-
-    private enum SpawnWhat
-    {
-        Assassin,
-        Citizen
-    }
-
     [SerializeField] private RangeType rangeType = RangeType.Box;
 
     [SerializeField] private float radius = 3f;
 
-    [SerializeField] private GameObject[] npc;
-    [SerializeField] private SpawnWhat spawnWhat = SpawnWhat.Citizen;
+    [Header("NPC Prefabs")]
+    [SerializeField] private GameObject citizenPrefab;
 
-    [Header("Spwan")]
-    [SerializeField] private SpawnType spawnType = SpawnType.Random;
+    [SerializeField] private GameObject assassinPrefab;
 
-    [SerializeField] private float randomin, randommax;
-    [SerializeField] private float spawnTime;
+    [Header("Target Settings")]
+    [SerializeField] private Vector3 gatheringPoint;
+
+    [SerializeField, Min(0f)] private float gatheringRadius = 3f;
+    [SerializeField] private Transform vipTarget;
+    [SerializeField] private Vector3 exitPoint;
+    [SerializeField, Min(0f)] private float maxSampleDistance = 1.5f;
+
+    [Header("Spawn Settings")]
+    [SerializeField, Min(0.1f)] private float minSpawnInterval = 5f;
+
+    [SerializeField, Min(0.1f)] private float maxSpawnInterval = 10f;
+    [SerializeField, Min(1)] private int maxNpcCount = 30;
+    [SerializeField, Range(0f, 100f)] private float assassinSpawnPercentage = 10f;
     private float spawnTimer;
-
-    [Header("Setting")]
-    [SerializeField] private int spawnCount;
-
-    [SerializeField] private int spawnNum;
+    private float nextSpawnInterval;
+    private readonly List<GameObject> activeNpcs = new List<GameObject>();
+    private readonly Queue<CitizenNPC> citizens = new Queue<CitizenNPC>();
 
     private void Start()
     {
+        ScheduleNextSpawn();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        ItemSpawnFunc();
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer < nextSpawnInterval) return;
+
+        spawnTimer = 0f;
+        ScheduleNextSpawn();
+        SpawnNpc();
     }
 
-    private void ItemSpawnFunc()
+    private void SpawnNpc()
     {
-        spawnTimer += Time.fixedDeltaTime;
-        if (spawnTimer > spawnTime)
+        activeNpcs.RemoveAll(npc => npc == null);
+        if (activeNpcs.Count >= maxNpcCount && !TryRemoveOldestCitizen()) return;
+
+        bool spawnAssassin = Random.Range(0f, 100f) < assassinSpawnPercentage;
+        GameObject prefab = spawnAssassin ? assassinPrefab : citizenPrefab;
+        if (prefab == null) return;
+
+        GameObject spawnedNpc = Instantiate(prefab, SpawnPosition(), Quaternion.identity);
+        activeNpcs.Add(spawnedNpc);
+        ConfigureSpawnedNpc(spawnedNpc);
+    }
+
+    private void ConfigureSpawnedNpc(GameObject spawnedNpc)
+    {
+        if (spawnedNpc == null) return;
+
+        bool isCitizen = spawnedNpc.TryGetComponent(out CitizenNPC citizen);
+        if (isCitizen) citizens.Enqueue(citizen);
+
+        Vector2 offset = Random.insideUnitCircle * gatheringRadius;
+        Vector3 targetPosition = gatheringPoint + new Vector3(offset.x, 0f, offset.y);
+        if (!NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas)) return;
+
+        if (isCitizen)
         {
-            switch (spawnType)
-            {
-                case SpawnType.Fixed:
-                    break;
-
-                case SpawnType.Random:
-                    spawnTime = Random.Range(randomin, randommax);
-                    break;
-            }
-            spawnTimer = 0;
-            switch (spawnWhat)
-            {
-                case SpawnWhat.Citizen:
-                    Instantiate(npc[0], SpawnPosition(), Quaternion.identity);
-                    break;
-
-                case SpawnWhat.Assassin:
-                    // taskManager.Current_Sum_EnemyNumberAdd();
-                    if (spawnCount <= 0)
-                    {
-                        break;
-                    }
-                    spawnCount -= 1;
-                    /// Instantiate(npc[0], SpawnPosition(), Quaternion.identity);
-                    var clone = Instantiate(npc[0], SpawnPosition(), Quaternion.identity);
-                    break;
-            }
+            citizen.ConfigureAudienceGathering(hit.position, vipTarget);
         }
+        else if (spawnedNpc.TryGetComponent(out AssassinNPC assassin))
+        {
+            assassin.ConfigurePreparation(hit.position, vipTarget);
+        }
+    }
+
+    private bool TryRemoveOldestCitizen()
+    {
+        while (citizens.Count > 0)
+        {
+            CitizenNPC citizen = citizens.Dequeue();
+            if (citizen == null) continue;
+
+            activeNpcs.Remove(citizen.gameObject);
+            StartCoroutine(ExitAndDestroy(citizen));
+            return true;
+        }
+
+        return false;
+    }
+
+    private IEnumerator ExitAndDestroy(CitizenNPC citizen)
+    {
+        if (citizen.Agent == null)
+        {
+            DestroyCitizen(citizen);
+            yield break;
+        }
+
+        if (!NavMesh.SamplePosition(exitPoint, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas))
+        {
+            DestroyCitizen(citizen);
+            yield break;
+        }
+
+        citizen.enabled = false;
+        citizen.SetNavigationMode(useAgent: true);
+        citizen.SetAgentVelocity(citizen.Agent.speed, isStopped: false);
+        citizen.ResetMovementAnimationFlags();
+        if (citizen.Anim != null) citizen.Anim.SetBool(AnimationConstants.IsWalking, true);
+        if (!citizen.Agent.SetDestination(hit.position))
+        {
+            DestroyCitizen(citizen);
+            yield break;
+        }
+
+        while (citizen != null
+            && citizen.Agent.enabled
+            && citizen.Agent.pathStatus != NavMeshPathStatus.PathInvalid
+            && (citizen.Agent.pathPending
+                || citizen.Agent.remainingDistance > citizen.Agent.stoppingDistance))
+        {
+            yield return null;
+        }
+
+        DestroyCitizen(citizen);
+    }
+
+    private void DestroyCitizen(CitizenNPC citizen)
+    {
+        if (citizen == null) return;
+
+        if (NPCManager.Instance != null) NPCManager.Instance.UnregisterCitizen(citizen);
+        Destroy(citizen.gameObject);
+    }
+
+    private void ScheduleNextSpawn()
+    {
+        float minInterval = Mathf.Min(minSpawnInterval, maxSpawnInterval);
+        float maxInterval = Mathf.Max(minSpawnInterval, maxSpawnInterval);
+        nextSpawnInterval = Random.Range(minInterval, maxInterval);
     }
 
     private void OnDrawGizmos()
