@@ -191,7 +191,7 @@ public class NPCManager : MonoBehaviour
         if (npcScript == null) return;
 
         if (npcScript is AssassinNPC assassin)
-            assassin.ConfigurePreparation(position, vipTransform);
+            assassin.SetNavMeshTarget(vipTransform);
 
         npcScript.Initialize();
         cachedSuspect = npcScript;

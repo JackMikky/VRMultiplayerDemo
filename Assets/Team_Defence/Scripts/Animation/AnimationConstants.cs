@@ -14,7 +14,9 @@ public static class AnimationConstants
 
     public static string IsRunningString = "IsRunning";
 
-    public static string ThreateningString = "Threatening";
+    public static string StayingString = "Staying";
+
+    public static string StayingIndexString = "StayingIndex";
 
     public static string JumpingNavLinkAnimString = "Jumping";
 
@@ -47,10 +49,9 @@ public static class AnimationConstants
     /// </summary>
     public static readonly int IsRunning = Animator.StringToHash(IsRunningString);
 
-    /// <summary>
-    /// Animator parameter "Threatening".For Assassins.
-    /// </summary>
-    public static readonly int Threatening = Animator.StringToHash(ThreateningString);
+    public static readonly int Staying = Animator.StringToHash(StayingString);
+
+    public static readonly int StayingIndex = Animator.StringToHash(StayingIndexString);
 
     /// <summary>
     /// Animator parameter "Jumping".For all NPCs.
