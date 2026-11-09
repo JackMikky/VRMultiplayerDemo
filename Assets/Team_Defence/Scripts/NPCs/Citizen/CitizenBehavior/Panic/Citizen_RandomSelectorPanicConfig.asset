@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463d487da1a8d854390d87d1d86f1f45, type: 3}
+  m_Name: Citizen_RandomSelectorPanicConfig
+  m_EditorClassIdentifier: Assembly-CSharp::RandomSelectorPanicBehavior
+  defaultAnimationTrigger: 
+  possibleBehaviors:
+  - {fileID: 11400000, guid: 3a4564be3b7cc6148a1dc5a1feca7a7a, type: 2}
+  - {fileID: 11400000, guid: 1a43042b22f687444b24eeed1e17a535, type: 2}

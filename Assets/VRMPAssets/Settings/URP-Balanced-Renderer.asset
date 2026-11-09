@@ -101,7 +101,8 @@ MonoBehaviour:
   - {fileID: 1499945515314798281}
   - {fileID: 9131221722497484465}
   - {fileID: 6414391266177785627}
-  m_RendererFeatureMap: adc0de57c6d2eee5be8fb8c1b629ab63af0973709368e4ccc95ec7c67fe0d014b106cbfec69db87e1b1fe526df7e0459
+  - {fileID: 1868397191515884954}
+  m_RendererFeatureMap: adc0de57c6d2eee5be8fb8c1b629ab63af0973709368e4ccc95ec7c67fe0d014b106cbfec69db87e1b1fe526df7e04599a4da4b358e1ed19
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -147,6 +148,26 @@ MonoBehaviour:
     renderPassEvent: 600
     material: {fileID: 2100000, guid: 88c9ae703ea0ca140bc6732155b79c9f, type: 2}
     renderInSceneView: 0
+--- !u!114 &1868397191515884954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22dcc01ab6f0cf242ba265231106089a, type: 3}
+  m_Name: OutlineRendererFeature
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineRendererFeature
+  m_Active: 1
+  m_OutlineMaterial: {fileID: 2100000, guid: 1c4ec848374e35b4bb97df0cb834c495, type: 2}
+  settings:
+    outlineColor: {r: 0.35928023, g: 1, b: 0, a: 1}
+    outlineWidth: 0.25
+    downSampleScale: 2
+    blurIterations: 1
+    blurSpread: 0.6
 --- !u!114 &6414391266177785627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -189,6 +210,29 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &6470317374880716667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b684f3393cac35949b2000976bba43ca, type: 3}
+  m_Name: SelectionOutlineFeature
+  m_EditorClassIdentifier: Assembly-CSharp::SelectionOutlineFeature
+  m_Active: 0
+  settings:
+    outlineLayerMask:
+      serializedVersion: 2
+      m_Bits: 512
+    outlineColor: {r: 0.13664329, g: 1, b: 0, a: 1}
+    thickness: 8
+    maskPassEvent: 300
+    outlinePassEvent: 500
+    maskShader: {fileID: 4800000, guid: b2db743d162df0d499d10dfc586d6748, type: 3}
+    compositeShader: {fileID: 4800000, guid: 47f3bddd3bf5f2c409e92d5292602377, type: 3}
 --- !u!114 &7181879895683272638
 MonoBehaviour:
   m_ObjectHideFlags: 0
