@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d82be70232e24e44d8c6f6ffb252baad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponObject
-  equipmentAsset: {fileID: 11400000, guid: 068c6855ed1c90046bd76a72ca2d552f, type: 2}
+  equipmentAsset: {fileID: 11400000, guid: 874033799b6c1234abbda65c5f550e69, type: 2}
 --- !u!82 &5702721603410921200
 AudioSource:
   m_ObjectHideFlags: 0

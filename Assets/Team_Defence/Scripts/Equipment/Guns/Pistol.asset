@@ -17,14 +17,14 @@ MonoBehaviour:
   attackSpeed: 1
   damage: 5
   attackDistance: 10
-  Description: This is a Test Pistol Gun.
+  Description: This is a Pistol.
   attackSounds:
   - {fileID: 8300000, guid: f9ab20b4342184a46921955b3300481d, type: 3}
   - {fileID: 8300000, guid: fc96ad27ad7acc246bc0bf45b3ffd5c8, type: 3}
   - {fileID: 8300000, guid: e3a46507263c1f04d9cee05cf2ebc532, type: 3}
   hitMask:
     serializedVersion: 2
-    m_Bits: 3520
+    m_Bits: 3521
   muzzleHeight: 1.4
   hitEffectPrefab: {fileID: 0}
   showDebugRay: 1
