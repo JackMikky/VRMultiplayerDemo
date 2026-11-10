@@ -29,7 +29,7 @@ public class AssassinFlexibleAttackBehavior : ScriptableAttackBehavior
 
         if (npc is AssassinNPC attackingAssassin && attackingAssassin.CurrentEquipment != null)
         {
-            attackingAssassin.CurrentEquipment.UseWeapon(attackingAssassin.transform, attackingAssassin.Target);
+            attackingAssassin.CurrentEquipment.UsItem(attackingAssassin.transform, attackingAssassin.Target);
         }
 
         Debug.Log("[Behavior] The assassin successfully launches an attack!");

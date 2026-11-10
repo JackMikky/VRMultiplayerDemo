@@ -34,7 +34,7 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
         Category = EquipmentCategory.Gun;
     }
 
-    public override void UseEquipment(Transform user, Transform target, WeaponObject weaponContext)
+    public override void UseEquipment(Transform user, Transform target, ItemObject weaponContext)
     {
         if (weaponContext == null || target == null) return;
 
@@ -68,7 +68,7 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
     /// <summary>
     /// Subclasses can override this to add their own specific behavioral logic (such as rapid fire, spread shots, logging, etc.).
     /// </summary>
-    protected virtual void OnFired(Transform user, Transform target, WeaponObject weaponContext)
+    protected virtual void OnFired(Transform user, Transform target, ItemObject weaponContext)
     { }
 
     #region Debugging

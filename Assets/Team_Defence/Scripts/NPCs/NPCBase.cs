@@ -54,9 +54,9 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
 
     [Space(10)]
     [Header("Equipment")]
-    [SerializeField] protected WeaponObject currentEquipment;
+    [SerializeField] protected ItemObject currentEquipment;
 
-    public WeaponObject CurrentEquipment => currentEquipment;
+    public ItemObject CurrentEquipment => currentEquipment;
 
     [Space(10)]
     [Header("Health Settings")]

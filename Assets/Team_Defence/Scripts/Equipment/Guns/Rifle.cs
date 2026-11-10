@@ -5,7 +5,7 @@ public class Rifle : GunEquipmentBase
 {
     [SerializeField] private int bulletsPerShot = 3;
 
-    protected override void OnFired(Transform user, Transform target, WeaponObject weaponContext)
+    protected override void OnFired(Transform user, Transform target, ItemObject weaponContext)
     {
         // 步枪特有的连发逻辑
     }

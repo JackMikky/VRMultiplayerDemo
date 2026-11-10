@@ -14,7 +14,7 @@ public abstract class MeleeEquipmentBase : ScriptableEquipmentBase
         Category = EquipmentCategory.Melee;
     }
 
-    public override void UseEquipment(Transform user, Transform target, WeaponObject weaponContext)
+    public override void UseEquipment(Transform user, Transform target, ItemObject weaponContext)
     {
         if (weaponContext == null || target == null) return;
 
@@ -42,6 +42,6 @@ public abstract class MeleeEquipmentBase : ScriptableEquipmentBase
     /// <summary>
     /// Subclasses can override this to add their own specific behavioral logic (such as bleeding effects, combo mechanics, logging, etc.).
     /// </summary>
-    protected virtual void OnHit(Transform user, Transform target, WeaponObject weaponContext)
+    protected virtual void OnHit(Transform user, Transform target, ItemObject weaponContext)
     { }
 }
