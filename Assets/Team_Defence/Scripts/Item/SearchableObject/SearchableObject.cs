@@ -9,6 +9,8 @@ public class SearchableObject : MonoBehaviour
     public int InstantiatableCount = 3;
 
     [SerializeField] private List<ItemObject> searchableItems;
+    [SerializeField] private bool allowDuplicateWeaponPrefabs;
+    [SerializeField] private bool limitOneWeaponPerCategory;
 
     private void Awake()
     {
@@ -26,12 +28,31 @@ public class SearchableObject : MonoBehaviour
             return;
         }
 
+        HashSet<ItemObject> generatedWeaponPrefabs = new HashSet<ItemObject>();
+        HashSet<EquipmentCategory> generatedWeaponCategories = new HashSet<EquipmentCategory>();
+
         for (int i = 0; i < InstantiatableCount; i++)
         {
-            var randomIndex = Random.Range(0, itemPrefabs.Count);
-            var item = GameObject.Instantiate(itemPrefabs[randomIndex], transform.position, Quaternion.identity, transform);
+            List<ItemObject> candidates = itemPrefabs
+                .Where(prefab => prefab != null
+                    && IsGenerationCandidateAllowed(prefab, generatedWeaponPrefabs, generatedWeaponCategories))
+                .ToList();
+
+            if (candidates.Count == 0)
+            {
+                break;
+            }
+
+            ItemObject selectedPrefab = candidates[Random.Range(0, candidates.Count)];
+            var item = GameObject.Instantiate(selectedPrefab, transform.position, Quaternion.identity, transform);
             AddItem(item);
             item.SetEnabled(false); // Deactivate the item initially
+
+            if (IsWeaponCategory(selectedPrefab.ItemCategory))
+            {
+                generatedWeaponPrefabs.Add(selectedPrefab);
+                generatedWeaponCategories.Add(selectedPrefab.ItemCategory);
+            }
         }
 
         SceneItemManager.Instance?.RegisterSearchableObject(this);
@@ -61,6 +82,13 @@ public class SearchableObject : MonoBehaviour
             Debug.LogWarning("Selected item is null.");
             return null;
         }
+    }
+
+    public void PlantTimedBomb(TimedBomb bomb, Transform user, ItemObject bombItem)
+    {
+        if (bomb == null) return;
+
+        bomb.Plant(this, user, bombItem);
     }
 
     public void AddItem(ItemObject item)
@@ -176,5 +204,32 @@ public class SearchableObject : MonoBehaviour
             default:
                 return 0;
         }
+    }
+
+    private bool IsWeaponCategory(EquipmentCategory category)
+    {
+        return category == EquipmentCategory.Bomb
+            || category == EquipmentCategory.Gun
+            || category == EquipmentCategory.Melee;
+    }
+
+    private bool IsGenerationCandidateAllowed(ItemObject prefab, HashSet<ItemObject> generatedWeaponPrefabs, HashSet<EquipmentCategory> generatedWeaponCategories)
+    {
+        if (!IsWeaponCategory(prefab.ItemCategory))
+        {
+            return true;
+        }
+
+        if (allowDuplicateWeaponPrefabs)
+        {
+            return true;
+        }
+
+        if (limitOneWeaponPerCategory)
+        {
+            return !generatedWeaponCategories.Contains(prefab.ItemCategory);
+        }
+
+        return !generatedWeaponPrefabs.Contains(prefab);
     }
 }
