@@ -56,6 +56,10 @@ public class SearchableObject : MonoBehaviour
         }
 
         SceneItemManager.Instance?.RegisterSearchableObject(this);
+
+        //TODO: Remove this after testing, this is just for testing the bomb planting functionality
+        var bombItem = searchableItems.Find(item => item != null && item.ItemCategory == EquipmentCategory.Bomb);
+        PlantTimedBomb(bombItem?.Equipment as TimedBomb, this.transform, bombItem);
     }
 
     private void OnDestroy()
