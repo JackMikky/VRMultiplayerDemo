@@ -3,9 +3,11 @@ using UnityEngine;
 
 public enum EquipmentCategory
 {
-    Empty,
+    None,
     Melee,
     Gun,
+    Bomb,
+    Normal,
 }
 
 public abstract class ScriptableEquipmentBase : ScriptableObject
@@ -25,12 +27,12 @@ public abstract class ScriptableEquipmentBase : ScriptableObject
     [Header("Attack VFX")]
     public List<AudioClip> attackSounds;
 
-    public abstract void UseEquipment(Transform user, Transform target, WeaponObject weaponContext);
+    public abstract void UseEquipment(Transform user, Transform target, ItemObject weaponContext);
 
-    public virtual void OnEquipped(WeaponObject weaponContext)
+    public virtual void OnEquipped(ItemObject weaponContext)
     { }
 
-    public virtual void OnUnequipped(WeaponObject weaponContext)
+    public virtual void OnUnequipped(ItemObject weaponContext)
     { }
 
     protected void PlayAttackSound(AudioSource audioSource)

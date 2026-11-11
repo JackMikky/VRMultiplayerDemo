@@ -8,7 +8,7 @@ public class Pistol : GunEquipmentBase
         Category = EquipmentCategory.Gun;
     }
 
-    protected override void OnFired(Transform user, Transform target, WeaponObject weaponContext)
+    protected override void OnFired(Transform user, Transform target, ItemObject weaponContext)
     {
         Debug.Log($"[Pistol]{user.name} fires at {target.name} using {Name}!");
     }

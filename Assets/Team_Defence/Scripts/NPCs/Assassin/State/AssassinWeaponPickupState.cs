@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class AssassinWeaponPickupState : IState
@@ -6,7 +7,7 @@ public class AssassinWeaponPickupState : IState
     private const float NavMeshSampleDistance = 2f;
 
     private readonly AssassinNPC npc;
-    private WeaponObject targetWeapon;
+    private SearchableObject targetSearchableObject;
     private float nextSearchTime;
     private float nextPathUpdateTime;
 
@@ -17,7 +18,7 @@ public class AssassinWeaponPickupState : IState
 
     public void Enter()
     {
-        targetWeapon = null;
+        targetSearchableObject = null;
         nextSearchTime = Time.time;
         nextPathUpdateTime = 0f;
 
@@ -46,13 +47,13 @@ public class AssassinWeaponPickupState : IState
             return;
         }
 
-        if (targetWeapon != null && targetWeapon.IsPickedUp)
+        if (targetSearchableObject != null && !targetSearchableObject.HasWeaponItems())
         {
             ReleaseTarget();
             nextSearchTime = Time.time + npc.WeaponSearchInterval;
         }
 
-        if (targetWeapon == null)
+        if (targetSearchableObject == null)
         {
             npc.Agent.isStopped = true;
             npc.SyncMovementAnimation();
@@ -77,12 +78,21 @@ public class AssassinWeaponPickupState : IState
             npc.Agent.isStopped = true;
             npc.ResetMovementAnimationFlags();
 
-            if (npc.TryEquipWeapon(targetWeapon))
+            if (targetSearchableObject != null)
             {
-                WeaponManager.Instance?.ReleaseReservation(npc, targetWeapon);
-                targetWeapon = null;
-                npc.ResumeAfterWeaponPickup();
-                return;
+                ItemObject weapon = targetSearchableObject.GetBestWeapon();
+                if (weapon != null)
+                {
+                    if (npc.TryEquipWeapon(weapon))
+                    {
+                        ReleaseTarget();
+                        npc.ResumeAfterWeaponPickup();
+                        return;
+                    }
+
+                    targetSearchableObject.AddItem(weapon);
+                    weapon.SetEnabled(false);
+                }
             }
 
             ReleaseTarget();
@@ -123,8 +133,8 @@ public class AssassinWeaponPickupState : IState
     {
         nextSearchTime = Time.time + npc.WeaponSearchInterval;
 
-        WeaponManager manager = WeaponManager.Instance;
-        if (manager == null || !manager.TryReserveRandomWeapon(npc, out targetWeapon))
+        SceneItemManager manager = SceneItemManager.Instance;
+        if (manager == null || !manager.TryReserveRandomSearchableObjectWithWeapon(npc, out targetSearchableObject))
         {
             return;
         }
@@ -138,13 +148,13 @@ public class AssassinWeaponPickupState : IState
 
     private bool SetDestinationToTarget()
     {
-        if (targetWeapon == null || npc.Agent == null || !npc.Agent.isOnNavMesh)
+        if (targetSearchableObject == null || npc.Agent == null || !npc.Agent.isOnNavMesh)
         {
             return false;
         }
 
         if (!NavMesh.SamplePosition(
-                targetWeapon.transform.position,
+                targetSearchableObject.transform.position,
                 out NavMeshHit navHit,
                 NavMeshSampleDistance,
                 npc.Agent.areaMask))
@@ -164,7 +174,12 @@ public class AssassinWeaponPickupState : IState
 
     private bool HasReachedWeapon()
     {
-        Vector3 offset = targetWeapon.transform.position - npc.transform.position;
+        if (targetSearchableObject == null)
+        {
+            return false;
+        }
+
+        Vector3 offset = targetSearchableObject.transform.position - npc.transform.position;
         offset.y = 0f;
 
         float pickupDistance = Mathf.Max(npc.WeaponPickupDistance, npc.Agent.stoppingDistance);
@@ -176,10 +191,10 @@ public class AssassinWeaponPickupState : IState
 
     private void ReleaseTarget()
     {
-        if (targetWeapon != null)
+        if (targetSearchableObject != null)
         {
-            WeaponManager.Instance?.ReleaseReservation(npc, targetWeapon);
-            targetWeapon = null;
+            SceneItemManager.Instance?.ReleaseSearchableReservation(npc, targetSearchableObject);
+            targetSearchableObject = null;
         }
     }
 }

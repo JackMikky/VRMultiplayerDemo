@@ -70,6 +70,7 @@ public class AssassinNPC : NPCBase
 
     [Header("Post-Pickup Wandering")]
     [SerializeField, Min(0f)] private float minWanderDuration = 4f;
+
     [SerializeField, Min(0f)] private float maxWanderDuration = 8f;
     [SerializeField, Min(0.1f)] private float wanderRadius = 4f;
     [SerializeField, Min(0.1f)] private float minWanderPauseInterval = 3f;
@@ -122,13 +123,13 @@ public class AssassinNPC : NPCBase
         if (agent != null) agent.autoTraverseOffMeshLink = false;
         UpdateWeaponAttackDistance();
 
-        if (currentEquipment == null && WeaponManager.Instance != null && weaponHoldPoint != null)
+        if (currentEquipment == null && SceneItemManager.Instance != null && weaponHoldPoint != null)
         {
             ChangeToState(WeaponPickupState, AssassinState.SeekingWeapon);
             return;
         }
 
-        if (currentEquipment == null && WeaponManager.Instance != null)
+        if (currentEquipment == null && SceneItemManager.Instance != null)
         {
             Debug.LogWarning($"[{name}] Weapon hold point is not assigned; skipping weapon pickup.", this);
         }
@@ -136,7 +137,7 @@ public class AssassinNPC : NPCBase
         ChangeToState(WanderingState, AssassinState.Wandering);
     }
 
-    public bool TryEquipWeapon(WeaponObject weapon)
+    public bool TryEquipWeapon(ItemObject weapon)
     {
         if (currentEquipment != null || weapon == null || weaponHoldPoint == null)
         {
