@@ -56,10 +56,6 @@ public class SearchableObject : MonoBehaviour
         }
 
         SceneItemManager.Instance?.RegisterSearchableObject(this);
-
-        //TODO: Remove this after testing, this is just for testing the bomb planting functionality
-        var bombItem = searchableItems.Find(item => item != null && item.ItemCategory == EquipmentCategory.Bomb);
-        PlantTimedBomb(bombItem?.Equipment as TimedBomb, this.transform, bombItem);
     }
 
     private void OnDestroy()
@@ -104,6 +100,12 @@ public class SearchableObject : MonoBehaviour
 
         if (item != null && !searchableItems.Contains(item))
         {
+            // Set the item as a child of this SearchableObject
+            item.SetEnabled(false);
+            item.transform.SetParent(transform);
+            item.transform.localPosition = Vector3.zero;
+            item.transform.localRotation = Quaternion.identity;
+
             searchableItems.Add(item);
         }
     }
@@ -170,11 +172,18 @@ public class SearchableObject : MonoBehaviour
     public ItemObject GetBestWeapon()
     {
         var item = searchableItems
-            .Where(item => item != null && (item.ItemCategory == EquipmentCategory.Bomb || item.ItemCategory == EquipmentCategory.Gun || item.ItemCategory == EquipmentCategory.Melee))
+            .Where(item => item != null && IsWeaponCategory(item.ItemCategory))
             .OrderByDescending(item => GetWeaponScore(item.ItemCategory))
             .FirstOrDefault();
         RemoveItem(item);
         return item;
+    }
+
+    public IReadOnlyList<ItemObject> GetAvailableWeapons()
+    {
+        return searchableItems
+            .Where(item => item != null && IsWeaponCategory(item.ItemCategory))
+            .ToList();
     }
 
     public ItemObject GetBombItem()

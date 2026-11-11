@@ -2276,7 +2276,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -32718,12 +32718,12 @@ PrefabInstance:
     - target: {fileID: 48055099341427816, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
         type: 3}
       propertyPath: InstantiatableCount
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 48055099341427816, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
         type: 3}
       propertyPath: itemPrefabs.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 48055099341427816, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
         type: 3}
@@ -32736,6 +32736,12 @@ PrefabInstance:
       propertyPath: 'itemPrefabs.Array.data[1]'
       value: 
       objectReference: {fileID: 7230835406997364563, guid: c5a46552fd5a5ea4d8dbd3c40c43eb20,
+        type: 3}
+    - target: {fileID: 48055099341427816, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
+        type: 3}
+      propertyPath: 'itemPrefabs.Array.data[2]'
+      value: 
+      objectReference: {fileID: 7169227144428614796, guid: 37609d1584796d046bbaae5700b73175,
         type: 3}
     - target: {fileID: 1733266443251843131, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
         type: 3}
