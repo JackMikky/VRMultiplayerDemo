@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db4c4f5d339597f4ab677ce85f3ceb3a, type: 3}
+  m_Name: TimedBomb
+  m_EditorClassIdentifier: Assembly-CSharp::TimedBomb
+  Category: 3
+  Name: TimedBomb
+  attackSpeed: 1
+  damage: 100
+  attackDistance: 0
+  Description: TimedBomb
+  attackSounds: []
+  explosionRadius: 15
+  damageMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  explosionEffectPrefab: {fileID: 1121192042590650, guid: e1b08032bec16ba4eb1ae23cbd572664,
+    type: 3}
+  canDamageUser: 0
+  fuseSeconds: 60
