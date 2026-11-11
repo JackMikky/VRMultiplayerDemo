@@ -18,8 +18,14 @@ MonoBehaviour:
   damage: 100
   attackDistance: 0
   Description: TimedBomb
-  attackSounds: []
-  explosionRadius: 15
+  attackSounds:
+  - {fileID: 8300000, guid: d4aee29185389894b9cc0d8873904a49, type: 3}
+  - {fileID: 8300000, guid: f0bba60dd1813bd40af826dbaa99b983, type: 3}
+  - {fileID: 8300000, guid: c1f8c36ebdb20024ea8a59ec457d582c, type: 3}
+  - {fileID: 8300000, guid: fd706038486fee041947a774223dc22e, type: 3}
+  - {fileID: 8300000, guid: f01c623f724825e44a923d1ae50256f2, type: 3}
+  - {fileID: 8300000, guid: 8b3f676fe7b41044495a2964396b8ba3, type: 3}
+  explosionRadius: 20
   damageMask:
     serializedVersion: 2
     m_Bits: 4294967295

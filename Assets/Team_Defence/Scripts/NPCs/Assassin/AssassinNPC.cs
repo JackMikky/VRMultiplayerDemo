@@ -12,6 +12,7 @@ public class AssassinNPC : NPCBase
     public AssassinWeaponPickupState WeaponPickupState { get; private set; }
     public AssassinNavLinkState NavLinkState { get; private set; }
     public AssassinInteractedState InteractedState { get; private set; }
+    public AssassinBombPlantState BombPlantState { get; private set; }
 
     [HideInInspector] public IState previousState;
     [HideInInspector] public AssassinState previousEnumState;
@@ -94,6 +95,19 @@ public class AssassinNPC : NPCBase
     public float WeaponPickupDistance => weaponPickupDistance;
     public float WeaponSearchInterval => weaponSearchInterval;
 
+    [Header("Personality")]
+    [SerializeField] private AssassinPersonalityProfile personalityProfile;
+
+    public AssassinPersonalityProfile PersonalityProfile => personalityProfile;
+
+    [Header("Bomb Planting")]
+    [SerializeField, Min(0.1f)] private float bombPlantDistance = 1.5f;
+
+    [SerializeField, Min(0.05f)] private float bombSearchInterval = 0.5f;
+
+    public float BombPlantDistance => bombPlantDistance;
+    public float BombSearchInterval => bombSearchInterval;
+
     [Space(10)]
     [Header("Debug")]
     [SerializeField] private AssassinState currentState = AssassinState.Wandering;
@@ -111,7 +125,7 @@ public class AssassinNPC : NPCBase
         NavLinkState = new AssassinNavLinkState(this);
         InteractedState = new AssassinInteractedState(this);
         WeaponPickupState = new AssassinWeaponPickupState(this);
-        AttackState = new AssassinAttackState(this);
+        BombPlantState = new AssassinBombPlantState(this);
     }
 
     protected override void OnSetupBehavior()
@@ -132,6 +146,23 @@ public class AssassinNPC : NPCBase
         if (currentEquipment == null && SceneItemManager.Instance != null)
         {
             Debug.LogWarning($"[{name}] Weapon hold point is not assigned; skipping weapon pickup.", this);
+        }
+
+        if (currentEquipment != null)
+        {
+            currentEquipment.SetEnabled(false);
+            currentEquipment.PickUp(this.weaponHoldPoint);
+
+            if (currentEquipment.ItemCategory == EquipmentCategory.Bomb)
+            {
+                ChangeToState(BombPlantState, AssassinState.BombPlanting);
+                return;
+            }
+            else
+            {
+                ChangeToState(WanderingState, AssassinState.Wandering);
+                return;
+            }
         }
 
         ChangeToState(WanderingState, AssassinState.Wandering);
@@ -238,6 +269,11 @@ public class AssassinNPC : NPCBase
         {
             transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
         }
+    }
+
+    public void ClearEquipment()
+    {
+        currentEquipment = null;
     }
 
     #endregion Helpers exposed for states

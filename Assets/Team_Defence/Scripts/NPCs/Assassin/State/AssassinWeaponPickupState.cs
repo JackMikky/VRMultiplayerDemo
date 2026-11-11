@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -79,7 +81,7 @@ public class AssassinWeaponPickupState : IState
 
             if (targetSearchableObject != null)
             {
-                ItemObject weapon = targetSearchableObject.GetBestWeapon();
+                ItemObject weapon = SelectBestWeapon(targetSearchableObject);
                 if (weapon != null)
                 {
                     if (npc.TryEquipWeapon(weapon))
@@ -195,5 +197,68 @@ public class AssassinWeaponPickupState : IState
             SceneItemManager.Instance?.ReleaseSearchableReservation(npc, targetSearchableObject);
             targetSearchableObject = null;
         }
+    }
+
+    private ItemObject SelectBestWeapon(SearchableObject searchable)
+    {
+        IReadOnlyList<ItemObject> availableWeapons = searchable.GetAvailableWeapons();
+        if (availableWeapons == null || availableWeapons.Count == 0)
+        {
+            return null;
+        }
+
+        AssassinPersonalityProfile personality = npc.PersonalityProfile;
+
+        float totalWeight = 0f;
+        for (int i = 0; i < availableWeapons.Count; i++)
+        {
+            ItemObject candidate = availableWeapons[i];
+            if (candidate == null)
+            {
+                continue;
+            }
+
+            totalWeight += personality != null ? personality.GetWeaponWeight(candidate.ItemCategory) : 1f;
+        }
+
+        ItemObject selectedWeapon = null;
+
+        if (totalWeight <= 0f)
+        {
+            selectedWeapon = availableWeapons.FirstOrDefault(item => item != null);
+        }
+        else
+        {
+            float roll = Random.Range(0f, totalWeight);
+            float cumulative = 0f;
+
+            for (int i = 0; i < availableWeapons.Count; i++)
+            {
+                ItemObject candidate = availableWeapons[i];
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                cumulative += personality != null ? personality.GetWeaponWeight(candidate.ItemCategory) : 1f;
+                if (roll <= cumulative)
+                {
+                    selectedWeapon = candidate;
+                    break;
+                }
+            }
+
+            if (selectedWeapon == null)
+            {
+                selectedWeapon = availableWeapons.LastOrDefault(item => item != null);
+            }
+        }
+
+        if (selectedWeapon != null)
+        {
+            searchable.RemoveItem(selectedWeapon);
+        }
+
+        return selectedWeapon;
     }
 }

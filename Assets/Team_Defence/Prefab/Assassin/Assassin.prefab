@@ -181,6 +181,9 @@ MonoBehaviour:
   weaponHoldPoint: {fileID: 3293356720851508103}
   weaponPickupDistance: 1.25
   weaponSearchInterval: 0.5
+  personalityProfile: {fileID: 11400000, guid: f6831e14ee804274593472ab052c8900, type: 2}
+  bombPlantDistance: 1.5
+  bombSearchInterval: 0.5
   currentState: 9
 --- !u!114 &1920606964429723827
 MonoBehaviour:
