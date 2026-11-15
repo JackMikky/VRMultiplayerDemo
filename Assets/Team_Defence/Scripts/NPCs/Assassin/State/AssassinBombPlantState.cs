@@ -43,7 +43,7 @@ public class AssassinBombPlantState : IState
     {
         if (npc.CurrentEquipment == null || npc.CurrentEquipment.ItemCategory != EquipmentCategory.Bomb)
         {
-            ResumeNormalBehavior();
+            npc.ChangeToState(npc.WanderingState, AssassinState.Wandering);
             return;
         }
 
@@ -244,6 +244,6 @@ public class AssassinBombPlantState : IState
 
     private void ResumeNormalBehavior()
     {
-        npc.ChangeToState(npc.WanderingState, AssassinState.Wandering);
+        npc.ChangeToState(npc.LeavingState, AssassinState.Leaving);
     }
 }

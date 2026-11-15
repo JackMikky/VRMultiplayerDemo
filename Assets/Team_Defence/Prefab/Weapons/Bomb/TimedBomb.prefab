@@ -154,6 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemObject
   equipmentAsset: {fileID: 11400000, guid: d5dacc2c51fea6843917951b2347585d, type: 2}
+  firePoint: {fileID: 5926578453463791524}
 --- !u!82 &7325734967191027199
 AudioSource:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ public class AssassinNPC : NPCBase
     public AssassinNavLinkState NavLinkState { get; private set; }
     public AssassinInteractedState InteractedState { get; private set; }
     public AssassinBombPlantState BombPlantState { get; private set; }
+    public AssassinLeavingState LeavingState { get; private set; }
 
     [HideInInspector] public IState previousState;
     [HideInInspector] public AssassinState previousEnumState;
@@ -126,6 +127,7 @@ public class AssassinNPC : NPCBase
         InteractedState = new AssassinInteractedState(this);
         WeaponPickupState = new AssassinWeaponPickupState(this);
         BombPlantState = new AssassinBombPlantState(this);
+        LeavingState = new AssassinLeavingState(this);
     }
 
     protected override void OnSetupBehavior()

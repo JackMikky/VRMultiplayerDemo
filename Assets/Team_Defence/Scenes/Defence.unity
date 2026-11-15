@@ -13955,6 +13955,37 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &845638424
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 845638425}
+  m_Layer: 0
+  m_Name: NPCSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &845638425
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845638424}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -41.47, y: 0.0000009536743, z: -2.41}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &851923769
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27886,7 +27917,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   citizenPrefab: {fileID: 7091489066321530029, guid: 7faf9c05d9cbc96419c4ceb24c5b129c,
     type: 3}
-  assassinPrefab: {fileID: 7091489066321530029, guid: cebd8654d57774048b0172fc9df02581,
+  assassinPrefab: {fileID: 7091489066321530029, guid: 17e32315532762640953d50baeb92563,
     type: 3}
   vipTransform: {fileID: 4111821227440638}
   vipSpawnPoint: {fileID: 0}
@@ -27894,6 +27925,7 @@ MonoBehaviour:
   audienceGatheringPoint: {fileID: 0}
   audienceGatheringRadius: 3
   assassinSpawnPoint: {fileID: 1187827487}
+  npcLeavePoint: {fileID: 845638425}
   npcCount: 0
   enableClickToSpawnSuspect: 1
   enableClickToInteractSuspect: 1
@@ -33549,6 +33581,7 @@ SceneRoots:
   - {fileID: 1568597277}
   - {fileID: 627715567}
   - {fileID: 1187827487}
+  - {fileID: 845638425}
   - {fileID: 6205591812202829951}
   - {fileID: 1395993151}
   - {fileID: 1783556283}

@@ -9,6 +9,7 @@ public abstract class BombEquipmentBase : ScriptableEquipmentBase
 
     [SerializeField] protected LayerMask damageMask = ~0;
     [SerializeField] protected GameObject explosionEffectPrefab;
+    [SerializeField, Min(0f)] protected float explosionEffectLifetime = 3f;
     [SerializeField] protected bool canDamageUser;
 
     private void OnValidate()
@@ -28,7 +29,8 @@ public abstract class BombEquipmentBase : ScriptableEquipmentBase
     {
         if (explosionEffectPrefab != null)
         {
-            Object.Instantiate(explosionEffectPrefab, explosionCenter, Quaternion.identity);
+            GameObject effect = Object.Instantiate(explosionEffectPrefab, explosionCenter, Quaternion.identity);
+            Object.Destroy(effect, explosionEffectLifetime);
         }
         else
         {

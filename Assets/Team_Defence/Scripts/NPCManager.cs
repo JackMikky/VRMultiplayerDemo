@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -35,6 +34,12 @@ public class NPCManager : MonoBehaviour
 
     [Header("Assasin Spawn Point")]
     [SerializeField] private Transform assassinSpawnPoint;
+
+    [Header("NPC Leave Point")]
+    [Tooltip("The destination the NPC will walk to and disappear at after planting the bomb.")]
+    [SerializeField] private Transform npcLeavePoint;
+
+    public Transform NPCLeavePoint => npcLeavePoint;
 
     public int npcCount = 10;
 
@@ -74,7 +79,7 @@ public class NPCManager : MonoBehaviour
         {
             SpawnSuspectAt(assassinSpawnPoint.position);
         }
-        
+
         if (vipTransform == null || citizenPrefab == null || crowdSpawnPoint == null) return;
 
         if (vipSpawnPoint != null)
@@ -236,12 +241,12 @@ public class NPCManager : MonoBehaviour
         }
     }
 
-    public void UnregisterAssassin(NPCBase npc)
+    public void UnregisterAssassin(NPCBase npc, bool wasCaptured = true)
     {
         if (npc != null && assassinNPCs.Contains(npc))
         {
             assassinNPCs.Remove(npc);
-            if (assassinNPCs.Count == 0)
+            if (wasCaptured && assassinNPCs.Count == 0)
             {
                 Debug.Log("[System] All Assassin NPCs have been removed from the scene.");
                 GameManager.Instance.PlayerWin();

@@ -16,7 +16,8 @@ public enum AssassinState
     Attacking = 7,
     SeekingWeapon = 8,
     Wandering = 9,
-    BombPlanting = 10
+    BombPlanting = 10,
+    Leaving = 11
 }
 
 public enum PoliceState
