@@ -11,4 +11,10 @@ public static class BehaviorConstants
     public const string AttackBehaviorMenuName = "NPC/Behaviors/Attack/";
 
     public const string NavLinkBehaviorMenuName = "NPC/Behaviors/NavLinking/";
+
+    public const string BombPlantBehaviorMenuName = "NPC/Behaviors/BombPlant/";
+
+    public const string PickupBehaviorMenuName = "NPC/Behaviors/Pickup/";
+
+    public const string LeavingBehaviorMenuName = "NPC/Behaviors/Leaving/";
 }

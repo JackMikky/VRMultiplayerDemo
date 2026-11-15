@@ -29,7 +29,7 @@ ModelImporter:
     resampleCurves: 1
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
-    motionNodeName: 
+    motionNodeName: <Root Transform>
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -761,7 +761,8 @@ ModelImporter:
     - name: RightFinger32
       parentName: RightFinger31
       position: {x: 0.000000081863256, y: 0.025687672, z: -8.9406965e-10}
-      rotation: {x: -0.00000048056194, y: -0.00000035017786, z: -0.0000012875527, w: 1}
+      rotation: {x: -0.00000048056194, y: -0.00000035017786, z: -0.0000012875527,
+        w: 1}
       scale: {x: 0.99999964, y: 0.99999976, z: 1.0000001}
     - name: RightFinger4
       parentName: RHand
@@ -771,7 +772,8 @@ ModelImporter:
     - name: RightFinger41
       parentName: RightFinger4
       position: {x: -0.00000013433396, y: 0.03395221, z: -0.0000000077486035}
-      rotation: {x: 0.000000029802315, y: -0.00000013411042, z: -0.00000047590572, w: 1}
+      rotation: {x: 0.000000029802315, y: -0.00000013411042, z: -0.00000047590572,
+        w: 1}
       scale: {x: 0.99999976, y: 0.9999999, z: 1.0000001}
     - name: RightFinger42
       parentName: RightFinger41

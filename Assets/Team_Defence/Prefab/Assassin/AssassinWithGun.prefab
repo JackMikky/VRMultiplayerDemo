@@ -168,13 +168,16 @@ MonoBehaviour:
   interactedBehavior: {fileID: 11400000, guid: 69e5ff2b602ffcf48961856f5cb89bb7, type: 2}
   attackBehavior: {fileID: 11400000, guid: e529810f6c74dec42be9160cb93c09ae, type: 2}
   navLinkingBehavior: {fileID: 11400000, guid: 34a3062147ffc2f4eb771746ba11562a, type: 2}
+  bombPlantBehavior: {fileID: 0}
+  weaponPickupBehavior: {fileID: 0}
+  leavingBehavior: {fileID: 0}
   nextPathUpdateTime: 0
-  walkSpeed: 1.5
+  walkSpeed: 2
   runSpeed: 4
   startRunningDistance: 15
   stayingAnimationCount: 4
   minWanderDuration: 4
-  maxWanderDuration: 11
+  maxWanderDuration: 55
   wanderRadius: 30
   minWanderPauseInterval: 3
   maxWanderPauseInterval: 6
@@ -185,6 +188,7 @@ MonoBehaviour:
   personalityProfile: {fileID: 11400000, guid: 261ccef2af7c0064eb9276c1bbe3640c, type: 2}
   bombPlantDistance: 1.5
   bombSearchInterval: 0.5
+  standUpDuration: 0.5
   currentState: 9
 --- !u!114 &1920606964429723827
 MonoBehaviour:

@@ -88,6 +88,12 @@ public class AssassinLeavingState : IState
 
     private void Despawn()
     {
+        if (npc.LeavingBehavior != null)
+        {
+            npc.LeavingBehavior.Despawn(npc);
+            return;
+        }
+
         if (NPCManager.Instance != null)
         {
             NPCManager.Instance.UnregisterAssassin(npc, wasCaptured: false);

@@ -53,6 +53,21 @@ public class AssassinNPC : NPCBase
 
     public ScriptableNavLinkBehavior NavLinkingBehavior => navLinkingBehavior;
 
+    [Header("Bomb Planting")]
+    [SerializeField] private ScriptableBombPlantBehavior bombPlantBehavior;
+
+    public ScriptableBombPlantBehavior BombPlantBehavior => bombPlantBehavior;
+
+    [Header("Weapon Pickup")]
+    [SerializeField] private ScriptablePickupBehavior weaponPickupBehavior;
+
+    public ScriptablePickupBehavior WeaponPickupBehavior => weaponPickupBehavior;
+
+    [Header("Leaving")]
+    [SerializeField] private ScriptableLeavingBehavior leavingBehavior;
+
+    public ScriptableLeavingBehavior LeavingBehavior => leavingBehavior;
+
     [HideInInspector] public float nextPathUpdateTime;
 
     #endregion Behavior Settings
@@ -108,6 +123,12 @@ public class AssassinNPC : NPCBase
 
     public float BombPlantDistance => bombPlantDistance;
     public float BombSearchInterval => bombSearchInterval;
+
+    [Header("Crouch/Search Animation")]
+    [Tooltip("Extra time to wait after a crouch/search action completes, so the stand-up animation can finish before moving again.")]
+    [SerializeField, Min(0f)] private float standUpDuration = 0.5f;
+
+    public float StandUpDuration => standUpDuration;
 
     [Space(10)]
     [Header("Debug")]

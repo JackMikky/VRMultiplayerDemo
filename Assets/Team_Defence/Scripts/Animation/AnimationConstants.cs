@@ -12,6 +12,8 @@ public static class AnimationConstants
 
     public static string ExposedString = "Exposed";
 
+    public static string IsSearchingString = "IsSearching";
+
     public static string IsRunningString = "IsRunning";
 
     public static string StayingString = "Staying";
@@ -43,6 +45,11 @@ public static class AnimationConstants
     /// Animator parameter "Exposed".For Assassins.
     /// </summary>
     public static readonly int Exposed = Animator.StringToHash(ExposedString);
+
+    /// <summary>
+    /// Animator parameter "IsSearching". For Assassins, used while crouching to search/pick up a weapon or plant a bomb.
+    /// </summary>
+    public static readonly int IsSearching = Animator.StringToHash(IsSearchingString);
 
     /// <summary>
     /// Animator parameter "AnimationConstants.IsRunning".For all NPCs.

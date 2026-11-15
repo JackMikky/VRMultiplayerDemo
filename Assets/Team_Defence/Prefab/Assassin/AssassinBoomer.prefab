@@ -105,7 +105,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 1479372276
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 1.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 200
@@ -168,13 +168,17 @@ MonoBehaviour:
   interactedBehavior: {fileID: 11400000, guid: 69e5ff2b602ffcf48961856f5cb89bb7, type: 2}
   attackBehavior: {fileID: 11400000, guid: e529810f6c74dec42be9160cb93c09ae, type: 2}
   navLinkingBehavior: {fileID: 11400000, guid: 34a3062147ffc2f4eb771746ba11562a, type: 2}
+  bombPlantBehavior: {fileID: 11400000, guid: 289ce066290afe94eb184dcf300366fb, type: 2}
+  weaponPickupBehavior: {fileID: 11400000, guid: 6baa891fff4e9d14bb4381b7c27050f4,
+    type: 2}
+  leavingBehavior: {fileID: 11400000, guid: 52fd21c9cd63c3b4597cdb7c787650a9, type: 2}
   nextPathUpdateTime: 0
-  walkSpeed: 1.5
+  walkSpeed: 2
   runSpeed: 4
   startRunningDistance: 15
   stayingAnimationCount: 4
   minWanderDuration: 4
-  maxWanderDuration: 5
+  maxWanderDuration: 55
   wanderRadius: 30
   minWanderPauseInterval: 3
   maxWanderPauseInterval: 6
@@ -185,6 +189,7 @@ MonoBehaviour:
   personalityProfile: {fileID: 11400000, guid: 6a4ec2e88be88b1409ede9b1e781c2c5, type: 2}
   bombPlantDistance: 1.5
   bombSearchInterval: 0.5
+  standUpDuration: 0.5
   currentState: 9
 --- !u!114 &1920606964429723827
 MonoBehaviour:

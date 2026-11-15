@@ -4,13 +4,15 @@ using UnityEngine.AI;
 public class AssassinBombPlantState : IState
 {
     private const float NavMeshSampleDistance = 2f;
-    private const float PlantingDuration = 2.5f;
+    private const float DefaultPlantingDuration = 14.5f;
 
     private readonly AssassinNPC npc;
     private SearchableObject targetSearchableObject;
     private float nextSearchTime;
     private float nextPathUpdateTime;
     private float plantingStartTime;
+    private bool hasPlantedBomb;
+    private float standUpEndTime;
 
     public AssassinBombPlantState(AssassinNPC npc)
     {
@@ -23,6 +25,8 @@ public class AssassinBombPlantState : IState
         nextSearchTime = Time.time;
         nextPathUpdateTime = 0f;
         plantingStartTime = 0f;
+        hasPlantedBomb = false;
+        standUpEndTime = 0f;
 
         npc.SetNavigationMode(useAgent: true);
         npc.ResetMovementAnimationFlags();
@@ -41,6 +45,15 @@ public class AssassinBombPlantState : IState
 
     public void Update()
     {
+        if (hasPlantedBomb)
+        {
+            if (Time.time >= standUpEndTime)
+            {
+                ResumeNormalBehavior();
+            }
+            return;
+        }
+
         if (npc.CurrentEquipment == null || npc.CurrentEquipment.ItemCategory != EquipmentCategory.Bomb)
         {
             npc.ChangeToState(npc.WanderingState, AssassinState.Wandering);
@@ -82,21 +95,33 @@ public class AssassinBombPlantState : IState
         {
             npc.Agent.isStopped = true;
             npc.ResetMovementAnimationFlags();
+            if (npc.Anim != null)
+            {
+                npc.Anim.SetBool(AnimationConstants.IsIdling, true);
+            }
 
             if (plantingStartTime == 0f)
             {
                 plantingStartTime = Time.time;
                 if (npc.Anim != null)
                 {
-                    npc.Anim.SetTrigger(AnimationConstants.Exposed);
+                    npc.Anim.SetBool(AnimationConstants.IsSearching, true);
                 }
             }
 
-            if (Time.time - plantingStartTime >= PlantingDuration)
+            float plantingDuration = npc.BombPlantBehavior != null ? npc.BombPlantBehavior.PlantingDuration : DefaultPlantingDuration;
+                        if (Time.time - plantingStartTime >= plantingDuration)
             {
-                PlantBomb();
+                npc.BombPlantBehavior?.PlantBomb(npc, targetSearchableObject);
                 ReleaseTarget();
-                ResumeNormalBehavior();
+
+                if (npc.Anim != null)
+                {
+                    npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+                }
+
+                hasPlantedBomb = true;
+                standUpEndTime = Time.time + npc.StandUpDuration;
                 return;
             }
 
@@ -116,6 +141,11 @@ public class AssassinBombPlantState : IState
     public void Exit()
     {
         ReleaseTarget();
+
+        if (npc.Anim != null)
+        {
+            npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+        }
 
         if (npc.Agent != null && npc.Agent.enabled)
         {
@@ -200,36 +230,6 @@ public class AssassinBombPlantState : IState
             || (!npc.Agent.pathPending
                 && npc.Agent.hasPath
                 && npc.Agent.remainingDistance <= plantDistance);
-    }
-
-    private void PlantBomb()
-    {
-        if (targetSearchableObject == null || npc.CurrentEquipment == null)
-        {
-            return;
-        }
-
-        TimedBomb bomb = npc.CurrentEquipment.Equipment as TimedBomb;
-        if (bomb != null)
-        {
-            ItemObject bombItem = npc.CurrentEquipment;
-
-            // Drop the bomb from the NPC
-            if (bombItem.Drop())
-            {
-                // AddItem handles all the positioning and hierarchy setup
-                targetSearchableObject.AddItem(bombItem);
-
-                // Clear the NPC's equipment reference
-                npc.ClearEquipment();
-
-                Debug.Log($"[{npc.name}] Transferred bomb to {targetSearchableObject.name}");
-            }
-
-            // Plant the bomb (trigger the explosion timer)
-            targetSearchableObject.PlantTimedBomb(bomb, npc.transform, bombItem);
-            Debug.Log($"[{npc.name}] Planted bomb at {targetSearchableObject.name}");
-        }
     }
 
     private void ReleaseTarget()
