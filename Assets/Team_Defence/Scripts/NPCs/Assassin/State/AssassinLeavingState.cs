@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine;
+
 using UnityEngine.AI;
 
 public class AssassinLeavingState : IState

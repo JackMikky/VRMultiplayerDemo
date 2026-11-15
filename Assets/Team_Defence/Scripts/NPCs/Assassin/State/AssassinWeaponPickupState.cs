@@ -106,7 +106,7 @@ public class AssassinWeaponPickupState : IState
             }
 
             float pickupDuration = npc.WeaponPickupBehavior != null ? npc.WeaponPickupBehavior.PickupDuration : DefaultPickupDuration;
-                        if (Time.time - pickupStartTime < pickupDuration)
+            if (Time.time - pickupStartTime < pickupDuration)
             {
                 return;
             }
