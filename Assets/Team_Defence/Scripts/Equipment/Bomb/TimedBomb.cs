@@ -7,6 +7,9 @@ public class TimedBomb : BombEquipmentBase
     [Header("Timed Bomb Settings")]
     [SerializeField, Min(0.1f)] private float fuseSeconds = 3f;
 
+    [Tooltip("How long the planted bomb object stays in the scene after exploding before being destroyed.")]
+    [SerializeField, Min(0f)] private float despawnDelay = 2.5f;
+
     public override void UseEquipment(Transform user, Transform target, ItemObject weaponContext)
     {
         if (weaponContext == null || user == null || target == null) return;
@@ -43,6 +46,11 @@ public class TimedBomb : BombEquipmentBase
         ExplodeAt(user, center, bombItem, center.position);
 
         GameManager.Instance?.EndGame();
+
+        if (bombItem != null)
+        {
+            Object.Destroy(bombItem.gameObject, despawnDelay);
+        }
     }
 
     protected override void OnExploded(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)

@@ -18,7 +18,11 @@ MonoBehaviour:
   damage: 100
   attackDistance: 0
   Description: Grenade
-  attackSounds: []
+  attackSounds:
+  - {fileID: 8300000, guid: 8524588a69a4f3e40bb597b6221138f1, type: 3}
+  - {fileID: 8300000, guid: fc96116dc3c141440aabb5605744fea2, type: 3}
+  - {fileID: 8300000, guid: c401d00c96b512e488d2e3bf5d111509, type: 3}
+  - {fileID: 8300000, guid: c2153dcd0edd22f40bdebf613271bae7, type: 3}
   explosionRadius: 10
   damageMask:
     serializedVersion: 2

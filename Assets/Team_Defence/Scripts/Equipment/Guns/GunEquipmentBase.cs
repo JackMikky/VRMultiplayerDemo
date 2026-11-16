@@ -12,6 +12,15 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
     [Tooltip("On-hit effect, optional")]
     [SerializeField] protected GameObject hitEffectPrefab;
 
+    [Tooltip("How long the hit effect stays in the scene before being destroyed")]
+    [SerializeField, Min(0f)] protected float hitEffectLifetime = 2f;
+
+    [Tooltip("Muzzle flash effect spawned at the weapon's fire point, optional")]
+    [SerializeField] protected GameObject muzzleEffectPrefab;
+
+    [Tooltip("How long the muzzle effect stays in the scene before being destroyed")]
+    [SerializeField, Min(0f)] protected float muzzleEffectLifetime = 1f;
+
     #region Debugging Settings
 
     [Header("Debug")]
@@ -38,17 +47,25 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
     {
         if (weaponContext == null || target == null) return;
 
-        Vector3 origin = user.position + Vector3.up * muzzleHeight;
+        Transform firePoint = weaponContext.FirePoint;
+        Vector3 origin = firePoint != null ? firePoint.position : user.position + Vector3.up * muzzleHeight;
         Vector3 targetPoint = target.position + Vector3.up * muzzleHeight;
         Vector3 direction = (targetPoint - origin).normalized;
 
         bool didHit = Physics.Raycast(origin, direction, out RaycastHit hit, attackDistance, hitMask);
 
+        if (muzzleEffectPrefab != null)
+        {
+            GameObject muzzleEffect = Object.Instantiate(muzzleEffectPrefab, origin, Quaternion.LookRotation(direction), firePoint);
+            Object.Destroy(muzzleEffect, muzzleEffectLifetime);
+        }
+
         if (didHit)
         {
             if (hitEffectPrefab != null)
             {
-                Object.Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                GameObject hitEffect = Object.Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                Object.Destroy(hitEffect, hitEffectLifetime);
             }
 
             if (hit.collider.TryGetComponent<IDamageable>(out var damageable))

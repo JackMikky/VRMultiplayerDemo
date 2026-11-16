@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Assassin_FlexibleIdleConfig
   m_EditorClassIdentifier: Assembly-CSharp::FlexibleIdleBehavior
   defaultAnimationTrigger: 
-  availableAnimationTriggers:
-  - Threatening
+  availableAnimationTriggers: []
   minInterval: 5
   maxInterval: 15
   actionChance: 0.25

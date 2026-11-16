@@ -6,9 +6,14 @@ public class ItemObject : MonoBehaviour
     [Header("Equipment Asset")]
     [SerializeField] private ScriptableEquipmentBase equipmentAsset;
 
+    [Header("Fire Point")]
+    [Tooltip("Where muzzle/attack effects should spawn (e.g. the gun's muzzle). Defaults to this transform if not set.")]
+    [SerializeField] private Transform firePoint;
+
     public ScriptableEquipmentBase Equipment => equipmentAsset;
     public AudioSource AudioSource { get; private set; }
     public bool IsPickedUp { get; private set; }
+    public Transform FirePoint => firePoint != null ? firePoint : transform;
 
     public EquipmentCategory ItemCategory => equipmentAsset != null ? equipmentAsset.Category : EquipmentCategory.None;
 

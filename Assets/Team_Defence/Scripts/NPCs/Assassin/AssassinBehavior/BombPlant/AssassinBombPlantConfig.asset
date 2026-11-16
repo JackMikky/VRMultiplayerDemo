@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 716618842820aa0468456161d10bd298, type: 3}
-  m_Name: NewAssassinNavLink
-  m_EditorClassIdentifier: Assembly-CSharp::AssassinJumpNavLinkBehavior
-  defaultAnimationTrigger: Jumping
+  m_Script: {fileID: 11500000, guid: 89bfe9026e9dbfb44ac5e2eba4eacedb, type: 3}
+  m_Name: AssassinBombPlantConfig
+  m_EditorClassIdentifier: Assembly-CSharp::AssassinBombPlantBehavior
+  defaultAnimationTrigger: 
