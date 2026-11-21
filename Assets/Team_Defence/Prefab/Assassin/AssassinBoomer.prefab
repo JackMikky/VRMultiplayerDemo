@@ -149,7 +149,7 @@ MonoBehaviour:
   cachedIdleAnimationHashes: 
   currentWaypointStayDuration: 0
   mark: {fileID: 1388017882453460408}
-  currentEquipment: {fileID: 252468440241668707}
+  currentEquipment: {fileID: 4486116703213915292}
   maxHealth: 100
   onDead:
     m_PersistentCalls:
@@ -476,24 +476,24 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37609d1584796d046bbaae5700b73175, type: 3}
---- !u!114 &252468440241668707 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7169227144428614796, guid: 37609d1584796d046bbaae5700b73175,
-    type: 3}
-  m_PrefabInstance: {fileID: 6989239931790653167}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d82be70232e24e44d8c6f6ffb252baad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemObject
 --- !u!4 &3657392509223043403 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5926578453463791524, guid: 37609d1584796d046bbaae5700b73175,
     type: 3}
   m_PrefabInstance: {fileID: 6989239931790653167}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4486116703213915292 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6827219473948768883, guid: 37609d1584796d046bbaae5700b73175,
+    type: 3}
+  m_PrefabInstance: {fileID: 6989239931790653167}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017afb072689b424b8a3d7d6b9c3b8c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BombItemObject
 --- !u!1001 &8085286258641580515
 PrefabInstance:
   m_ObjectHideFlags: 0

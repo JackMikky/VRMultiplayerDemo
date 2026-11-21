@@ -21,7 +21,7 @@ TagManager:
   - AssemblyTarget_4
   - TutorialBall
   - Weapon
-  - SearchableItem
+  - SearchableObject
   layers:
   - Default
   - TransparentFX

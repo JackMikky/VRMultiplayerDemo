@@ -24,13 +24,11 @@ public class AssassinBombPlantBehavior : ScriptableBombPlantBehavior
 
         AssassinNPC assassin = npc as AssassinNPC;
 
-        TimedBomb bomb = npc.CurrentEquipment.Equipment as TimedBomb;
-        if (bomb == null)
+        if (!(npc.CurrentEquipment is BombItemObject bombItem))
         {
+            Debug.LogWarning($"[{npc.name}] Equipped bomb is not a BombItemObject; cannot plant.", npc);
             return;
         }
-
-        ItemObject bombItem = npc.CurrentEquipment;
 
         // Drop the bomb from the NPC
         if (bombItem.Drop())
@@ -44,8 +42,8 @@ public class AssassinBombPlantBehavior : ScriptableBombPlantBehavior
             Debug.Log($"[{npc.name}] Transferred bomb to {targetSearchableObject.name}");
         }
 
-        // Plant the bomb (trigger the explosion timer)
-        targetSearchableObject.PlantTimedBomb(bomb, npc.transform, bombItem);
+        // Plant the bomb (the bomb item runs its own explosion timer)
+        bombItem.Plant(targetSearchableObject.transform, npc.transform);
         Debug.Log($"[{npc.name}] Planted bomb at {targetSearchableObject.name}");
     }
 }

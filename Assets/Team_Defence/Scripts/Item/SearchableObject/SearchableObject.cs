@@ -84,13 +84,6 @@ public class SearchableObject : MonoBehaviour
         }
     }
 
-    public void PlantTimedBomb(TimedBomb bomb, Transform user, ItemObject bombItem)
-    {
-        if (bomb == null) return;
-
-        bomb.Plant(this, user, bombItem);
-    }
-
     public void AddItem(ItemObject item)
     {
         if (searchableItems == null)

@@ -24046,6 +24046,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Scearchable_Garbage_Bag (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2389752134854118228, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
+        type: 3}
+      propertyPath: m_TagString
+      value: SearchableObject
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -29359,6 +29364,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Scearchable_Garbage_Bag (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 2389752134854118228, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
+        type: 3}
+      propertyPath: m_TagString
+      value: SearchableObject
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -32773,7 +32783,7 @@ PrefabInstance:
         type: 3}
       propertyPath: 'itemPrefabs.Array.data[2]'
       value: 
-      objectReference: {fileID: 7169227144428614796, guid: 37609d1584796d046bbaae5700b73175,
+      objectReference: {fileID: 6827219473948768883, guid: 37609d1584796d046bbaae5700b73175,
         type: 3}
     - target: {fileID: 1733266443251843131, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
         type: 3}
@@ -32829,6 +32839,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Scearchable_Garbage_Bag (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2389752134854118228, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
+        type: 3}
+      propertyPath: m_TagString
+      value: SearchableObject
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -33450,6 +33465,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Scearchable_Garbage_Bag
+      objectReference: {fileID: 0}
+    - target: {fileID: 2389752134854118228, guid: 24bb8a7dee3c830419210ce0f89d0d8b,
+        type: 3}
+      propertyPath: m_TagString
+      value: SearchableObject
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

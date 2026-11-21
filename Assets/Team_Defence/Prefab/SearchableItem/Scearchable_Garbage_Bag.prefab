@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 159142052862038825}
   m_Layer: 0
   m_Name: Scearchable_Garbage_Bag
-  m_TagString: Untagged
+  m_TagString: SearchableObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -109,6 +109,8 @@ MonoBehaviour:
   - {fileID: 6418582676048620437, guid: bf29e070d8e06df4ba75476ec5baf31a, type: 3}
   InstantiatableCount: 5
   searchableItems: []
+  allowDuplicateWeaponPrefabs: 0
+  limitOneWeaponPerCategory: 0
 --- !u!135 &159142052862038825
 SphereCollider:
   m_ObjectHideFlags: 0

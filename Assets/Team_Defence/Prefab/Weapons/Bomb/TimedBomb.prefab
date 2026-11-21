@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 1276394757304443777}
   - component: {fileID: 5387254999674657650}
   - component: {fileID: 4525685507557051342}
-  - component: {fileID: 7169227144428614796}
   - component: {fileID: 7325734967191027199}
+  - component: {fileID: 6827219473948768883}
   m_Layer: 0
   m_Name: TimedBomb
   m_TagString: Weapon
@@ -141,20 +141,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7169227144428614796
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3393645489489511610}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d82be70232e24e44d8c6f6ffb252baad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemObject
-  equipmentAsset: {fileID: 11400000, guid: d5dacc2c51fea6843917951b2347585d, type: 2}
-  firePoint: {fileID: 5926578453463791524}
 --- !u!82 &7325734967191027199
 AudioSource:
   m_ObjectHideFlags: 0
@@ -252,3 +238,17 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6827219473948768883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3393645489489511610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017afb072689b424b8a3d7d6b9c3b8c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BombItemObject
+  equipmentAsset: {fileID: 11400000, guid: d5dacc2c51fea6843917951b2347585d, type: 2}
+  firePoint: {fileID: 5926578453463791524}

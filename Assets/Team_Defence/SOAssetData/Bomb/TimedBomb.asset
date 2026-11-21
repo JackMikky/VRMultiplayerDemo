@@ -33,5 +33,5 @@ MonoBehaviour:
     type: 3}
   explosionEffectLifetime: 3
   canDamageUser: 0
-  fuseSeconds: 60
+  fuseSeconds: 11
   despawnDelay: 2
