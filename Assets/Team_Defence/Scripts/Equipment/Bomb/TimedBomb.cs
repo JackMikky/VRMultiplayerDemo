@@ -10,6 +10,9 @@ public class TimedBomb : BombEquipmentBase
     [Tooltip("How long the planted bomb object stays in the scene after exploding before being destroyed.")]
     [SerializeField, Min(0f)] private float despawnDelay = 2.5f;
 
+    public float FuseSeconds => fuseSeconds;
+    public float DespawnDelay => despawnDelay;
+
     public override void UseEquipment(Transform user, Transform target, ItemObject weaponContext)
     {
         if (weaponContext == null || user == null || target == null) return;
@@ -19,11 +22,9 @@ public class TimedBomb : BombEquipmentBase
         weaponContext.StartCoroutine(ExplodeAfterDelay(user, target, weaponContext, armedPosition));
     }
 
-    public void Plant(SearchableObject container, Transform user, ItemObject bombItem)
+    public void Detonate(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)
     {
-        if (container == null) return;
-
-        container.StartCoroutine(ExplodePlantedAfterDelay(container, user, bombItem));
+        ExplodeAt(user, target, weaponContext, explosionCenter);
     }
 
     private IEnumerator ExplodeAfterDelay(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)
@@ -36,21 +37,6 @@ public class TimedBomb : BombEquipmentBase
         }
 
         ExplodeAt(user, target, weaponContext, explosionCenter);
-    }
-
-    private IEnumerator ExplodePlantedAfterDelay(SearchableObject container, Transform user, ItemObject bombItem)
-    {
-        yield return new WaitForSeconds(fuseSeconds);
-
-        Transform center = container.transform;
-        ExplodeAt(user, center, bombItem, center.position);
-
-        GameManager.Instance?.EndGame();
-
-        if (bombItem != null)
-        {
-            Object.Destroy(bombItem.gameObject, despawnDelay);
-        }
     }
 
     protected override void OnExploded(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)

@@ -26,7 +26,7 @@ public class ItemObject : MonoBehaviour
     private bool originalIsKinematic;
     private bool originalDetectCollisions;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         AudioSource = GetComponent<AudioSource>();
         itemRigidbody = GetComponent<Rigidbody>();
@@ -50,7 +50,7 @@ public class ItemObject : MonoBehaviour
         originalDetectCollisions = itemRigidbody.detectCollisions;
 
     }
-    private void Start()
+    protected virtual void Start()
     {
         if (this.IsWeapon())
         {
