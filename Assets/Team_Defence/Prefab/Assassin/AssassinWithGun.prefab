@@ -178,15 +178,15 @@ MonoBehaviour:
   stayingAnimationCount: 4
   minWanderDuration: 4
   maxWanderDuration: 5
-  wanderRadius: 30
+  wanderRadius: 15
   minWanderPauseInterval: 3
   maxWanderPauseInterval: 6
   wanderPauseChance: 0.35
   weaponHoldPoint: {fileID: 3293356720851508103}
-  weaponPickupDistance: 1.25
+  weaponPickupDistance: 1.1
   weaponSearchInterval: 0.5
   personalityProfile: {fileID: 11400000, guid: 261ccef2af7c0064eb9276c1bbe3640c, type: 2}
-  bombPlantDistance: 1.5
+  bombPlantDistance: 1
   bombSearchInterval: 0.5
   standUpDuration: 0.5
   currentState: 9

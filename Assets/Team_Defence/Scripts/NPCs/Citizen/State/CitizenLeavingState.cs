@@ -28,9 +28,7 @@ public class CitizenLeavingState : IState
             return;
         }
 
-        Transform leavePoint = null;
-        if (VenueManager.Instance != null) leavePoint = VenueManager.Instance.ExitPoint;
-        if (leavePoint == null && NPCManager.Instance != null) leavePoint = NPCManager.Instance.NPCLeavePoint;
+        Transform leavePoint = NPCManager.Instance != null ? NPCManager.Instance.NPCLeavePoint : null;
 
         if (leavePoint == null)
         {

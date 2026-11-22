@@ -19,6 +19,15 @@ public class VenueManager : MonoBehaviour
     [Tooltip("Destination passersby walk to before being removed.")]
     [SerializeField] private Transform exitPoint;
 
+    [Header("Spawn Areas")]
+    [Tooltip("Where NPCSpawner spawns citizens.")]
+    [SerializeField] private AreaZone citizenSpawnZone;
+
+    [Tooltip("Where the initial assassin is spawned.")]
+    [SerializeField] private AreaZone assassinSpawnZone;
+
+    public AreaZone CitizenSpawnZone => citizenSpawnZone;
+    public AreaZone AssassinSpawnZone => assassinSpawnZone;
     public AreaZone GatheringZone => gatheringZone;
     public IReadOnlyList<AreaZone> RoamingZones => roamingZones;
     public Transform ExitPoint => exitPoint;

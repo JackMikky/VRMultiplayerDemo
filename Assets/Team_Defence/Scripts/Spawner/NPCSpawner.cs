@@ -5,27 +5,13 @@ using UnityEngine.AI;
 
 public class NPCSpawner : MonoBehaviour
 {
-    private enum RangeType
-    {
-        Box,
-        Sphere
-    }
-
-    [SerializeField] private RangeType rangeType = RangeType.Box;
-
-    [SerializeField] private float radius = 3f;
-
     [Header("NPC Prefabs")]
     [SerializeField] private GameObject citizenPrefab;
 
     [SerializeField] private GameObject assassinPrefab;
 
     [Header("Target Settings")]
-    [SerializeField] private Vector3 gatheringPoint;
-
-    [SerializeField, Min(0f)] private float gatheringRadius = 3f;
     [SerializeField] private Transform vipTarget;
-    [SerializeField] private Vector3 exitPoint;
     [SerializeField, Min(0f)] private float maxSampleDistance = 1.5f;
 
     [Header("Spawn Settings")]
@@ -59,11 +45,15 @@ public class NPCSpawner : MonoBehaviour
         activeNpcs.RemoveAll(npc => npc == null);
         if (activeNpcs.Count >= maxNpcCount && !TryRemoveOldestCitizen()) return;
 
+        AreaZone spawnZone = VenueManager.Instance != null ? VenueManager.Instance.CitizenSpawnZone : null;
+        if (spawnZone == null) return;
+
         bool spawnAssassin = Random.Range(0f, 100f) < assassinSpawnPercentage;
         GameObject prefab = spawnAssassin ? assassinPrefab : citizenPrefab;
         if (prefab == null) return;
 
-        GameObject spawnedNpc = Instantiate(prefab, SpawnPosition(), Quaternion.identity);
+        Vector3 spawnPosition = spawnZone.TryGetRandomNavMeshPoint(out Vector3 navPoint) ? navPoint : spawnZone.GetRandomPoint();
+        GameObject spawnedNpc = Instantiate(prefab, spawnPosition, Quaternion.identity);
         activeNpcs.Add(spawnedNpc);
         ConfigureSpawnedNpc(spawnedNpc);
     }
@@ -77,11 +67,10 @@ public class NPCSpawner : MonoBehaviour
 
         if (isCitizen)
         {
-            Vector2 offset = Random.insideUnitCircle * gatheringRadius;
-            Vector3 targetPosition = gatheringPoint + new Vector3(offset.x, 0f, offset.y);
-            if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas))
+            AreaZone gatheringZone = VenueManager.Instance != null ? VenueManager.Instance.GatheringZone : null;
+            if (gatheringZone != null && gatheringZone.TryGetRandomNavMeshPoint(out Vector3 gatheringPosition))
             {
-                citizen.ConfigureAudienceGathering(hit.position, vipTarget);
+                citizen.ConfigureAudienceGathering(gatheringPosition, vipTarget);
             }
         }
         else if (spawnedNpc.TryGetComponent(out AssassinNPC assassin))
@@ -113,7 +102,9 @@ public class NPCSpawner : MonoBehaviour
             yield break;
         }
 
-        if (!NavMesh.SamplePosition(exitPoint, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas))
+        Transform exitPoint = NPCManager.Instance != null ? NPCManager.Instance.NPCLeavePoint : null;
+        if (exitPoint == null
+            || !NavMesh.SamplePosition(exitPoint.position, out NavMeshHit hit, maxSampleDistance, NavMesh.AllAreas))
         {
             DestroyCitizen(citizen);
             yield break;
@@ -155,43 +146,5 @@ public class NPCSpawner : MonoBehaviour
         float minInterval = Mathf.Min(minSpawnInterval, maxSpawnInterval);
         float maxInterval = Mathf.Max(minSpawnInterval, maxSpawnInterval);
         nextSpawnInterval = Random.Range(minInterval, maxInterval);
-    }
-
-    private void OnDrawGizmos()
-    {
-        switch (rangeType)
-        {
-            case RangeType.Box:
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireCube(transform.position, new Vector3(radius * 2, 0, radius * 2));
-                break;
-
-            case RangeType.Sphere:
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(transform.position, radius);
-                break;
-        }
-    }
-
-    private Vector3 SpawnPosition()
-    {
-        var pos = new Vector3();
-        switch (rangeType)
-        {
-            case RangeType.Box:
-                var xBox = transform.position.x + Random.Range(-radius, radius);
-                //Random.InitState((int)xBox);
-                var zBox = transform.position.z + Random.Range(-radius, radius);
-                pos = new Vector3(xBox, transform.position.y, zBox);
-                break;
-
-            case RangeType.Sphere:
-                var angle = Random.Range(-180f, 180f);
-                var xSphere = transform.position.x + Mathf.Cos(angle) * Random.Range(-radius, radius);//Random.Range(-radius, radius);
-                var zSphere = transform.position.z + Mathf.Sin(angle) * Random.Range(-radius, radius);//Random.Range(-radius, radius);
-                pos = new Vector3(xSphere, transform.position.y, zSphere);
-                break;
-        }
-        return pos;
     }
 }

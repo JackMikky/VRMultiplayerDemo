@@ -12,7 +12,9 @@ public static class AnimationConstants
 
     public static string ExposedString = "Exposed";
 
-    public static string IsSearchingString = "IsSearching";
+    public static string IsPlantingString = "IsPlanting";
+
+    public static string IsPickingString = "IsPicking";
 
     public static string IsRunningString = "IsRunning";
 
@@ -53,9 +55,14 @@ public static class AnimationConstants
     public static readonly int Exposed = Animator.StringToHash(ExposedString);
 
     /// <summary>
-    /// Animator parameter "IsSearching". For Assassins, used while crouching to search/pick up a weapon or plant a bomb.
+    /// Animator parameter "IsPlanting". For Assassins, used while crouching to plant a bomb.
     /// </summary>
-    public static readonly int IsSearching = Animator.StringToHash(IsSearchingString);
+    public static readonly int IsPlanting = Animator.StringToHash(IsPlantingString);
+
+    /// <summary>
+    /// Animator parameter "IsPicking". For Assassins, used while crouching to pick up a weapon.
+    /// </summary>
+    public static readonly int IsPicking = Animator.StringToHash(IsPickingString);
 
     /// <summary>
     /// Animator parameter "AnimationConstants.IsRunning".For all NPCs.

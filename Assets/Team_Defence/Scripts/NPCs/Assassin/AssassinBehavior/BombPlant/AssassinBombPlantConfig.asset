@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: AssassinBombPlantConfig
   m_EditorClassIdentifier: Assembly-CSharp::AssassinBombPlantBehavior
   defaultAnimationTrigger: 
+  plantingDuration: 11
