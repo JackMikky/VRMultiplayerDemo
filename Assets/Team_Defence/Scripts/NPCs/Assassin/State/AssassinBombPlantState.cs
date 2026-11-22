@@ -105,7 +105,7 @@ public class AssassinBombPlantState : IState
                 plantingStartTime = Time.time;
                 if (npc.Anim != null)
                 {
-                    npc.Anim.SetBool(AnimationConstants.IsSearching, true);
+                    npc.Anim.SetBool(AnimationConstants.IsPlanting, true);
                 }
             }
 
@@ -117,7 +117,7 @@ public class AssassinBombPlantState : IState
 
                 if (npc.Anim != null)
                 {
-                    npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+                    npc.Anim.SetBool(AnimationConstants.IsPlanting, false);
                 }
 
                 hasPlantedBomb = true;
@@ -144,7 +144,7 @@ public class AssassinBombPlantState : IState
 
         if (npc.Anim != null)
         {
-            npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+            npc.Anim.SetBool(AnimationConstants.IsPlanting, false);
         }
 
         if (npc.Agent != null && npc.Agent.enabled)

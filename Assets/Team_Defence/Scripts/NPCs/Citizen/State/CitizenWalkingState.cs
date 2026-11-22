@@ -26,6 +26,8 @@ public class CitizenWalkingState : IState
             {
                 if (npc.IsMovingToGatheringPoint)
                     npc.CompleteAudienceGathering();
+                else if (npc.CitizenType == CitizenType.Passerby)
+                    npc.ChangeToState(npc.PasserbyState, CitizenState.Roaming);
                 else
                     npc.ChangeToState(npc.StayingState, CitizenState.Staying);
             }

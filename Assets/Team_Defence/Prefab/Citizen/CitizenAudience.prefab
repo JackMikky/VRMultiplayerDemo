@@ -92,8 +92,20 @@ MonoBehaviour:
   previousEnumState: 0
   interactionEndTime: 0
   CitizenType: 0
-  minStayDuration: 10
-  maxStayDuration: 60
+  stayingAnimationCount: 12
+  panicAnimationCount: 2
+  panicDuration: 10
+  minIdleInterval: 3
+  maxIdleInterval: 30
+  minVisitDuration: 40
+  maxVisitDuration: 90
+  minWatchDuration: 5
+  maxWatchDuration: 12
+  minPauseDuration: 2
+  maxPauseDuration: 6
+  minReactionInterval: 4
+  maxReactionInterval: 10
+  animationRepeatChance: 0.5
   moveBehavior: {fileID: 0}
   idleBehavior: {fileID: 11400000, guid: a24a62cb506b793429ed09f14365f594, type: 2}
   panicBehavior: {fileID: 11400000, guid: 3a4564be3b7cc6148a1dc5a1feca7a7a, type: 2}
@@ -109,8 +121,8 @@ NavMeshAgent:
   m_GameObject: {fileID: 7091489066321530029}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
-  m_Speed: 3.5
+  m_Radius: 0.32
+  m_Speed: 2.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -516,7 +528,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: f295d5a4b1fd7604fa193f5532c4b81a, type: 2}
+      objectReference: {fileID: 9100000, guid: aa41ef0d254db5042af80f248efd0621, type: 2}
     - target: {fileID: 95841064056441438, guid: 68617247be1cad64d8dfe7e3cbbb3174,
         type: 3}
       propertyPath: m_AnimatePhysics

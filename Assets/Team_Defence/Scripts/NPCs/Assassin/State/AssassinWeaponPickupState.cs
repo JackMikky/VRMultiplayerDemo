@@ -97,7 +97,7 @@ public class AssassinWeaponPickupState : IState
             if (npc.Anim != null)
             {
                 npc.Anim.SetBool(AnimationConstants.IsIdling, true);
-                npc.Anim.SetBool(AnimationConstants.IsSearching, true);
+                npc.Anim.SetBool(AnimationConstants.IsPicking, true);
             }
 
             if (pickupStartTime == 0f)
@@ -122,7 +122,7 @@ public class AssassinWeaponPickupState : IState
 
                         if (npc.Anim != null)
                         {
-                            npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+                            npc.Anim.SetBool(AnimationConstants.IsPicking, false);
                         }
 
                         isStandingUp = true;
@@ -157,7 +157,7 @@ public class AssassinWeaponPickupState : IState
 
         if (npc.Anim != null)
         {
-            npc.Anim.SetBool(AnimationConstants.IsSearching, false);
+            npc.Anim.SetBool(AnimationConstants.IsPicking, false);
         }
 
         if (npc.Agent != null && npc.Agent.enabled)

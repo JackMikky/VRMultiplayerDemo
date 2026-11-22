@@ -21,6 +21,12 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
     [Tooltip("How long the muzzle effect stays in the scene before being destroyed")]
     [SerializeField, Min(0f)] protected float muzzleEffectLifetime = 1f;
 
+    [Header("Panic")]
+    [Tooltip("Citizens within this radius panic when the gun is fired. 0 disables.")]
+    [SerializeField, Min(0f)] protected float panicRadius = 10f;
+
+    public float PanicRadius => panicRadius;
+
     #region Debugging Settings
 
     [Header("Debug")]
@@ -51,6 +57,11 @@ public abstract class GunEquipmentBase : ScriptableEquipmentBase
         Vector3 origin = firePoint != null ? firePoint.position : user.position + Vector3.up * muzzleHeight;
         Vector3 targetPoint = target.position + Vector3.up * muzzleHeight;
         Vector3 direction = (targetPoint - origin).normalized;
+
+        if (panicRadius > 0f && NPCManager.Instance != null)
+        {
+            NPCManager.Instance.BroadcastPanic(origin, panicRadius);
+        }
 
         bool didHit = Physics.Raycast(origin, direction, out RaycastHit hit, attackDistance, hitMask);
 

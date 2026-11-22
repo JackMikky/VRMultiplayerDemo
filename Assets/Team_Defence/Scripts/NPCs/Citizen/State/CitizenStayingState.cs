@@ -1,34 +1,35 @@
-﻿using UnityEngine;
-
-public class CitizenStayingState : BaseTimedState<CitizenNPC>
+﻿public class CitizenStayingState : IState
 {
-    public CitizenStayingState(CitizenNPC npc, float duration) : base(npc, duration)
+    private readonly CitizenNPC npc;
+    private readonly StayingAnimationPlayer player;
+
+    public CitizenStayingState(CitizenNPC npc)
     {
+        this.npc = npc;
+        player = new StayingAnimationPlayer(npc);
     }
 
-    public override void Enter()
+    public void Enter()
     {
-        this.duration = Random.Range(npc.minStayDuration, npc.maxStayDuration);
-        base.Enter();
-
-        npc.IdleBehavior?.Enter(npc);
+        npc.SetNavigationMode(useAgent: false);
+        npc.ResetMovementAnimationFlags();
+        player.Begin(npc.StayingAnimationCount);
     }
 
-    public override void Update()
+    public void Update()
     {
-        base.Update();
-
-        npc.IdleBehavior?.UpdateBehavior(npc);
+        if (player.Tick())
+        {
+            player.End();
+            npc.ChangeToState(npc.WalkingState, CitizenState.Wandering);
+        }
     }
 
-    public override void Exit()
+    public void Exit()
     {
-        base.Exit();
-        npc.IdleBehavior?.Exit(npc);
+        player.End();
     }
 
-    protected override void OnTimeOut()
-    {
-        npc.ChangeToState(npc.WalkingState, CitizenState.Wandering);
-    }
+    public void Dispose()
+    { }
 }

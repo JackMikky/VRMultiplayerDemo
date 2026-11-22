@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d02a7d131c7228245a4d495faca47009, type: 3}
   m_Name: Citizen_FlexiblePanicConfig
   m_EditorClassIdentifier: Assembly-CSharp::FlexiblePanicBehavior
-  availableAnimationTriggers:
-  - SquatDownPanic
-  - StandingPanic
+  defaultAnimationTrigger: 
+  availableAnimationTriggers: []

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: AssassinWeaponPickupConfig
   m_EditorClassIdentifier: Assembly-CSharp::AssassinWeaponPickupBehavior
   defaultAnimationTrigger: 
-  pickupDuration: 14.5
+  pickupDuration: 7.2

@@ -9,6 +9,29 @@ public class BombItemObject : ItemObject
 
     public TimedBomb TimedBombAsset => Equipment as TimedBomb;
 
+    [Header("Debug")]
+    [Tooltip("Draw the explosion (red) and panic (yellow) radius in the Scene view.")]
+    [SerializeField] private bool showRadiusGizmos = true;
+
+    private void OnDrawGizmos()
+    {
+        if (!showRadiusGizmos) return;
+
+        BombEquipmentBase bomb = Equipment as BombEquipmentBase;
+        if (bomb == null) return;
+
+        Vector3 center = transform.position;
+
+        Gizmos.color = new Color(1f, 0.1f, 0.1f, 0.9f);
+        Gizmos.DrawWireSphere(center, bomb.ExplosionRadius);
+
+        if (bomb.PanicRadius > 0f)
+        {
+            Gizmos.color = new Color(1f, 0.85f, 0.1f, 0.6f);
+            Gizmos.DrawWireSphere(center, bomb.PanicRadius);
+        }
+    }
+
     public bool Plant(Transform container, Transform user)
     {
         TimedBomb bomb = TimedBombAsset;

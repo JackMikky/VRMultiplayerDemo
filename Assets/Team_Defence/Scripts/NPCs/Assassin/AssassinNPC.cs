@@ -154,7 +154,6 @@ public class AssassinNPC : NPCBase
     protected override void OnSetupBehavior()
     {
         SetNavigationMode(useAgent: true);
-        LookAtTargetNPC();
         NPCManager.Instance.RegisterAssassin(this);
 
         if (agent != null) agent.autoTraverseOffMeshLink = false;
@@ -283,14 +282,6 @@ public class AssassinNPC : NPCBase
         {
             ResetMovementAnimationFlags();
             anim.SetBool(AnimationConstants.IsIdling, true);
-        }
-    }
-
-    private void LookAtTargetNPC()
-    {
-        if (target != null)
-        {
-            transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
         }
     }
 

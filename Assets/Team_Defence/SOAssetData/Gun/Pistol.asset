@@ -24,11 +24,14 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e3a46507263c1f04d9cee05cf2ebc532, type: 3}
   hitMask:
     serializedVersion: 2
-    m_Bits: 3521
+    m_Bits: 3137
   muzzleHeight: 1.4
   hitEffectPrefab: {fileID: 0}
+  hitEffectLifetime: 2
   muzzleEffectPrefab: {fileID: 1743301284569550, guid: ad2ab49d0a2a17148bd51c93d977bdbc,
     type: 3}
+  muzzleEffectLifetime: 1
+  panicRadius: 10
   showDebugRay: 1
   debugRayDuration: 1
   debugRayHitColor: {r: 1, g: 0, b: 0, a: 1}

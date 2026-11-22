@@ -12,6 +12,9 @@ public class NPCManager : MonoBehaviour
 {
     public static NPCManager Instance { get; private set; }
 
+    private const float PanicMaxReactionDelay = 0.6f;
+    private const float PanicRandomDelay = 0.3f;
+
     [Header("Prefabs Settings")]
     [Tooltip("A civilian prefab with the CitizenNPC script attached.")]
     public GameObject citizenPrefab;
@@ -22,24 +25,11 @@ public class NPCManager : MonoBehaviour
     [Header("Game Settings")]
     public Transform vipTransform;
 
-    [Header("Spawn Settings")]
-    [SerializeField] private VIPSpawnPoint vipSpawnPoint;
-
-    [SerializeField] private CrowdSpawnPoint crowdSpawnPoint;
-
-    [Header("Audience Gathering Settings")]
-    [SerializeField] private Transform audienceGatheringPoint;
-
-    [SerializeField, Min(0f)] private float audienceGatheringRadius = 3f;
-
-    [Header("Assasin Spawn Point")]
-    [SerializeField] private Transform assassinSpawnPoint;
-
     [Header("NPC Leave Point")]
-    [Tooltip("The destination the NPC will walk to and disappear at after planting the bomb.")]
-    [SerializeField] private Transform npcLeavePoint;
+    [Tooltip("Obsolete. Set the exit point on VenueManager instead.")]
+    [SerializeField, HideInInspector] private Transform npcLeavePoint;
 
-    public Transform NPCLeavePoint => npcLeavePoint;
+    public Transform NPCLeavePoint => VenueManager.Instance != null ? VenueManager.Instance.ExitPoint : null;
 
     public int npcCount = 10;
 
@@ -75,16 +65,11 @@ public class NPCManager : MonoBehaviour
 
     private void Start()
     {
-        if (assassinSpawnPoint != null)
+        AreaZone assassinZone = VenueManager.Instance != null ? VenueManager.Instance.AssassinSpawnZone : null;
+        if (assassinZone != null)
         {
-            SpawnSuspectAt(assassinSpawnPoint.position);
-        }
-
-        if (vipTransform == null || citizenPrefab == null || crowdSpawnPoint == null) return;
-
-        if (vipSpawnPoint != null)
-        {
-            vipTransform.SetPositionAndRotation(vipSpawnPoint.Position, vipSpawnPoint.Rotation);
+            Vector3 spawnPosition = assassinZone.TryGetRandomNavMeshPoint(out Vector3 navPoint) ? navPoint : assassinZone.Center;
+            SpawnSuspectAt(spawnPosition);
         }
     }
 
@@ -149,34 +134,6 @@ public class NPCManager : MonoBehaviour
                         SpawnSuspectAt(navHit.position);
                     }
                 }
-            }
-        }
-    }
-
-    private void SpawnCrowd()
-    {
-        for (int i = 0; i < npcCount; i++)
-        {
-            Vector3 spawnPos = crowdSpawnPoint.GetRandomPosition();
-            GameObject npcGo = Instantiate(citizenPrefab, spawnPos, Quaternion.identity);
-
-            NPCBase npcScript = npcGo.GetComponent<NPCBase>();
-            if (npcScript != null && audienceGatheringPoint != null)
-            {
-                Vector2 gatheringOffset = Random.insideUnitCircle * audienceGatheringRadius;
-                Vector3 gatheringPosition = audienceGatheringPoint.position
-                    + new Vector3(gatheringOffset.x, 0f, gatheringOffset.y);
-
-                if (NavMesh.SamplePosition(gatheringPosition, out NavMeshHit gatheringHit, maxSampleDistance, NavMesh.AllAreas))
-                {
-                    if (npcScript is CitizenNPC citizen)
-                        citizen.ConfigureAudienceGathering(gatheringHit.position, vipTransform);
-                }
-            }
-
-            if (npcScript != null)
-            {
-                npcScript.Initialize();
             }
         }
     }
@@ -259,6 +216,30 @@ public class NPCManager : MonoBehaviour
         if (npc != null && !policeNPCs.Contains(npc))
         {
             policeNPCs.Add(npc);
+        }
+    }
+
+    /// <summary>
+    /// Makes every registered citizen within radius panic. Each citizen reacts after a small random delay scaled by distance.
+    /// </summary>
+    public void BroadcastPanic(Vector3 position, float radius)
+    {
+        float radiusSqr = radius * radius;
+
+        for (int i = citizenNPCs.Count - 1; i >= 0; i--)
+        {
+            if (!(citizenNPCs[i] is CitizenNPC citizen) || citizen == null)
+            {
+                citizenNPCs.RemoveAt(i);
+                continue;
+            }
+
+            float distanceSqr = (citizen.transform.position - position).sqrMagnitude;
+            if (distanceSqr > radiusSqr) continue;
+
+            float delay = Mathf.Sqrt(distanceSqr) / Mathf.Max(0.01f, radius) * PanicMaxReactionDelay
+                + Random.Range(0f, PanicRandomDelay);
+            citizen.TriggerPanic(delay);
         }
     }
 

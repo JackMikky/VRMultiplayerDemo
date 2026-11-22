@@ -5,6 +5,8 @@ public class Grenade : BombEquipmentBase
 {
     protected override void OnExploded(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)
     {
-        Debug.Log($"[Grenade]{user.name} exploded {Name} near {target.name}, radius={explosionRadius}, damage={damage}");
+        string userName = user != null ? user.name : "Unknown";
+        string targetName = target != null ? target.name : "Unknown";
+        Debug.Log($"[Grenade]{userName} exploded {Name} near {targetName}, radius={explosionRadius}, damage={damage}");
     }
 }

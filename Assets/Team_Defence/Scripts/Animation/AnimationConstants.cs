@@ -12,11 +12,13 @@ public static class AnimationConstants
 
     public static string ExposedString = "Exposed";
 
-    public static string IsSearchingString = "IsSearching";
+    public static string IsPlantingString = "IsPlanting";
+
+    public static string IsPickingString = "IsPicking";
 
     public static string IsRunningString = "IsRunning";
 
-    public static string StayingString = "Staying";
+    public static string IsStayingString = "IsStaying";
 
     public static string StayingIndexString = "StayingIndex";
 
@@ -25,6 +27,12 @@ public static class AnimationConstants
     public static string ApplauseString = "Applause";
 
     public static string IsTalkingString = "IsTalking";
+
+    public static string IsPanicString = "IsPanic";
+
+    public static string PanicIndexString = "PanicIndex";
+
+    public static string IsDeadString = "IsDead";
 
     #endregion Animation Parameter Names
 
@@ -47,16 +55,21 @@ public static class AnimationConstants
     public static readonly int Exposed = Animator.StringToHash(ExposedString);
 
     /// <summary>
-    /// Animator parameter "IsSearching". For Assassins, used while crouching to search/pick up a weapon or plant a bomb.
+    /// Animator parameter "IsPlanting". For Assassins, used while crouching to plant a bomb.
     /// </summary>
-    public static readonly int IsSearching = Animator.StringToHash(IsSearchingString);
+    public static readonly int IsPlanting = Animator.StringToHash(IsPlantingString);
+
+    /// <summary>
+    /// Animator parameter "IsPicking". For Assassins, used while crouching to pick up a weapon.
+    /// </summary>
+    public static readonly int IsPicking = Animator.StringToHash(IsPickingString);
 
     /// <summary>
     /// Animator parameter "AnimationConstants.IsRunning".For all NPCs.
     /// </summary>
     public static readonly int IsRunning = Animator.StringToHash(IsRunningString);
 
-    public static readonly int Staying = Animator.StringToHash(StayingString);
+    public static readonly int Staying = Animator.StringToHash(IsStayingString);
 
     public static readonly int StayingIndex = Animator.StringToHash(StayingIndexString);
 
@@ -74,6 +87,21 @@ public static class AnimationConstants
     /// Animator parameter "IsTalking". For VIPs.
     /// </summary>
     public static readonly int IsTalking = Animator.StringToHash(IsTalkingString);
+
+    /// <summary>
+    /// Animator parameter "IsPanic" (bool). For Citizens.
+    /// </summary>
+    public static readonly int IsPanic = Animator.StringToHash(IsPanicString);
+
+    /// <summary>
+    /// Animator parameter "PanicIndex" (int). For Citizens, selects which panic animation plays.
+    /// </summary>
+    public static readonly int PanicIndex = Animator.StringToHash(PanicIndexString);
+
+    /// <summary>
+    /// Animator parameter "IsDead" (bool). For VIPs.
+    /// </summary>
+    public static readonly int IsDead = Animator.StringToHash(IsDeadString);
 
     #endregion Animation Hashes
 }
