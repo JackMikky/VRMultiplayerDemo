@@ -92,8 +92,18 @@ MonoBehaviour:
   previousEnumState: 0
   interactionEndTime: 0
   CitizenType: 1
-  minStayDuration: 10
-  maxStayDuration: 60
+  stayingAnimationCount: 11
+  minIdleInterval: 2
+  maxIdleInterval: 6
+  minVisitDuration: 40
+  maxVisitDuration: 90
+  minWatchDuration: 5
+  maxWatchDuration: 12
+  minPauseDuration: 8
+  maxPauseDuration: 25
+  minReactionInterval: 2
+  maxReactionInterval: 8
+  animationRepeatChance: 0.25
   moveBehavior: {fileID: 11400000, guid: 3ccf552e1d167d04aabed055a760df20, type: 2}
   idleBehavior: {fileID: 11400000, guid: 569aa5031f2726d48811cbd821f6ba64, type: 2}
   panicBehavior: {fileID: 11400000, guid: 1a43042b22f687444b24eeed1e17a535, type: 2}
@@ -109,8 +119,8 @@ NavMeshAgent:
   m_GameObject: {fileID: 7091489066321530029}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
-  m_Speed: 3.5
+  m_Radius: 0.32
+  m_Speed: 2.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -120,7 +130,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 47
   m_ObstacleAvoidanceType: 4
 --- !u!208 &-439759263467744534
 NavMeshObstacle:

@@ -16,7 +16,7 @@ public static class AnimationConstants
 
     public static string IsRunningString = "IsRunning";
 
-    public static string StayingString = "Staying";
+    public static string IsStayingString = "IsStaying";
 
     public static string StayingIndexString = "StayingIndex";
 
@@ -56,7 +56,7 @@ public static class AnimationConstants
     /// </summary>
     public static readonly int IsRunning = Animator.StringToHash(IsRunningString);
 
-    public static readonly int Staying = Animator.StringToHash(StayingString);
+    public static readonly int Staying = Animator.StringToHash(IsStayingString);
 
     public static readonly int StayingIndex = Animator.StringToHash(StayingIndexString);
 

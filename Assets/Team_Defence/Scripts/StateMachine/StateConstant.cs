@@ -3,7 +3,9 @@ public enum CitizenState
     Watching,
     Wandering,
     Staying,
-    Interacted
+    Interacted,
+    Roaming,
+    Leaving
 }
 
 public enum AssassinState

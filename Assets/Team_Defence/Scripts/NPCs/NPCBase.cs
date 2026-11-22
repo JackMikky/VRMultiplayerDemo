@@ -153,9 +153,14 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
 
     public void LookAtPlayer(Transform player)
     {
-        if (player == null) return;
+        LookAtTarget(player);
+    }
 
-        Vector3 direction = player.position - transform.position;
+    public void LookAtTarget(Transform lookTarget)
+    {
+        if (lookTarget == null) return;
+
+        Vector3 direction = lookTarget.position - transform.position;
         direction.y = 0;
 
         if (direction != Vector3.zero)

@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: CitizenPasserby_IdleConfig
   m_EditorClassIdentifier: Assembly-CSharp::FlexibleIdleBehavior
   defaultAnimationTrigger: 
-  availableAnimationTriggers:
-  - Wave
-  - Applause
+  availableAnimationTriggers: []
   minInterval: 5
   maxInterval: 15
+  actionChance: 0.35

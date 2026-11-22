@@ -7,6 +7,9 @@ public class AssassinStayingState : IState
     private bool animationStarted;
     private bool transitionRequested;
 
+    private const float NoticeDistance = 10f;
+    private const float NoticeHalfAngle = 40f;
+
     public AssassinStayingState(AssassinNPC npc)
     {
         this.npc = npc;
@@ -24,7 +27,7 @@ public class AssassinStayingState : IState
             previousAnimatorStateHash = npc.Anim.GetCurrentAnimatorStateInfo(0).fullPathHash;
             int animationCount = Mathf.Max(1, npc.StayingAnimationCount);
             npc.Anim.SetInteger(AnimationConstants.StayingIndex, Random.Range(0, animationCount));
-            npc.Anim.SetTrigger(AnimationConstants.Staying);
+            npc.Anim.SetBool(AnimationConstants.Staying, true);
         }
     }
 
@@ -70,13 +73,24 @@ public class AssassinStayingState : IState
 
         if (npc.Target != null)
         {
-            Vector3 lookTarget = new Vector3(npc.Target.position.x, npc.transform.position.y, npc.Target.position.z);
-            npc.transform.LookAt(lookTarget);
+            Vector3 direction = npc.Target.position - npc.transform.position;
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude <= NoticeDistance * NoticeDistance
+                && Vector3.Angle(npc.transform.forward, direction) <= NoticeHalfAngle)
+            {
+                npc.LookAtTarget(npc.Target);
+            }
         }
     }
 
     public void Exit()
     {
+        if (npc.Agent != null) npc.Agent.isStopped = false;
+        if (npc.Anim != null)
+        {
+            npc.Anim.SetBool(AnimationConstants.Staying, false);
+        }
     }
 
     public void Dispose()

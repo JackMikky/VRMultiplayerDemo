@@ -7,6 +7,8 @@ public class CitizenNPC : NPCBase
     public CitizenWatchingState WatchingState { get; private set; }
     public CitizenWalkingState WalkingState { get; private set; }
     public CitizenStayingState StayingState { get; private set; }
+    public CitizenPasserbyState PasserbyState { get; private set; }
+    public CitizenLeavingState LeavingState { get; private set; }
 
     public CitizenPanicState PanicState { get; private set; }
 
@@ -23,9 +25,40 @@ public class CitizenNPC : NPCBase
     public CitizenType CitizenType = CitizenType.Audience;
 
     [Header("Stay Setting")]
-    public float minStayDuration = 2f;
+    [Tooltip("Number of Staying animations selectable by StayingIndex")]
+    [SerializeField, Min(1)] private int stayingAnimationCount = 1;
 
-    public float maxStayDuration = 5f;
+    public int StayingAnimationCount => stayingAnimationCount;
+
+    [Header("Audience Settings")]
+    [Tooltip("How long an audience member stays in Idle between two random Staying animations.")]
+    [Min(0f)] public float minIdleInterval = 2f;
+
+    [Min(0f)] public float maxIdleInterval = 6f;
+
+    [Header("Passerby Settings")]
+    [Tooltip("Total time a passerby stays at the venue before leaving.")]
+    [Min(0f)] public float minVisitDuration = 40f;
+
+    [Min(0f)] public float maxVisitDuration = 90f;
+
+    [Tooltip("How long a passerby stands and watches the speech each time.")]
+    [Min(0f)] public float minWatchDuration = 5f;
+
+    [Min(0f)] public float maxWatchDuration = 12f;
+
+    [Tooltip("How long a passerby pauses after reaching a roaming point.")]
+    [Min(0f)] public float minPauseDuration = 2f;
+
+    [Min(0f)] public float maxPauseDuration = 6f;
+
+    [Tooltip("Idle time after standing still (and between animations) before the next random Staying animation starts.")]
+    [Min(0.1f)] public float minReactionInterval = 4f;
+
+    [Min(0.1f)] public float maxReactionInterval = 10f;
+
+    [Tooltip("Chance to play another random animation after one finishes, if the stay time has not run out.")]
+    [Range(0f, 1f)] public float animationRepeatChance = 0.5f;
 
     #region Behavior Settings
 
@@ -57,6 +90,7 @@ public class CitizenNPC : NPCBase
     private Transform audienceLookTarget;
 
     public bool IsMovingToGatheringPoint => isMovingToGatheringPoint;
+    public Transform LookTarget => audienceLookTarget;
 
     #endregion Behavior Settings
 
@@ -71,7 +105,9 @@ public class CitizenNPC : NPCBase
 
         WatchingState = new CitizenWatchingState(this);
         WalkingState = new CitizenWalkingState(this);
-        StayingState = new CitizenStayingState(this, 0f);
+        StayingState = new CitizenStayingState(this);
+        PasserbyState = new CitizenPasserbyState(this);
+        LeavingState = new CitizenLeavingState(this);
         InteractedState = new CitizenInteractedState(this);
         PanicState = new CitizenPanicState(this);
     }
@@ -81,14 +117,14 @@ public class CitizenNPC : NPCBase
         switch (this.CitizenType)
         {
             case CitizenType.Audience:
-                if (isMovingToGatheringPoint)
-                    ChangeToState(WalkingState, CitizenState.Wandering);
-                else
-                    ChangeToState(WatchingState, CitizenState.Watching);
+                ChangeToState(WatchingState, CitizenState.Watching);
                 break;
 
             case CitizenType.Passerby:
-                ChangeToState(WalkingState, CitizenState.Wandering);
+                if (isMovingToGatheringPoint)
+                    ChangeToState(WalkingState, CitizenState.Wandering);
+                else
+                    ChangeToState(PasserbyState, CitizenState.Roaming);
                 break;
 
             case CitizenType.None:
@@ -125,8 +161,12 @@ public class CitizenNPC : NPCBase
 
     public void CompleteAudienceGathering()
     {
-        ChangeToState(WatchingState, CitizenState.Watching);
         isMovingToGatheringPoint = false;
+
+        if (CitizenType == CitizenType.Passerby)
+            ChangeToState(PasserbyState, CitizenState.Roaming);
+        else
+            ChangeToState(WatchingState, CitizenState.Watching);
     }
 
     public void ChangeToState(IState newState, CitizenState enumState)
