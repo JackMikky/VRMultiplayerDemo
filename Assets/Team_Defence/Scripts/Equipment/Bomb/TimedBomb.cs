@@ -41,6 +41,7 @@ public class TimedBomb : BombEquipmentBase
 
     protected override void OnExploded(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)
     {
-        Debug.Log($"[TimedBomb]{user.name} exploded {Name} after {fuseSeconds:0.00}s at {explosionCenter}");
+        string userName = user != null ? user.name : "Unknown";
+        Debug.Log($"[TimedBomb]{userName} exploded {Name} after {fuseSeconds:0.00}s at {explosionCenter}");
     }
 }

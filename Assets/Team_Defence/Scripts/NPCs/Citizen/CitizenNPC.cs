@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class CitizenNPC : NPCBase
 {
@@ -29,6 +30,15 @@ public class CitizenNPC : NPCBase
     [SerializeField, Min(1)] private int stayingAnimationCount = 1;
 
     public int StayingAnimationCount => stayingAnimationCount;
+
+    [Header("Panic Setting")]
+    [Tooltip("Number of Panic animations selectable by PanicIndex")]
+    [SerializeField, Min(1)] private int panicAnimationCount = 1;
+
+    public int PanicAnimationCount => panicAnimationCount;
+
+    [Tooltip("How long a citizen stays panicked before calming down and returning to idle.")]
+    [Min(0f)] public float panicDuration = 10f;
 
     [Header("Audience Settings")]
     [Tooltip("How long an audience member stays in Idle between two random Staying animations.")]
@@ -88,6 +98,7 @@ public class CitizenNPC : NPCBase
     private bool isMovingToGatheringPoint;
     private Vector3 gatheringPosition;
     private Transform audienceLookTarget;
+    private Coroutine panicRoutine;
 
     public bool IsMovingToGatheringPoint => isMovingToGatheringPoint;
     public Transform LookTarget => audienceLookTarget;
@@ -175,8 +186,59 @@ public class CitizenNPC : NPCBase
         currentState = enumState;
     }
 
+    public void TriggerPanic(float delay = 0f)
+    {
+        if (IsDead || StateMachine.CurrentState == PanicState || StateMachine.CurrentState == LeavingState) return;
+
+        if (delay > 0f)
+        {
+            if (panicRoutine == null) panicRoutine = StartCoroutine(PanicAfterDelay(delay));
+            return;
+        }
+
+        EnterPanic();
+    }
+
+    private IEnumerator PanicAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        panicRoutine = null;
+
+        if (IsDead || StateMachine.CurrentState == PanicState || StateMachine.CurrentState == LeavingState) yield break;
+        EnterPanic();
+    }
+
+    private void EnterPanic()
+    {
+        ChangeToState(PanicState, CitizenState.Panic);
+    }
+
+    public void RecoverFromPanic()
+    {
+        if (CitizenType == CitizenType.Audience)
+            ChangeToState(WatchingState, CitizenState.Watching);
+        else
+            ChangeToState(PasserbyState, CitizenState.Roaming);
+    }
+
+    protected override void Die(GameObject attacker)
+    {
+        base.Die(attacker);
+
+        if (panicRoutine != null)
+        {
+            StopCoroutine(panicRoutine);
+            panicRoutine = null;
+        }
+
+        PlayDeathAnimation();
+        NPCManager.Instance?.UnregisterCitizen(this);
+    }
+
     public override void OnInteracted()
     {
+        if (IsDead) return;
+
         base.OnInteracted();
 
         if (StateMachine.CurrentState != InteractedState)

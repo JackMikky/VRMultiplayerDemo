@@ -48,6 +48,13 @@ public class VipNPC : NPCBase
     {
         base.Die(attacker);
 
+        if (anim != null)
+        {
+            anim.SetBool(IsTalkingHash, false);
+            anim.SetBool(IsWalkingHash, false);
+            anim.SetBool(AnimationConstants.IsDead, true);
+        }
+
         Debug.LogWarning("VIP is dead; mission failed.!");
         GameManager.Instance.EndGame();
     }

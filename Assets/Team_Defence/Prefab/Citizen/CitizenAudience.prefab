@@ -93,6 +93,7 @@ MonoBehaviour:
   interactionEndTime: 0
   CitizenType: 0
   stayingAnimationCount: 12
+  panicAnimationCount: 2
   minIdleInterval: 3
   maxIdleInterval: 30
   minVisitDuration: 40

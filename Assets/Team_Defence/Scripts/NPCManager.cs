@@ -12,6 +12,9 @@ public class NPCManager : MonoBehaviour
 {
     public static NPCManager Instance { get; private set; }
 
+    private const float PanicMaxReactionDelay = 0.6f;
+    private const float PanicRandomDelay = 0.3f;
+
     [Header("Prefabs Settings")]
     [Tooltip("A civilian prefab with the CitizenNPC script attached.")]
     public GameObject citizenPrefab;
@@ -259,6 +262,30 @@ public class NPCManager : MonoBehaviour
         if (npc != null && !policeNPCs.Contains(npc))
         {
             policeNPCs.Add(npc);
+        }
+    }
+
+    /// <summary>
+    /// Makes every registered citizen within radius panic. Each citizen reacts after a small random delay scaled by distance.
+    /// </summary>
+    public void BroadcastPanic(Vector3 position, float radius)
+    {
+        float radiusSqr = radius * radius;
+
+        for (int i = citizenNPCs.Count - 1; i >= 0; i--)
+        {
+            if (!(citizenNPCs[i] is CitizenNPC citizen) || citizen == null)
+            {
+                citizenNPCs.RemoveAt(i);
+                continue;
+            }
+
+            float distanceSqr = (citizen.transform.position - position).sqrMagnitude;
+            if (distanceSqr > radiusSqr) continue;
+
+            float delay = Mathf.Sqrt(distanceSqr) / Mathf.Max(0.01f, radius) * PanicMaxReactionDelay
+                + Random.Range(0f, PanicRandomDelay);
+            citizen.TriggerPanic(delay);
         }
     }
 

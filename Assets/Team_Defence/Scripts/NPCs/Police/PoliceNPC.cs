@@ -87,8 +87,16 @@ public class PoliceNPC : NPCBase
         currentState = enumState;
     }
 
+    protected override void Die(GameObject attacker)
+    {
+        base.Die(attacker);
+        PlayDeathAnimation();
+    }
+
     public override void OnInteracted()
     {
+        if (IsDead) return;
+
         base.OnInteracted();
         ChangeToState(InteractedState, PoliceState.Interacted);
     }

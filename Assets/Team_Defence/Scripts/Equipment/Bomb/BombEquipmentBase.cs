@@ -12,6 +12,13 @@ public abstract class BombEquipmentBase : ScriptableEquipmentBase
     [SerializeField, Min(0f)] protected float explosionEffectLifetime = 3f;
     [SerializeField] protected bool canDamageUser;
 
+    [Header("Panic")]
+    [Tooltip("Citizens within this distance of the explosion panic. Independent from the damage radius.")]
+    [SerializeField, Min(0f)] protected float panicRadius = 20f;
+
+    public float ExplosionRadius => explosionRadius;
+    public float PanicRadius => panicRadius;
+
     private void OnValidate()
     {
         Category = EquipmentCategory.Bomb;
@@ -27,6 +34,11 @@ public abstract class BombEquipmentBase : ScriptableEquipmentBase
 
     protected void ExplodeAt(Transform user, Transform target, ItemObject weaponContext, Vector3 explosionCenter)
     {
+        if (panicRadius > 0f && NPCManager.Instance != null)
+        {
+            NPCManager.Instance.BroadcastPanic(explosionCenter, panicRadius);
+        }
+
         if (explosionEffectPrefab != null)
         {
             GameObject effect = Object.Instantiate(explosionEffectPrefab, explosionCenter, Quaternion.identity);

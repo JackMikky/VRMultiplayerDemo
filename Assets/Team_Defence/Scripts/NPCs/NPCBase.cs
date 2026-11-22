@@ -142,6 +142,8 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
 
     private void Update()
     {
+        if (IsDead) return;
+
         StateMachine.Update();
 
         OnUpdate();
@@ -253,6 +255,23 @@ public abstract class NPCBase : MonoBehaviour, IDamageable
         Debug.Log($"[{name}] has died, killed by {attacker?.name ?? "Unknown"}");
 
         SetAgentVelocity(0f, isStopped: true);
+    }
+
+    protected void PlayDeathAnimation()
+    {
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
+        if (anim == null) return;
+
+        anim.SetBool(AnimationConstants.IsWalking, false);
+        anim.SetBool(AnimationConstants.IsRunning, false);
+        anim.SetBool(AnimationConstants.IsIdling, false);
+        anim.SetBool(AnimationConstants.Staying, false);
+        anim.SetBool(AnimationConstants.IsPanic, false);
+        anim.SetBool(AnimationConstants.IsDead, true);
     }
 
 #if UNITY_EDITOR

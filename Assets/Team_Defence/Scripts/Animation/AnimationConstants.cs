@@ -26,6 +26,12 @@ public static class AnimationConstants
 
     public static string IsTalkingString = "IsTalking";
 
+    public static string IsPanicString = "IsPanic";
+
+    public static string PanicIndexString = "PanicIndex";
+
+    public static string IsDeadString = "IsDead";
+
     #endregion Animation Parameter Names
 
     #region Animation Hashes
@@ -74,6 +80,21 @@ public static class AnimationConstants
     /// Animator parameter "IsTalking". For VIPs.
     /// </summary>
     public static readonly int IsTalking = Animator.StringToHash(IsTalkingString);
+
+    /// <summary>
+    /// Animator parameter "IsPanic" (bool). For Citizens.
+    /// </summary>
+    public static readonly int IsPanic = Animator.StringToHash(IsPanicString);
+
+    /// <summary>
+    /// Animator parameter "PanicIndex" (int). For Citizens, selects which panic animation plays.
+    /// </summary>
+    public static readonly int PanicIndex = Animator.StringToHash(PanicIndexString);
+
+    /// <summary>
+    /// Animator parameter "IsDead" (bool). For VIPs.
+    /// </summary>
+    public static readonly int IsDead = Animator.StringToHash(IsDeadString);
 
     #endregion Animation Hashes
 }

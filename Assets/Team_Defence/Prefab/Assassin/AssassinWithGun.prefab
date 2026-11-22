@@ -173,11 +173,11 @@ MonoBehaviour:
   leavingBehavior: {fileID: 0}
   nextPathUpdateTime: 0
   walkSpeed: 2
-  runSpeed: 4
+  runSpeed: 55
   startRunningDistance: 15
   stayingAnimationCount: 4
   minWanderDuration: 4
-  maxWanderDuration: 55
+  maxWanderDuration: 5
   wanderRadius: 30
   minWanderPauseInterval: 3
   maxWanderPauseInterval: 6

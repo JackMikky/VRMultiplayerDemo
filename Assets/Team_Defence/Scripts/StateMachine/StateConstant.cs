@@ -5,7 +5,8 @@ public enum CitizenState
     Staying,
     Interacted,
     Roaming,
-    Leaving
+    Leaving,
+    Panic
 }
 
 public enum AssassinState
