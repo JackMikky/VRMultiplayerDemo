@@ -16,11 +16,23 @@ public class AreaZone : MonoBehaviour
     [SerializeField, Min(0f)] private float radius = 3f;
     [SerializeField] private Vector2 boxSize = new Vector2(6f, 6f);
 
+    [Header("Selection")]
+    [Tooltip("Multiplier applied to the area when a roaming zone is picked. 0 disables the zone, 2 makes it twice as likely.")]
+    [SerializeField, Min(0f)] private float weight = 1f;
+
     [Header("NavMesh")]
     [SerializeField, Min(0f)] private float maxSampleDistance = 1.5f;
     [SerializeField, Min(1)] private int sampleAttempts = 8;
 
     public Vector3 Center => transform.position;
+
+    public float Weight => weight;
+
+    public float SelectionWeight => Mathf.Max(0.01f, Area) * weight;
+
+    public float Area => shape == ZoneShape.Circle
+        ? Mathf.PI * radius * radius
+        : boxSize.x * boxSize.y * Mathf.Abs(transform.lossyScale.x * transform.lossyScale.z);
 
     public Vector3 GetRandomPoint()
     {

@@ -95,9 +95,8 @@ public class CitizenPasserbyState : IState
     private bool BeginMoving()
     {
         VenueManager venue = VenueManager.Instance;
-        AreaZone zone = venue != null ? venue.RoamingZone : null;
-        if (zone == null || npc.Agent == null || !npc.Agent.enabled || !npc.Agent.isOnNavMesh) return false;
-        if (!zone.TryGetRandomNavMeshPoint(out Vector3 destination)) return false;
+        if (venue == null || npc.Agent == null || !npc.Agent.enabled || !npc.Agent.isOnNavMesh) return false;
+        if (!venue.TryGetRandomRoamingPoint(out Vector3 destination)) return false;
 
         EndReaction();
         npc.SetAgentVelocity(npc.Agent.speed, isStopped: false);
