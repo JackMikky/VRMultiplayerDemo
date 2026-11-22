@@ -186,6 +186,13 @@ public class CitizenNPC : NPCBase
         currentState = enumState;
     }
 
+    public void Leave()
+    {
+        if (IsDead || StateMachine.CurrentState == LeavingState) return;
+
+        ChangeToState(LeavingState, CitizenState.Leaving);
+    }
+
     public void TriggerPanic(float delay = 0f)
     {
         if (IsDead || StateMachine.CurrentState == PanicState || StateMachine.CurrentState == LeavingState) return;
